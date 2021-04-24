@@ -115,4 +115,4 @@ GitHub.sublime-settings
 .history
 
 # env-specific config
-rongwebapp/settings.py
+rongwebapp/config.py
