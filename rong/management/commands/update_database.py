@@ -156,7 +156,7 @@ WHERE constraint_type = 'FOREIGN KEY' AND ccu.table_schema = %s;
                     cur.execute("DROP TABLE {0}.{1}".format(schema_name, row[0]))
                 
                 # now move over sqlite data
-                with sqlite3.connect('./redive_en.db') as sqlite_conn:
+                with sqlite3.connect('./redive_dbs/%s.db' % options['version']) as sqlite_conn:
                     sqlite_conn.row_factory = sqlite3.Row
                     with closing(sqlite_conn.cursor()) as sqlite_cur:
                         sqlite_cur.execute("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")
