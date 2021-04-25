@@ -1,6 +1,0 @@
-DATABASE_ENGINE = 'django.db.backends.postgresql'
-DATABASE_HOST = 'localhost'
-DATABASE_PORT = '5432'
-DATABASE_DB = 'rongwebapp'
-DATABASE_USER = 'rongwebapp'
-DATABASE_PASSWORD = 'rongwebapp'

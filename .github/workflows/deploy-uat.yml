@@ -4,7 +4,7 @@ on:
     branches:
       - uat
 jobs:
-  build-and-deploy:
+  deploy-uat:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,4 +19,17 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy with rsync
-        run: rsync -avz ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ronguat/django/
+        run: rsync -avz --exclude '.git' --exclude '.github' --exclude '.gitignore' ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ronguat/django/
+      
+      - name: Update deps and migrate
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            source ~/django-env/bin/activate
+            cd ~/django
+            pip install -r requirements.txt
+            python manage.py migrate
