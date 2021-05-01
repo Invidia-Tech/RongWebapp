@@ -5,4 +5,4 @@ class Member(models.Model):
     platform_id = models.CharField(max_length=30, db_index=True)
     name = models.CharField(max_length=50)
     is_lead = models.BooleanField()
-    group_num = models.IntegerField()
+    group_num = models.PositiveIntegerField()
