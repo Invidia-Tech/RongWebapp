@@ -18,7 +18,7 @@ def discordcallback(request : HttpRequest):
             client_secret=settings.DISCORD_CLIENT_SECRET,
             authorization_response=request.build_absolute_uri())
         request.session['discord_token'] = token
-        return HttpResponse('HeyGuys')
+        return HttpResponse(str(token))
     else:
         raise PermissionDenied
 
