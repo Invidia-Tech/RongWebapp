@@ -1,3 +1,7 @@
 {% load bootstrap4 %}
 
-<a href='{% url 'rong:discordlogin' %}'>Login</a>
+{% if user.is_authenticated %}
+    <p>Welcome, {{ user.name }}. <a href='{% url 'rong:logout' %}'>Logout</a></p>
+{% else %}
+    <a href='{% url 'rong:discordlogin' %}'>Login</a>
+{% endif %}

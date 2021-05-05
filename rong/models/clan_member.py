@@ -4,7 +4,7 @@ class ClanMember(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     clan = models.ForeignKey('Clan', on_delete=models.CASCADE)
     is_lead = models.BooleanField()
-    group_num = models.PositiveIntegerField()
+    group_num = models.PositiveIntegerField(null=True)
 
     class Meta:
         constraints = [

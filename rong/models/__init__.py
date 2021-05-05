@@ -1,6 +1,6 @@
 from .clan_collection import ClanCollection
 from .clan import Clan
-from .user import User
+from .user import User, AnonymousUser
 from .clan_member import ClanMember
 from .member_schedule import MemberSchedule
 from .box import Box
@@ -12,3 +12,4 @@ from .battle_arena_counter import BattleArenaCounter
 from .princess_arena_comp import PrincessArenaComp
 from .team import Team
 from .redive_models import *
+from .bot_models import *
