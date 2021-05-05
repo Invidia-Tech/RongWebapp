@@ -5,6 +5,7 @@ class ClanMember(models.Model):
     clan = models.ForeignKey('Clan', on_delete=models.CASCADE)
     is_lead = models.BooleanField()
     group_num = models.PositiveIntegerField(null=True)
+    box = models.OneToOneField('Box', null=True, on_delete=models.SET_NULL)
 
     class Meta:
         constraints = [
