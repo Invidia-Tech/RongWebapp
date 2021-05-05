@@ -1,7 +1,7 @@
 from django.db import models
 
 class BattleArenaCounter(models.Model):
-    submitter = models.ForeignKey('Member', null=True, on_delete=models.SET_NULL)
+    submitter = models.ForeignKey('User', null=True, on_delete=models.SET_NULL)
     from_defense = models.BooleanField()
     last_updated = models.DateTimeField()
     upvotes = models.PositiveIntegerField()

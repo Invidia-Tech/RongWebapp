@@ -1,7 +1,7 @@
 from django.db import models
 
-class AvailableUnit(models.Model):
-    member = models.ForeignKey('Member', on_delete=models.CASCADE)
+class BoxUnit(models.Model):
+    box = models.ForeignKey('Box', on_delete=models.CASCADE)
     unit = models.ForeignKey('Unit', on_delete=models.CASCADE)
     power = models.PositiveIntegerField(null=True)
     level = models.PositiveIntegerField(null=True)
@@ -15,3 +15,8 @@ class AvailableUnit(models.Model):
     equip4 = models.PositiveIntegerField(null=True)
     equip5 = models.PositiveIntegerField(null=True)
     equip6 = models.PositiveIntegerField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['box', 'unit'], name='unique box unit')
+        ]

@@ -30,7 +30,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rong.apps.RongConfig'
+    'rong.apps.RongConfig',
+    'bootstrap4'
 ]
 
 MIDDLEWARE = [
