@@ -1,6 +1,8 @@
 from django import template
 from django.utils.html import format_html, mark_safe
 from django.templatetags.static import static
+from django.conf import settings
+import os.path
 import json
 
 register = template.Library()
@@ -11,7 +13,7 @@ def unit_icon(context, identifier, size, is_round=False, margin='2px 2px 3px'):
     sheet_url = static('rong/icon_sheet.webp') if context.get('supports_webp', False) else static('rong/icon_sheet.jpg')
     global position_cache
     if position_cache is None:
-        with open('assets/icons/sheet_positions.json', 'r', encoding='utf-8') as fh:
+        with open(os.path.join(settings.BASE_DIR, 'assets/icons/sheet_positions.json'), 'r', encoding='utf-8') as fh:
             position_cache = json.load(fh)
     
     if identifier not in position_cache:
