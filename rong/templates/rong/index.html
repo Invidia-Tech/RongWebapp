@@ -1,7 +1,14 @@
-{% load bootstrap4 %}
+{% extends 'rong/layout.html' %}
 
+{% block title %}Home{% endblock %}
+
+
+{% block content %}
 {% if user.is_authenticated %}
     <p>Welcome, {{ user.name }}. <a href='{% url 'rong:logout' %}'>Logout</a></p>
 {% else %}
     <a href='{% url 'rong:discordlogin' %}'>Login</a>
 {% endif %}
+{% endblock %}
+
+

@@ -8,6 +8,7 @@ from .models import User
 from django.db import connection
 from django.utils.http import url_has_allowed_host_and_scheme
 from .decorators import login_required
+from requests.exceptions import HTTPError
 
 # Create your views here.
 
@@ -24,21 +25,24 @@ def discordcallback(request : HttpRequest):
     if request.method == 'GET':
         if request.GET.get('error'):
             return HttpResponse('HeyGuys %s' % request.GET['error'])
-        discord = make_session(request, state=request.session.get('oauth2_state'))
-        token = discord.fetch_token(
-            settings.DISCORD_TOKEN_URL,
-            client_secret=settings.DISCORD_CLIENT_SECRET,
-            authorization_response=request.build_absolute_uri())
-        user = User.for_discord_session(discord)
-        destination = request.session.get('redirect_url', '')
-        if not destination:
-            destination = reverse('rong:index')
-        if 'redirect_url' in request.session:
-            del request.session['redirect_url']
-        del request.session['oauth2_state']
-        request.session['user_id'] = user.id
-        request.session.set_expiry(64800)
-        return redirect(destination)
+        try:
+            discord = make_session(request, state=request.session.get('oauth2_state'))
+            token = discord.fetch_token(
+                settings.DISCORD_TOKEN_URL,
+                client_secret=settings.DISCORD_CLIENT_SECRET,
+                authorization_response=request.build_absolute_uri())
+            user = User.for_discord_session(discord)
+            destination = request.session.get('redirect_url', '')
+            if not destination:
+                destination = reverse('rong:index')
+            if 'redirect_url' in request.session:
+                del request.session['redirect_url']
+            del request.session['oauth2_state']
+            request.session['user_id'] = user.id
+            request.session.set_expiry(64800)
+            return redirect(destination)
+        except HTTPError:
+            raise PermissionDenied
     else:
         raise PermissionDenied
 

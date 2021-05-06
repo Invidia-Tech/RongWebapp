@@ -19,3 +19,4 @@ tabulate==0.8.9
 texture2ddecoder==1.0.2
 UnityPy==1.7.5
 urllib3==1.26.4
+httpagentparser >= 1.9.0
