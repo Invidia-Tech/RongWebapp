@@ -1,0 +1,16 @@
+{% extends 'rong/layout.html' %}
+
+{% load unit_icons %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h2>User Preferences</h2>
+    <form role="form" method="post">
+        {% csrf_token %}
+        {% bootstrap_form form layout='horizontal' bound_css_class='' %}
+        {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
+    </form>
+{% endblock %}

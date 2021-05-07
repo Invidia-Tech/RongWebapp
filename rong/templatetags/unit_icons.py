@@ -6,7 +6,6 @@ import os.path
 import json
 
 register = template.Library()
-position_cache = None
 
 @register.simple_tag(takes_context=True)
 def unit_icon(context, identifier, size, **kwargs):
@@ -15,20 +14,30 @@ def unit_icon(context, identifier, size, **kwargs):
     border = kwargs.get('border', None)
     stars = kwargs.get('stars', None)
     selectable = kwargs.get('selectable', False)
+    use_webp = kwargs.get('webp', None)
 
-    sheet_url = static('rong/images/icon_sheet.webp') if context.get('supports_webp', False) else static('rong/images/icon_sheet.jpg')
-    global position_cache
-    if position_cache is None:
-        with open(os.path.join(settings.BASE_DIR, 'assets/icons/sheet_positions.json'), 'r', encoding='utf-8') as fh:
-            position_cache = json.load(fh)
-    
-    if identifier not in position_cache:
-        raise ValueError("Identifier %s not found" % identifier)
+    if selectable and border is not None:
+        raise ValueError("Cannot specify both selectable and border")
     
     if selectable:
-        border_str = format_html('<img class="selectable-icon-border" src="{}" style="width: {}px; height: {}px;" />', static('rong/images/border_white.png'), size, size)
-    elif border is not None:
-        border_str = format_html('<img src="{}" style="width: {}px; height: {}px;" />', static('rong/images/border_%s.png' % border), size, size)
+        border = 'white'
+
+    if use_webp or (use_webp is None and context.get('supports_webp', False)):
+        round_sheet = normal_sheet = static('rong/images/icon_sheet.webp')
+    else:
+        round_sheet = static('rong/images/icon_sheet.jpg')
+        normal_sheet = static('rong/images/icon_sheet.png')
+    
+    if identifier not in settings.UNIT_ICON_POSITIONS:
+        raise ValueError("Identifier %s not found" % identifier)
+    
+    if border is not None:
+        border_str = format_html('<img src="{}" style="width: {}px; height: {}px; border-radius: {}px;" />',
+            static('rong/images/border_%s.png' % border),
+            size,
+            size,
+            size * 5 // 64
+        )
     else:
         border_str = ''
 
@@ -45,12 +54,12 @@ def unit_icon(context, identifier, size, **kwargs):
         return format_html('<div class="unit-icon" style="width: {}px; height: {}px; background-image: url(\'{}\'); background-size: {}px; border-radius: {}px; border: 1px solid transparent; margin: {}; background-position: -{}px -{}px;">{}{}</div>',
             size,
             size,
-            sheet_url,
+            round_sheet,
             640 * size // 64,
             size // 2,
             mark_safe(margin),
-            position_cache[identifier][0] * size // 64,
-            position_cache[identifier][1] * size // 64,
+            settings.UNIT_ICON_POSITIONS[identifier][0] * size // 64,
+            settings.UNIT_ICON_POSITIONS[identifier][1] * size // 64,
             border_str,
             star_str
         )
@@ -58,11 +67,11 @@ def unit_icon(context, identifier, size, **kwargs):
         return format_html('<div class="unit-icon" style="width: {}px; height: {}px; background-image: url(\'{}\'); background-size: {}px; margin: {}; background-position: -{}px -{}px;">{}{}</div>',
             size,
             size,
-            sheet_url,
+            normal_sheet,
             640 * size // 64,
             mark_safe(margin),
-            position_cache[identifier][0] * size // 64,
-            position_cache[identifier][1] * size // 64,
+            settings.UNIT_ICON_POSITIONS[identifier][0] * size // 64,
+            settings.UNIT_ICON_POSITIONS[identifier][1] * size // 64,
             border_str,
             star_str
         )

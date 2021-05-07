@@ -50,7 +50,7 @@
                     {% if user.is_authenticated %}
                         <!-- display pic here -->
                         <li class="nav-item">
-                            {% unit_icon '101431' 48 round=True %}
+                            {% unit_icon user.display_pic 48 round=True %}
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userSettingsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -58,7 +58,7 @@
                                 {{ user.name }}
                             </a>
                             <div class="dropdown-menu" aria-labelledby="userSettingsDropdown">
-                                <a class="dropdown-item" href="#">Preferences</a>
+                                <a class="dropdown-item" href="{% url 'rong:preferences' %}">Preferences</a>
                                 <a class="dropdown-item" href="{% url 'rong:logout' %}">Logout</a>
                             </div>
                         </li>

@@ -9,12 +9,25 @@ from django.db import connection
 from django.utils.http import url_has_allowed_host_and_scheme
 from .decorators import login_required
 from requests.exceptions import HTTPError
+from django.contrib import messages
+from .forms import PreferencesForm
 
 # Create your views here.
 
 @login_required
-def privileged(request : HttpRequest):
-    return HttpResponse("You privileged person, you.")
+def preferences(request : HttpRequest):
+    if request.method == 'POST':
+        form = PreferencesForm(request, request.POST)
+        if form.is_valid():
+            request.user.display_pic = form.cleaned_data['display_pic']
+            request.user.single_mode = form.cleaned_data['single_mode']
+            request.user.save()
+            messages.add_message(request, messages.SUCCESS, 'Preferences saved.')
+        else:
+            messages.add_message(request, messages.ERROR, 'Invalid preferences.')
+    else:
+        form = PreferencesForm(request, initial={'display_pic': request.user.display_pic, 'single_mode': request.user.single_mode})
+    return render(request, 'rong/preferences.html', {'form': form})
 
 @login_required
 def logout(request: HttpRequest):

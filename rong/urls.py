@@ -4,7 +4,7 @@ from . import views
 
 app_name = 'rong'
 urlpatterns = [
-    path('privileged', views.privileged, name='privileged'),
+    path('preferences', views.preferences, name='preferences'),
     path('auth/logout', views.logout, name='logout'),
     path('auth/login/discord', views.discordlogin, name='discordlogin'),
     path('auth/login/discord/callback', views.discordcallback, name='discordcallback'),

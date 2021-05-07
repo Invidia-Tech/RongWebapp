@@ -2,31 +2,22 @@
 
 {% load unit_icons %}
 {% load static %}
+{% load bootstrap4 %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
+<h2>Home</h2>
 {% if user.is_authenticated %}
-    <p>Welcome, {{ user.name }}. <a href='{% url 'rong:logout' %}'>Logout</a></p>
+    <p>Welcome, {{ user.name }}.</p>
     <h3>A good team</h3>
     <p>
     {% unit_icon '103831' 64 border='gold' stars=5 %}
-    {% unit_icon '102831' 64 border='gold' stars=5 %}
+    {% unit_icon '102831' 64 border='gold' stars=4 %}
     {% unit_icon '104331' 64 border='gold' stars=5 %}
     {% unit_icon '101731' 64 border='gold' stars=5 %}
-    {% unit_icon '104731' 64 border='gold' stars=5 %}
+    {% unit_icon '104731' 64 border='gold' stars=4 %}
     </p>
-    <h3>A very basic unit selector</h3>
-    <form>
-    <label class="image-radio">
-        <input type="radio" name="character" value="103831" checked>
-        {% unit_icon '103831' 64 selectable=True %}
-    </label>
-    <label class="image-radio">
-        <input type="radio" name="character" value="102831">
-        {% unit_icon '102831' 64 selectable=True %}
-    </label>
-    </form>
 {% else %}
     <a href='{% url 'rong:discordlogin' %}'>Login</a>
 {% endif %}

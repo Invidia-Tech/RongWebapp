@@ -9,6 +9,8 @@ class User(models.Model):
     platform_id = models.CharField(max_length=30, db_index=True)
     name = models.CharField(max_length=50)
     clans = models.ManyToManyField('Clan', through='ClanMember')
+    display_pic = models.CharField(max_length=6, default='105811')
+    single_mode = models.BooleanField(default=True)
 
     def sync_clans(self):
         all_clans = {clan.platform_id:clan for clan in Clan.objects.all()}

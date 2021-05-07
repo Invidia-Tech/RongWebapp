@@ -73,8 +73,8 @@ class Command(BaseCommand):
             position_map[icon_of] = position
         
         sheet.save("rong/static/rong/images/icon_sheet.webp", format='webp')
-        sheet = sheet.convert("RGB")
-        sheet.save("rong/static/rong/images/icon_sheet.jpg", format='jpeg', quality=90)
+        sheet.convert("RGB").save("rong/static/rong/images/icon_sheet.jpg", format='jpeg', quality=90)
+        sheet.quantize(colors=256).save("rong/static/rong/images/icon_sheet.png", format='png')
 
         with open('assets/icons/sheet_positions.json', 'w', encoding='utf-8') as fh:
             json.dump(position_map, fh)

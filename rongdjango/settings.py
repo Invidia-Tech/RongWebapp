@@ -41,7 +41,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'rong.middleware.AuthenticationMiddleware'
+    'rong.middleware.AuthenticationMiddleware',
+    'rong.middleware.WebPMiddleware'
 ]
 
 ROOT_URLCONF = 'rongdjango.urls'
@@ -104,3 +105,7 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+import json
+with open(os.path.join(BASE_DIR, 'assets/icons/sheet_positions.json'), 'r', encoding='utf-8') as fh:
+    UNIT_ICON_POSITIONS = json.load(fh)
