@@ -1,0 +1,41 @@
+body {
+    padding-top: 80px;
+}
+
+.inline-button, .clickable {
+    cursor: pointer;
+}
+
+.unit-icon {
+    display: inline-block;
+    position: relative;
+}
+
+.unit-icon .stars {
+    position: absolute;
+    left: 5.58%;
+    bottom: 5%;
+    line-height: 1;
+}
+
+.unit-icon .stars img {
+    margin-right: -1px;
+}
+
+.image-radio [type=radio] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.image-radio [type=radio] + div img {
+    cursor: pointer;
+    content:url("../images/border_white.png");
+    transition: box-shadow 0.2s;
+    border-radius: 5px;
+}
+
+.image-radio [type=radio]:checked + div img {
+    box-shadow: 0px 0px 10px 0px #119600;
+}
