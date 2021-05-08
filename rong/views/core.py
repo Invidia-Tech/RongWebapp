@@ -3,14 +3,14 @@ from django.http import HttpResponse, HttpRequest
 from django.conf import settings
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
-from .discord import make_session
-from .models import User
+from rong.discord import make_session
+from rong.models import User
 from django.db import connection
 from django.utils.http import url_has_allowed_host_and_scheme
-from .decorators import login_required
+from rong.decorators import login_required
 from requests.exceptions import HTTPError
 from django.contrib import messages
-from .forms import PreferencesForm
+from rong.forms import PreferencesForm
 
 # Create your views here.
 

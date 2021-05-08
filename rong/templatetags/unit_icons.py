@@ -7,27 +7,9 @@ import json
 
 register = template.Library()
 
-@register.simple_tag(takes_context=True)
-def unit_icon(context, identifier, size, **kwargs):
-    is_round = kwargs.get('round', False)
-    margin = kwargs.get('margin', '0')
-    border = kwargs.get('border', None)
-    stars = kwargs.get('stars', None)
-    selectable = kwargs.get('selectable', False)
-    use_webp = kwargs.get('webp', None)
+def _generate_icon(sheet, is_round, identifier, size, border=None, margin='0', stars=None):
+    identifier = str(identifier)
 
-    if selectable and border is not None:
-        raise ValueError("Cannot specify both selectable and border")
-    
-    if selectable:
-        border = 'white'
-
-    if use_webp or (use_webp is None and context.get('supports_webp', False)):
-        round_sheet = normal_sheet = static('rong/images/icon_sheet.webp')
-    else:
-        round_sheet = static('rong/images/icon_sheet.jpg')
-        normal_sheet = static('rong/images/icon_sheet.png')
-    
     if identifier not in settings.UNIT_ICON_POSITIONS:
         raise ValueError("Identifier %s not found" % identifier)
     
@@ -54,7 +36,7 @@ def unit_icon(context, identifier, size, **kwargs):
         return format_html('<div class="unit-icon" style="width: {}px; height: {}px; background-image: url(\'{}\'); background-size: {}px; border-radius: {}px; border: 1px solid transparent; margin: {}; background-position: -{}px -{}px;">{}{}</div>',
             size,
             size,
-            round_sheet,
+            sheet,
             640 * size // 64,
             size // 2,
             mark_safe(margin),
@@ -67,7 +49,7 @@ def unit_icon(context, identifier, size, **kwargs):
         return format_html('<div class="unit-icon" style="width: {}px; height: {}px; background-image: url(\'{}\'); background-size: {}px; margin: {}; background-position: -{}px -{}px;">{}{}</div>',
             size,
             size,
-            normal_sheet,
+            sheet,
             640 * size // 64,
             mark_safe(margin),
             settings.UNIT_ICON_POSITIONS[identifier][0] * size // 64,
@@ -75,3 +57,42 @@ def unit_icon(context, identifier, size, **kwargs):
             border_str,
             star_str
         )
+
+rank_colors = ["white", "blue"] + (["bronze"] * 2) + (["silver"] * 3) + (["gold"] * 4) + (["purple"] * 4)
+
+@register.simple_tag(takes_context=True)
+def box_icon(context, unit_id, stars, rank, **kwargs):
+    size = kwargs.get('size', 64)
+    margin = kwargs.get('margin', '0')
+    use_webp = kwargs.get('webp', None)
+
+    if use_webp or (use_webp is None and context.get('supports_webp', False)):
+        sheet = static('rong/images/icon_sheet.webp')
+    else:
+        sheet = static('rong/images/icon_sheet.png')
+    
+    star_part = 1 if stars < 3 else 3
+    identifier = int(unit_id)//100*100 + star_part*10 + 1
+    return _generate_icon(sheet, False, identifier, size, rank_colors[rank], margin, stars)
+
+@register.simple_tag(takes_context=True)
+def unit_icon(context, identifier, size, **kwargs):
+    is_round = kwargs.get('round', False)
+    margin = kwargs.get('margin', '0')
+    border = kwargs.get('border', None)
+    stars = kwargs.get('stars', None)
+    selectable = kwargs.get('selectable', False)
+    use_webp = kwargs.get('webp', None)
+
+    if selectable and border is not None:
+        raise ValueError("Cannot specify both selectable and border")
+    
+    if selectable:
+        border = 'white'
+
+    if use_webp or (use_webp is None and context.get('supports_webp', False)):
+        sheet = static('rong/images/icon_sheet.webp')
+    else:
+        sheet = static('rong/images/icon_sheet.jpg') if is_round else static('rong/images/icon_sheet.png')
+    
+    return _generate_icon(sheet, is_round, identifier, size, border, margin, stars)

@@ -1,12 +1,11 @@
 from django.urls import path
-
-from . import views
+from .views import core
 
 app_name = 'rong'
 urlpatterns = [
-    path('preferences', views.preferences, name='preferences'),
-    path('auth/logout', views.logout, name='logout'),
-    path('auth/login/discord', views.discordlogin, name='discordlogin'),
-    path('auth/login/discord/callback', views.discordcallback, name='discordcallback'),
-    path('', views.index, name='index'),
+    path('preferences', core.preferences, name='preferences'),
+    path('auth/logout', core.logout, name='logout'),
+    path('auth/login/discord', core.discordlogin, name='discordlogin'),
+    path('auth/login/discord/callback', core.discordcallback, name='discordcallback'),
+    path('', core.index, name='index'),
 ]

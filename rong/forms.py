@@ -15,8 +15,8 @@ class PreferencesForm(forms.Form):
     display_pic = forms.ChoiceField(widget=SelectDisplayPic(), choices=get_display_pic_choices(), required=True)
     single_mode = forms.BooleanField(required=False)
 
-    def __init__(self, request, data=None, initial=None):
-        super().__init__(data=data, initial=initial)
+    def __init__(self, request, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # hacky thing to make webp usable in the display pic selection
         if request.supports_webp:
             old_choices = self.fields["display_pic"].widget.choices

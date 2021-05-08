@@ -3,6 +3,10 @@ from django.db import models
 class Unit(models.Model):
     id = models.AutoField(primary_key=True, db_column='unit_id')
     name = models.TextField(db_column='unit_name')
+    cutin_1 = models.IntegerField()
+
+    def valid_units():
+        return Unit.objects.filter(id__gt=100000, id__lt=200000).exclude(cutin_1=0)
 
     class Meta():
         managed = False
