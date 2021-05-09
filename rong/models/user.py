@@ -1,6 +1,7 @@
 from django.db import models
 from requests_oauthlib import OAuth2Session
 from django.conf import settings
+from .box import Box
 from .clan import Clan
 from .bot_models import DiscordRoleMember
 from .clan_member import ClanMember
@@ -11,6 +12,28 @@ class User(models.Model):
     clans = models.ManyToManyField('Clan', through='ClanMember')
     display_pic = models.CharField(max_length=6, default='105811')
     single_mode = models.BooleanField(default=True)
+
+    def check_single_mode(self):
+        if not self.single_mode:
+            return
+
+        num_clans = self.clans.count()
+        num_boxes = self.box_set.count()
+        
+        if num_clans > 1 or num_boxes > 1:
+            self.single_mode = False
+            self.save()
+            return
+        
+        if not num_boxes:
+            box = self.box_set.create(name='My Box')
+        else:
+            box = self.box_set.get()
+        
+        if num_clans:
+            clanmemb = ClanMember.objects.get(user=self)
+            clanmemb.box = box
+            clanmemb.save()
 
     def sync_clans(self):
         all_clans = {clan.platform_id:clan for clan in Clan.objects.all()}

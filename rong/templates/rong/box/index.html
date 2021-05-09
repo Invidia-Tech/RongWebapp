@@ -1,0 +1,16 @@
+{% extends 'rong/layout.html' %}
+
+{% load unit_icons %}
+{% load static %}
+{% load bootstrap4 %}
+
+{% block title %}My Boxes{% endblock %}
+
+{% block content %}
+<h2>My Boxes</h2>
+<ul>
+    {% for box in user.box_set.all %}
+        <li>{{ box.name }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -18,10 +18,12 @@
     {% load static %}
     <link rel='shortcut icon' type='image/x-icon' href='{% static "rong/favicon.ico" %}' />
     <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/unit_icons.css' %}">
     {% block extra_head %}{% endblock %}
 
     <!-- Bootstrap JavaScript if it is in head -->
     {% bootstrap_javascript jquery='full' %}
+    <script src="{% static 'rong/js/modernizr.js' %}"></script>
 
 </head>
 
@@ -36,7 +38,7 @@
                 <ul class="navbar-nav mr-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">My Box</a>
+                            <a class="nav-link" href="{% url 'rong:box_index' %}">My Box</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#">Clan Battle</a>
@@ -50,7 +52,7 @@
                     {% if user.is_authenticated %}
                         <!-- display pic here -->
                         <li class="nav-item">
-                            {% unit_icon user.display_pic 48 round=True %}
+                            {% unit_icon user.display_pic pfp=True %}
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userSettingsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

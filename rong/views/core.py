@@ -17,16 +17,14 @@ from rong.forms import PreferencesForm
 @login_required
 def preferences(request : HttpRequest):
     if request.method == 'POST':
-        form = PreferencesForm(request, request.POST)
+        form = PreferencesForm(request.POST, instance=request.user)
         if form.is_valid():
-            request.user.display_pic = form.cleaned_data['display_pic']
-            request.user.single_mode = form.cleaned_data['single_mode']
-            request.user.save()
+            form.save()
             messages.add_message(request, messages.SUCCESS, 'Preferences saved.')
         else:
             messages.add_message(request, messages.ERROR, 'Invalid preferences.')
     else:
-        form = PreferencesForm(request, initial={'display_pic': request.user.display_pic, 'single_mode': request.user.single_mode})
+        form = PreferencesForm(instance=request.user)
     return render(request, 'rong/preferences.html', {'form': form})
 
 @login_required
@@ -45,6 +43,7 @@ def discordcallback(request : HttpRequest):
                 client_secret=settings.DISCORD_CLIENT_SECRET,
                 authorization_response=request.build_absolute_uri())
             user = User.for_discord_session(discord)
+            user.check_single_mode()
             destination = request.session.get('redirect_url', '')
             if not destination:
                 destination = reverse('rong:index')

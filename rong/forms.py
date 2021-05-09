@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.forms import RadioSelect
+from rong.models import User, Box, BoxUnit
 
 def get_display_pic_choices():
     return [(x, x) for x in settings.UNIT_ICON_POSITIONS if x != 'unknown']
@@ -8,17 +9,24 @@ def get_display_pic_choices():
 class SelectDisplayPic(RadioSelect):
     template_name = "rong/widgets/select_display_pic.html"
 
-class SelectDisplayPicWebP(RadioSelect):
-    template_name = "rong/widgets/select_display_pic_webp.html"
-
-class PreferencesForm(forms.Form):
+class PreferencesForm(forms.ModelForm):
     display_pic = forms.ChoiceField(widget=SelectDisplayPic(), choices=get_display_pic_choices(), required=True)
-    single_mode = forms.BooleanField(required=False)
+    
+    class Meta:
+        model = User
+        fields = ['display_pic', 'single_mode']
 
-    def __init__(self, request, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # hacky thing to make webp usable in the display pic selection
-        if request.supports_webp:
-            old_choices = self.fields["display_pic"].widget.choices
-            self.fields["display_pic"].widget = SelectDisplayPicWebP()
-            self.fields["display_pic"].widget.choices = old_choices
+class BoxForm(forms.ModelForm):
+    class Meta:
+        model = Box
+        fields = ['name']
+
+class CreateBoxUnitForm(forms.ModelForm):
+    class Meta:
+        model = BoxUnit
+        fields = ['unit']
+
+class EditBoxUnitForm(forms.ModelForm):
+    class Meta:
+        model = BoxUnit
+        fields = ['power', 'level', 'star', 'rank', 'bond', 'equip1', 'equip2', 'equip3', 'equip4', 'equip5', 'equip6']

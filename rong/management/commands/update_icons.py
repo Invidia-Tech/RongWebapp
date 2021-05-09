@@ -79,6 +79,24 @@ class Command(BaseCommand):
         with open('assets/icons/sheet_positions.json', 'w', encoding='utf-8') as fh:
             json.dump(position_map, fh)
 
+        # generate spritesheet for stars here too
+        star_size = 10
+        star_overlap = 2
+        star_on = Image.open("rong/static/rong/images/star_on.png").resize((10, 10))
+        star_off = Image.open("rong/static/rong/images/star_off.png").resize((10, 10))
+        star_sheet = Image.new(mode = "RGBA", size=(star_size*5 - star_overlap*4, star_size*6))
+        for star_num in range(6):
+            for off in range(4, star_num - 1, -1):
+                star_sheet.paste(star_off, (off*(star_size - star_overlap), star_num*star_size))
+            for on in range(star_num - 1, -1, -1):
+                star_sheet.paste(star_on, (on*(star_size - star_overlap), star_num*star_size))
+        star_sheet.save("rong/static/rong/images/icon_stars.png", format='png')
 
-
-
+        # generate CSS
+        with open('rong/static/rong/styles/unit_icons.css', 'w', encoding='utf-8') as css:
+            for unit in position_map:
+                css.write(".unit-icon-%s {background-position: -%dpx -%dpx; }\n" % (unit, position_map[unit][0], position_map[unit][1]))
+                css.write(".unit-pfp-%s {background-position: -%dpx -%dpx; }\n" % (unit, position_map[unit][0] * 48 // 64, position_map[unit][1] * 48 // 64))
+            
+            for star_num in range(6):
+                css.write(".unit-icon-stars.stars-%d {background-position: 0px -%dpx; }\n" % (star_num, star_num*star_size))
