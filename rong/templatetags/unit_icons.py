@@ -9,7 +9,6 @@ register = template.Library()
 
 def _generate_icon(is_pfp, identifier, border=None, stars=None):
     identifier = str(identifier)
-    size = 64 # temp
 
     if identifier not in settings.UNIT_ICON_POSITIONS:
         raise ValueError("Identifier %s not found" % identifier)
