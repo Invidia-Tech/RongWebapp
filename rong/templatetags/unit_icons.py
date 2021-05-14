@@ -10,7 +10,7 @@ register = template.Library()
 def _generate_icon(is_pfp, identifier, border=None, stars=None):
     identifier = str(identifier)
 
-    if identifier not in settings.UNIT_ICON_POSITIONS:
+    if identifier not in settings.SPRITE_DATA["units"]:
         raise ValueError("Identifier %s not found" % identifier)
     
     if border is not None:

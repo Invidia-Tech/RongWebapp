@@ -25,16 +25,12 @@ body {
   border: 1px solid transparent;
 }
 
-html.no-webp .unit-icon {
-  background-image: url('../images/icon_sheet.png');
-}
-
-html.no-webp .unit-pfp {
-  background-image: url('../images/icon_sheet.jpg');
+html.no-webp .unit-icon, html.no-webp .unit-pfp {
+  background-image: url('../images/unit_icon_sheet.png');
 }
 
 html.webp .unit-icon, html.webp .unit-pfp {
-  background-image: url('../images/icon_sheet.webp');
+  background-image: url('../images/unit_icon_sheet.webp');
 }
 
 .unit-icon-border {

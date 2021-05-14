@@ -8,6 +8,41 @@ import glob
 from PIL import Image
 import math
 
+def interested_unit(filename):
+    interested = False
+    if filename.startswith("unit_icon_unit_") and filename.endswith(".unity3d"):
+        icon_of_what = filename[15:-8]
+        # interested in 'unknown' or an id between 100000 and 200000
+        if icon_of_what == "unknown":
+            interested = True
+        else:
+            try:
+                uid = int(icon_of_what)
+                interested = uid >= 100000 and uid < 200000
+            except:
+                pass
+    return interested
+
+def download_icons(manifest, interested_func):
+    # check current icons folder and download missing ones or checksum mismatches
+    for mfline in manifest:
+        filename, md5sum, _ = mfline.split(',', 2)
+        filename = filename[2:]
+        interested = interested_func(filename)
+        
+        if interested:
+            # does file already exist with correct hash?
+            if os.path.exists('assets/icons/%s' % filename):
+                with open('assets/icons/%s' % filename, 'rb') as fh:
+                    md5current = hashlib.md5(fh.read()).hexdigest()
+                if md5sum.lower() == md5current.lower():
+                    continue
+            
+            # download new file
+            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/pool/AssetBundles/%s/%s' % (md5sum[:2], md5sum)) as rf:
+                with open('assets/icons/%s' % filename, 'wb') as fh:
+                    fh.write(rf.content)
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
@@ -21,45 +56,23 @@ class Command(BaseCommand):
             with open('./redive_dbs/truthversion_en', "r", encoding="utf-8") as f:
                 truth_version = json.load(f)
             
-            # download manifest
+            # download unit manifest
             with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/unit_assetmanifest' % truth_version) as rm:
-                manifest = rm.text.splitlines()
+                unit_manifest = rm.text.splitlines()
+            download_icons(unit_manifest, interested_unit)
 
-            # check current icons folder and download missing ones or checksum mismatches
-            for mfline in manifest:
-                filename, md5sum, _ = mfline.split(',', 2)
-                filename = filename[2:]
-                interested = False
-                if filename.startswith("unit_icon_unit_") and filename.endswith(".unity3d"):
-                    icon_of_what = filename[15:-8]
-                    # interested in 'unknown' or an id between 100000 and 200000
-                    if icon_of_what == "unknown":
-                        interested = True
-                    else:
-                        try:
-                            uid = int(icon_of_what)
-                            interested = uid >= 100000 and uid < 200000
-                        except:
-                            pass
-                
-                if interested:
-                    # does file already exist with correct hash?
-                    if os.path.exists('assets/icons/%s' % filename):
-                        with open('assets/icons/%s' % filename, 'rb') as fh:
-                            md5current = hashlib.md5(fh.read()).hexdigest()
-                        if md5sum.lower() == md5current.lower():
-                            continue
-                    
-                    # download new file
-                    with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/pool/AssetBundles/%s/%s' % (md5sum[:2], md5sum)) as rf:
-                        with open('assets/icons/%s' % filename, 'wb') as fh:
-                            fh.write(rf.content)
+            # download equipment icons
+            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/icon_assetmanifest' % truth_version) as rm:
+                icon_manifest = rm.text.splitlines()
+            download_icons(icon_manifest, lambda fn: (fn.startswith("icon_icon_equipment_") and fn.endswith(".unity3d")))
+
+        sprite_data = {}
         
-        # compile icon spritesheet
+        # compile unit icon spritesheet
         icon_files = glob.glob("assets/icons/unit_icon_unit_*.unity3d")
         tile_width = tile_height = 64
         sheet = Image.new(mode = "RGBA", size = (tile_width * 10, tile_height*math.ceil(len(icon_files)/10)))
-        position_map = {}
+        sprite_data["units"] = {}
 
         for index, image_path in enumerate(icon_files):
             icon_of = image_path[image_path.rindex("_")+1:-8]
@@ -70,14 +83,10 @@ class Command(BaseCommand):
                     data = object.read()
                     image = data.image
                     sheet.paste(image.resize((tile_width, tile_height)), position)
-            position_map[icon_of] = position
+            sprite_data["units"][icon_of] = position
         
-        sheet.save("rong/static/rong/images/icon_sheet.webp", format='webp')
-        sheet.convert("RGB").save("rong/static/rong/images/icon_sheet.jpg", format='jpeg', quality=90)
-        sheet.quantize(colors=256).save("rong/static/rong/images/icon_sheet.png", format='png')
-
-        with open('assets/icons/sheet_positions.json', 'w', encoding='utf-8') as fh:
-            json.dump(position_map, fh)
+        sheet.save("rong/static/rong/images/unit_icon_sheet.webp", format='webp')
+        sheet.quantize(colors=256).save("rong/static/rong/images/unit_icon_sheet.png", format='png')
 
         # generate spritesheet for stars here too
         star_size = 10
@@ -94,9 +103,12 @@ class Command(BaseCommand):
 
         # generate CSS
         with open('rong/static/rong/styles/unit_icons.css', 'w', encoding='utf-8') as css:
-            for unit in position_map:
-                css.write(".unit-icon-%s {background-position: -%dpx -%dpx; }\n" % (unit, position_map[unit][0], position_map[unit][1]))
-                css.write(".unit-pfp-%s {background-position: -%dpx -%dpx; }\n" % (unit, position_map[unit][0] * 48 // 64, position_map[unit][1] * 48 // 64))
+            for unit in sprite_data["units"]:
+                css.write(".unit-icon-%s {background-position: -%dpx -%dpx; }\n" % (unit, sprite_data["units"][unit][0], sprite_data["units"][unit][1]))
+                css.write(".unit-pfp-%s {background-position: -%dpx -%dpx; }\n" % (unit, sprite_data["units"][unit][0] * 48 // 64, sprite_data["units"][unit][1] * 48 // 64))
             
             for star_num in range(6):
                 css.write(".unit-icon-stars.stars-%d {background-position: 0px -%dpx; }\n" % (star_num, star_num*star_size))
+
+        with open('assets/icons/sprite_data.json', 'w', encoding='utf-8') as fh:
+            json.dump(sprite_data, fh)

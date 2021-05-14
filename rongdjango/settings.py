@@ -107,5 +107,9 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 import json
-with open(os.path.join(BASE_DIR, 'assets/icons/sheet_positions.json'), 'r', encoding='utf-8') as fh:
-    UNIT_ICON_POSITIONS = json.load(fh)
+_sprite_data_path = os.path.join(BASE_DIR, 'assets/icons/sprite_data.json')
+if os.path.exists(_sprite_data_path):
+    with open(_sprite_data_path, 'r', encoding='utf-8') as fh:
+        SPRITE_DATA = json.load(fh)
+else:
+    SPRITE_DATA = {"units": {}, "equipment": {}}

@@ -4,7 +4,7 @@ from django.forms import RadioSelect
 from rong.models import User, Box, BoxUnit
 
 def get_display_pic_choices():
-    return [(x, x) for x in settings.UNIT_ICON_POSITIONS if x != 'unknown']
+    return [(x, x) for x in settings.SPRITE_DATA["units"] if x != 'unknown']
 
 class SelectDisplayPic(RadioSelect):
     template_name = "rong/widgets/select_display_pic.html"
