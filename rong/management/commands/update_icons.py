@@ -7,6 +7,7 @@ import json
 import glob
 from PIL import Image
 import math
+import re
 
 def interested_unit(filename):
     interested = False
@@ -48,31 +49,12 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--download', action='store_true', help='Download latest icons from PCRD servers')
 
-    def handle(self, *args, **options):
-        if options['download']:
-            if not os.path.exists('./redive_dbs/truthversion_en'):
-                raise CommandError("Execution out of order: run update_database --download en first")
-            
-            with open('./redive_dbs/truthversion_en', "r", encoding="utf-8") as f:
-                truth_version = json.load(f)
-            
-            # download unit manifest
-            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/unit_assetmanifest' % truth_version) as rm:
-                unit_manifest = rm.text.splitlines()
-            download_icons(unit_manifest, interested_unit)
-
-            # download equipment icons
-            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/icon_assetmanifest' % truth_version) as rm:
-                icon_manifest = rm.text.splitlines()
-            download_icons(icon_manifest, lambda fn: (fn.startswith("icon_icon_equipment_") and fn.endswith(".unity3d")))
-
-        sprite_data = {}
-        
+    def process_unit_icons(self):
         # compile unit icon spritesheet
         icon_files = glob.glob("assets/icons/unit_icon_unit_*.unity3d")
         tile_width = tile_height = 64
         sheet = Image.new(mode = "RGBA", size = (tile_width * 10, tile_height*math.ceil(len(icon_files)/10)))
-        sprite_data["units"] = {}
+        positions = {}
 
         for index, image_path in enumerate(icon_files):
             icon_of = image_path[image_path.rindex("_")+1:-8]
@@ -83,7 +65,7 @@ class Command(BaseCommand):
                     data = object.read()
                     image = data.image
                     sheet.paste(image.resize((tile_width, tile_height)), position)
-            sprite_data["units"][icon_of] = position
+            positions[icon_of] = position
         
         sheet.save("rong/static/rong/images/unit_icon_sheet.webp", format='webp')
         sheet.quantize(colors=256).save("rong/static/rong/images/unit_icon_sheet.png", format='png')
@@ -103,12 +85,55 @@ class Command(BaseCommand):
 
         # generate CSS
         with open('rong/static/rong/styles/unit_icons.css', 'w', encoding='utf-8') as css:
-            for unit in sprite_data["units"]:
-                css.write(".unit-icon-%s {background-position: -%dpx -%dpx; }\n" % (unit, sprite_data["units"][unit][0], sprite_data["units"][unit][1]))
-                css.write(".unit-pfp-%s {background-position: -%dpx -%dpx; }\n" % (unit, sprite_data["units"][unit][0] * 48 // 64, sprite_data["units"][unit][1] * 48 // 64))
+            for unit in positions:
+                css.write(".unit-icon-%s {background-position: -%dpx -%dpx; }\n" % (unit, positions[unit][0], positions[unit][1]))
+                css.write(".unit-pfp-%s {background-position: -%dpx -%dpx; }\n" % (unit, positions[unit][0] * 48 // 64, positions[unit][1] * 48 // 64))
             
             for star_num in range(6):
                 css.write(".unit-icon-stars.stars-%d {background-position: 0px -%dpx; }\n" % (star_num, star_num*star_size))
+        
+        return positions
+    
+    def process_equip_icons(self):
+        # save equip icons to individual files because there are too many of them
+        icon_files = glob.glob("assets/icons/icon_icon_equipment_*.unity3d")
+        tile_width = tile_height = 64
+        equip_files = []
+        regex = re.compile("[^a-zA-Z0-9]+")
+
+        for image_path in icon_files:
+            icon_of = regex.sub("-", os.path.basename(image_path)[20:-8])
+            env = UnityPy.load(image_path)
+            for object in env.objects:
+                if object.type == 'Texture2D':
+                    object.read().image.resize((tile_width, tile_height)).save("rong/static/rong/images/equipment/%s.png" % icon_of, format='png')
+            equip_files.append(icon_of)
+        
+        return equip_files
+
+
+    def handle(self, *args, **options):
+        if options['download']:
+            if not os.path.exists('./redive_dbs/truthversion_en'):
+                raise CommandError("Execution out of order: run update_database --download en first")
+            
+            with open('./redive_dbs/truthversion_en', "r", encoding="utf-8") as f:
+                truth_version = json.load(f)
+            
+            # download unit manifest
+            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/unit_assetmanifest' % truth_version) as rm:
+                unit_manifest = rm.text.splitlines()
+            download_icons(unit_manifest, interested_unit)
+
+            # download equipment icons
+            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/icon_assetmanifest' % truth_version) as rm:
+                icon_manifest = rm.text.splitlines()
+            download_icons(icon_manifest, lambda fn: (fn.startswith("icon_icon_equipment_") and fn.endswith(".unity3d")))
+
+        sprite_data = {
+            "units": self.process_unit_icons(),
+            "equipment": self.process_equip_icons()
+        }
 
         with open('assets/icons/sprite_data.json', 'w', encoding='utf-8') as fh:
             json.dump(sprite_data, fh)
