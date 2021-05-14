@@ -40,6 +40,9 @@ class BoxUnit(models.Model):
             self.star = self.unit.rarity
         super().save(*args, **kwargs)
 
+    def box_json(self):
+        return {"id": self.id, "unit_id": self.unit_id, "name": self.unit.name, "range": self.unit.search_area_width, "star": self.star, "rank": self.rank}
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['box', 'unit'], name='unique box unit')

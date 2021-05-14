@@ -4,13 +4,59 @@
 {% load static %}
 {% load bootstrap4 %}
 
+{% block extra_js %}
+<script src="{% static 'rong/js/box.js' %}"></script>
+{% endblock %}
+
 {% block title %}My Boxes{% endblock %}
 
 {% block content %}
+{% if not user.single_mode %}
 <h2>My Boxes</h2>
-<ul>
-    {% for box in user.box_set.all %}
-        <li>{{ box.name }}</li>
-    {% endfor %}
-</ul>
+{% endif %}
+
+{% for box in user.box_set.all %}
+<div id="box-{{ box.id }}" data-id="{{box.id}}" data-title="{{box.name}}" data-units="{{ box.unit_json }}" class="box">
+    <div class="box-header">
+        <h2 class="mr-auto">{{ box.name }}</h2>
+        <div class="actions"><button type="button" class="btn btn-primary box-load-screenshot">Load From
+                Screenshot</button></div>
+    </div>
+    <div class="box-units"></div>
+</div>
+{% endfor %}
+
+<!-- Add Unit modal -->
+<div class="modal fade" id="addUnitModal" tabindex="-1" aria-labelledby="addUnitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUnitModalLabel">Add Unit</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-header unit-filter-header">
+                <ul class="position-selector">
+                    <li class="active" data-filter="all">All</li>
+                    <li data-filter="front"><img src="{% static 'rong/images/position_front.png' %}" /> Front</li>
+                    <li data-filter="middle"><img src="{% static 'rong/images/position_middle.png' %}" /> Middle</li>
+                    <li data-filter="back"><img src="{% static 'rong/images/position_back.png' %}" /> Back</li>
+                </ul>
+            </div>
+            <div class="modal-body">
+
+                <form id="addUnitForm">
+                    {% csrf_token %}
+                    <div class="units"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary add-button">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

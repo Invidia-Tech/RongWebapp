@@ -40,7 +40,7 @@ def create_boxunit(request : HttpRequest, box_id):
             try:
                 box_unit.validate_unique()
                 form.save()
-                return JsonResponse({"success": True, "id": box_unit.id})
+                return JsonResponse({"success": True, "unit": box_unit.box_json()})
             except ValidationError as ex:
                 return JsonResponse({"success": False, "errors": [str(ex)]})
         else:
