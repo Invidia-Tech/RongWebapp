@@ -211,6 +211,51 @@ $(document).ready(function () {
         $('#editUnitForm .unit-preview-holder').html(unit_el);
     }
 
+    function doDeleteUnit() {
+        let dialog = $('<p>Are you sure you want to remove <b>' + $('<span />').text(current_unit.unit.name).html() + '</b> from your box?</p>').dialog(
+            {
+                buttons: {
+                    "Yes": function () {
+                        dialog.dialog('destroy');
+                        dirty = false;
+                        $('#editUnitModal').modal('hide');
+                        show_loading();
+                        $.ajax({
+                            url: "/box/" + current_unit.box + "/unit/" + current_unit.id + "/",
+                            beforeSend: function (xhr) {
+                                xhr.setRequestHeader("X-CSRFToken", $('#editUnitForm input[name="csrfmiddlewaretoken"]').val());
+                            },
+                            type: 'DELETE',
+                            success: function (data) {
+                                if (data.success) {
+                                    let idx = -1;
+                                    for (let i = 0; i < boxes[current_unit.box].length; i++) {
+                                        if (boxes[current_unit.box][i].id == current_unit.id) {
+                                            idx = i;
+                                            break;
+                                        }
+                                    }
+                                    if (idx > -1) {
+                                        boxes[current_unit.box].splice(idx, 1);
+                                    }
+                                    renderBoxUnits(current_unit.box);
+                                    make_alert($('#mainContent'), 'success', 'Unit removed from box successfully.');
+                                }
+                                else {
+                                    make_alert($('#mainContent'), 'danger', 'Unit could not be removed.');
+                                }
+                                hide_loading();
+                            }
+                        });
+                    },
+                    "No": function () { dialog.dialog('destroy'); },
+                },
+                appendTo: '#editUnitModal',
+                modal: true,
+            }
+        );
+    }
+
     function doEditUnit() {
         dirty = false;
         $('#editUnitModal').modal('hide');
@@ -389,4 +434,5 @@ $(document).ready(function () {
     });
 
     $('#editUnitSaveBtn').click(doEditUnit);
+    $('#editUnitRemoveBtn').click(doDeleteUnit);
 });
