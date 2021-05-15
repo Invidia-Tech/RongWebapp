@@ -5,6 +5,7 @@ $(document).ready(function () {
     let equipped_all_slots = false;
     let refined_all_slots = false;
     let dirty = false;
+    let MAX_STAR = 5;
 
     $('#rankField').change(function () {
         if (setting_up) {
@@ -18,6 +19,10 @@ $(document).ready(function () {
         editUnitRenderEquips();
     });
 
+    $('#rankMaxBtn').click(function () {
+        $('#rankField').val(current_unit.ranks.length).change();
+    });
+
     $('#starField').change(function () {
         if (setting_up) {
             return;
@@ -25,6 +30,10 @@ $(document).ready(function () {
         current_unit.star = parseInt($('#starField').val());
         dirty = true;
         editUnitRenderPreview();
+    });
+
+    $('#starMaxBtn').click(function () {
+        $('#starField').val(MAX_STAR).change();
     });
 
     $('#levelField').change(function () {
@@ -35,9 +44,13 @@ $(document).ready(function () {
         dirty = true;
     });
 
+    $('#levelMaxBtn').click(function () {
+        $('#levelField').val(current_unit.max_level).change();
+    });
+
     $('#editUnitMaxAllBtn').click(function () {
         $('#rankField').val(current_unit.ranks.length).change();
-        $('#starField').val(5).change();
+        $('#starField').val(MAX_STAR).change();
         $('#levelField').val(current_unit.max_level).change();
         equipAll(true);
     });
@@ -311,7 +324,7 @@ $(document).ready(function () {
 
             editUnitRenderEquips();
             populateNumericDropdown('rankField', 1, current_unit.ranks.length, current_unit.rank);
-            populateNumericDropdown('starField', current_unit.unit.rarity, 5, current_unit.star);
+            populateNumericDropdown('starField', current_unit.unit.rarity, MAX_STAR, current_unit.star);
 
             let level_field = $('#levelField');
             level_field.attr("min", 1);
