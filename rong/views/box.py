@@ -17,15 +17,15 @@ def alter_boxunit(request : HttpRequest, box_id, boxunit_id):
         form = EditBoxUnitForm(request.POST, instance=boxunit)
         if form.is_valid():
             form.save()
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "unit": boxunit.box_json()})
         else:
             return JsonResponse({"success": False, "errors": form.errors.get_json_data()})
     elif request.method == 'DELETE':
         boxunit.delete()
         return JsonResponse({"success": True})
     elif request.method == 'GET':
-        # TODO return data needed to populate the unit editor
-        return JsonResponse({"wip": True})
+        # return data needed to populate the unit editor
+        return JsonResponse({"unit": boxunit.edit_json()})
     else:
         raise SuspiciousOperation()
 

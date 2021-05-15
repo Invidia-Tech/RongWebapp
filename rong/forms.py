@@ -27,6 +27,12 @@ class CreateBoxUnitForm(forms.ModelForm):
         fields = ['unit']
 
 class EditBoxUnitForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for equip in range(1, 7):
+            self.fields["equip%d" % equip].required = False
+    
     class Meta:
         model = BoxUnit
-        fields = ['power', 'level', 'star', 'rank', 'bond', 'equip1', 'equip2', 'equip3', 'equip4', 'equip5', 'equip6']
+        fields = ['level', 'star', 'rank', 'equip1', 'equip2', 'equip3', 'equip4', 'equip5', 'equip6']

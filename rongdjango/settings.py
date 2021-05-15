@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import json
 from pathlib import Path
 from .config import *
 
@@ -106,7 +107,6 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-import json
 _sprite_data_path = os.path.join(BASE_DIR, 'assets/icons/sprite_data.json')
 if os.path.exists(_sprite_data_path):
     with open(_sprite_data_path, 'r', encoding='utf-8') as fh:

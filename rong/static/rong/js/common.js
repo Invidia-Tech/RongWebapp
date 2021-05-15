@@ -44,7 +44,38 @@ function unit_position(range) {
     }
 }
 
-function make_alert(type, text) {
-    let alertBox = $('<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="close">&#215;</button></div>');
-    return alertBox.html(alertBox.html() + $('<div />').text(text).html());
+let alert_id = 0;
+
+function make_alert(dest, type, text) {
+    alert_id ++;
+    let alertBox = $('<div class="alert alert-' + type + ' alert-dismissible fade show" id="alert-'+alert_id+'" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="close">&#215;</button><span class="alert-text"></span></div>');
+    dest.prepend(alertBox);
+    $('#alert-'+alert_id+' .alert-text').text(text);
+    setTimeout(function() {
+        $('#alert-'+alert_id).fadeOut(1000);
+    }, 5000);
+}
+
+function equipment_stars(promotion_level) {
+    if(promotion_level >= 4) {
+        return 5;
+    }
+    else if(promotion_level == 3) {
+        return 3;
+    }
+    else if(promotion_level == 2) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+function populateNumericDropdown(id, min, max, value) {
+    let select_el = $('#' + id);
+    select_el.empty();
+    for (let choice = min; choice <= max; choice++) {
+        select_el.append($("<option></option>").attr("value", choice).text(choice));
+    }
+    select_el.val(value);
 }

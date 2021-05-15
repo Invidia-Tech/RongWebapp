@@ -173,3 +173,40 @@ ul.position-selector li.active {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
+
+#editUnitModal .equipment {
+  margin-left: 40px;
+  margin-right: 40px;
+  font-size: 125%;
+}
+
+#editUnitModal .equip-holder {
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  width: 84px;
+  height: 94px;
+}
+
+#editUnitModal .unit-preview-holder {
+  display: inline-block;
+  position: relative;
+  text-align: center;
+  height: 94px;
+}
+
+#editUnitModal .equip-holder img, #editUnitModal .equip-holder span {
+  cursor: pointer;
+}
+
+#editUnitModal .star {
+  color: gray;
+}
+
+#editUnitModal .star.active {
+  color: gold;
+}
+
+#editUnitModal .star.disabled {
+  display: none;
+}

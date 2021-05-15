@@ -20,12 +20,14 @@
     <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/main.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/loading.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/unit_icons.css' %}">
-    {% block extra_styles %}{% endblock %}
+    <link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    {% block extra_css %}{% endblock %}
 
     <!-- Bootstrap JavaScript if it is in head -->
     {% bootstrap_javascript jquery='full' %}
     <script src="{% static 'rong/js/modernizr.js' %}"></script>
     <script src="{% static 'rong/js/common.js' %}"></script>
+    <script type="text/javascript" src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     {% block extra_js %}{% endblock %}
 
 </head>
