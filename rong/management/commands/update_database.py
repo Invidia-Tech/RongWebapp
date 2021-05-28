@@ -8,6 +8,7 @@ import time
 import sqlite3
 import json
 from contextlib import closing
+import brotli
 
 def _iterdump(connection, table_name, schema_name):
     """
@@ -57,12 +58,12 @@ def _iterdump(connection, table_name, schema_name):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('version', type=str, choices=['en'], help='PCRD version to update')
+        parser.add_argument('version', type=str, choices=['en','jp','cn'], help='PCRD version to update')
         parser.add_argument('--download', action='store_true', help='Download latest database from PCRD servers')
 
     def download(self, version):
         # default version
-        default_versions = {"en": 10000000}
+        default_versions = {"en": 10000000, "jp": "0", "cn": "0"}
         truth_version = default_versions[version]
 
         if os.path.exists('./redive_dbs/truthversion_%s' % version):
@@ -104,6 +105,13 @@ class Command(BaseCommand):
                         print("DB version %d: status code %d" % (truth_version, r2.status_code))
             
             os.remove("./redive_en.unity3d")
+        elif version in ['jp', 'cn']:
+            with requests.get('https://redive.estertion.win/last_version_%s.json' % version) as rv:
+                new_tv = rv.json()["TruthVersion"]
+                if new_tv > truth_version:
+                    with requests.get('https://redive.estertion.win/db/redive_%s.db.br' % version) as rd:
+                        with open("./redive_dbs/%s.db" % version, "wb") as fh3:
+                            fh3.write(brotli.decompress(rd.content))
         
         with open('./redive_dbs/truthversion_%s' % version, "w", encoding="utf-8") as f:
             json.dump(truth_version, f)
