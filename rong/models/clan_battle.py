@@ -16,6 +16,7 @@ class ClanBattle(models.Model):
         # called from hit when hp=0 to load new boss's hp, doesn't call save itself
         if self.current_boss == 5:
             self.current_lap += 1
+            self.current_boss = 1
         else:
             self.current_boss += 1
         self.current_hp = getattr(self.lap_info(self.current_lap), 'boss%d_hp' % self.current_boss)
