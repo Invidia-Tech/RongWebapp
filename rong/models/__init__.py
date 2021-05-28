@@ -8,6 +8,7 @@ from .box_unit import BoxUnit
 from .clan_battle import ClanBattle
 from .clan_battle_score import ClanBattleScore
 from .clan_battle_comp import ClanBattleComp
+from .clan_battle_boss_info import ClanBattleBossInfo
 from .battle_arena_counter import BattleArenaCounter
 from .princess_arena_comp import PrincessArenaComp
 from .team import Team
