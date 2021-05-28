@@ -1,4 +1,5 @@
 from django.db import models
+from .clan_battle_score import ClanBattleHitType
 
 class ClanBattle(models.Model):
     clan = models.ForeignKey('Clan', on_delete=models.CASCADE)
@@ -39,12 +40,14 @@ class ClanBattle(models.Model):
             hit.boss_lap = self.current_lap
             hit.boss_number = self.current_boss
             hit.actual_damage = min(hit.damage, self.current_hp)
-            hit.is_carryover = hit.user_id in lasthit_users
-            if hit.is_carryover:
+            if hit.user_id in lasthit_users:
+                hit.hit_type = ClanBattleHitType.CARRYOVER
                 lasthit_users.remove(hit.user_id)
-            hit.is_last_hit = (not hit.is_carryover) and hit.actual_damage == self.current_hp
-            if hit.is_last_hit:
+            elif hit.actual_damage == self.current_hp:
+                hit.hit_type = ClanBattleHitType.LAST_HIT
                 lasthit_users.append(hit.user_id)
+            else:
+                hit.hit_type = ClanBattleHitType.NORMAL
             hit.save()
             self.current_hp -= hit.actual_damage
             if self.current_hp == 0:

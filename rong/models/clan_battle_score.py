@@ -1,6 +1,12 @@
 from django.db import models
 from django.db.models import Max
 from enum import Enum
+from django_enum_choices.fields import EnumChoiceField
+
+class ClanBattleHitType(Enum):
+    NORMAL = "Normal"
+    LAST_HIT = "Last Hit"
+    CARRYOVER = "Carryover"
 
 class ClanBattleScore(models.Model):
     clan_battle = models.ForeignKey('ClanBattle', on_delete=models.CASCADE, related_name='hits')
@@ -18,8 +24,7 @@ class ClanBattleScore(models.Model):
     boss_lap = models.PositiveIntegerField()
     boss_number = models.PositiveIntegerField()
     actual_damage = models.PositiveIntegerField()
-    is_last_hit = models.BooleanField(default=False)
-    is_carryover = models.BooleanField(default=False)
+    hit_type = EnumChoiceField(ClanBattleHitType, default=ClanBattleHitType.NORMAL)
 
     def save(self, *args, **kwargs):
         # autopopulate fields for new entry
@@ -35,9 +40,12 @@ class ClanBattleScore(models.Model):
             self.boss_number = self.clan_battle.current_boss
             self.actual_damage = min(self.damage, self.clan_battle.current_hp)
             previous_hit_today = self.clan_battle.hits.filter(day=self.day, user=self.user).order_by('-order').first()
-            if previous_hit_today:
-                self.is_carryover = previous_hit_today.is_last_hit
-            self.is_last_hit = (not self.is_carryover) and self.actual_damage == self.clan_battle.current_hp
+            if previous_hit_today and previous_hit_today.hit_type == ClanBattleHitType.LAST_HIT:
+                self.hit_type = ClanBattleHitType.CARRYOVER
+            elif self.actual_damage == self.clan_battle.current_hp:
+                self.hit_type = ClanBattleHitType.LAST_HIT
+            else:
+                self.hit_type = ClanBattleHitType.NORMAL
             self.clan_battle.current_hp -= self.actual_damage
             if self.clan_battle.current_hp == 0:
                 self.clan_battle.spawn_next_boss()
