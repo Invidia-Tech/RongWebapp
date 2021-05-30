@@ -1,0 +1,99 @@
+@import "../components/position_selector";
+
+.box {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding-left: 15px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+
+    .box-header {
+        display: flex;
+        align-items: center;
+        position: relative;
+        margin-bottom: 5px;
+
+        &::after {
+            content: "";
+            display: block;
+            border-bottom: 1px solid black;
+            position: absolute;
+            bottom: -5px;
+            left: 0px;
+            right: 10px;
+        }
+
+        .actions {
+            text-align: right;
+        }
+    }
+    .box-units {
+        margin-top: 20px;
+        div {
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .box-units-add {
+            display: inline-block;
+            position: relative;
+            width: 64px;
+            height: 64px;
+            background-image: url("../images/add_chara.png");
+            background-size: 64px;
+        }
+    }
+}
+
+#addUnitModal {
+    .modal-content {
+        height: 500px;
+    }
+
+    .unit-filter-header {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+}
+
+#editUnitModal {
+    .equipment {
+        margin-left: 40px;
+        margin-right: 40px;
+        font-size: 125%;
+    }
+
+    .equip-holder {
+        display: inline-block;
+        position: relative;
+        text-align: center;
+        width: 84px;
+        height: 94px;
+
+        img,
+        span {
+            cursor: pointer;
+        }
+    }
+
+    .unit-preview-holder {
+        display: inline-block;
+        position: relative;
+        text-align: center;
+        height: 94px;
+    }
+
+    .star {
+        color: gray;
+
+        &.active {
+            color: gold;
+        }
+
+        &.disabled {
+            display: none;
+        }
+    }
+}

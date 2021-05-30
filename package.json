@@ -1,7 +1,7 @@
 {
   "name": "rongwebapp",
   "version": "1.0.0",
-  "description": "A webapp for \"casual\" clans.",
+  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,13 +10,16 @@
     "type": "git",
     "url": "git+https://github.com/Invidia-Tech/RongWebapp.git"
   },
-  "author": "Dabomstew",
-  "license": "UNLICENSED",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Invidia-Tech/RongWebapp/issues"
   },
   "homepage": "https://github.com/Invidia-Tech/RongWebapp#readme",
-  "dependencies": {
-    "node-sass": "^6.0.0"
+  "devDependencies": {
+    "del": "^6.0.0",
+    "gulp": "^4.0.2",
+    "gulp-sass": "^4.1.0"
   }
 }

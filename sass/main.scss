@@ -1,0 +1,12 @@
+@import "components/loading";
+@import "components/image_radio";
+@import "components/unit_icons";
+@import "components/box_header";
+
+body {
+    padding-top: 80px;
+}
+.inline-button,
+.clickable {
+    cursor: pointer;
+}
