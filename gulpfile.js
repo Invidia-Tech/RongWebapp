@@ -8,6 +8,12 @@ gulp.task('styles', () => {
         .pipe(gulp.dest('./rong/static/rong/styles/'));
 });
 
+gulp.task('prod', () => {
+    return gulp.src('sass/**/*.scss')
+        .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+        .pipe(gulp.dest('./rong/static/rong/styles/'));
+});
+
 gulp.task('clean', () => {
     return del([
         'rong/static/rong/styles/main.css',
