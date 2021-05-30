@@ -20,10 +20,22 @@
 
 {% for box in user.box_set.all %}
 <div id="box-{{ box.id }}" data-id="{{box.id}}" data-title="{{box.name}}" data-units="{{ box.unit_json }}" class="box">
-    <div class="box-header">
-        <h2 class="mr-auto">{{ box.name }}</h2>
-        <div class="actions"><button type="button" class="btn btn-primary box-load-screenshot">Load From
-                Screenshot</button></div>
+    <div class="row header box-header">
+        <div class="col-md-5">
+            <h2>{{ box.name }}</h2>
+        </div>
+        <div class="col-md-2">
+            {% if not user.single_mode %}
+            Clan: <span class="box-clan-name">{{ box.clan_name }}</span>
+            {% endif %}
+        </div>
+        <div class="col-md-5 actions">
+            <button type="button" class="btn btn-primary box-load-screenshot">Load From Screenshot</button>
+            {% if not user.single_mode %}
+            <button type="button" class="btn btn-primary box-edit">Edit</button>
+            <button type="button" class="btn btn-danger box-delete">Delete</button>
+            {% endif %}
+        </div>
     </div>
     <div class="box-units"></div>
 </div>

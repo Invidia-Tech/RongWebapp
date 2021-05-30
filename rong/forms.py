@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.forms import RadioSelect
+from django.db import models
 from rong.models import User, Box, BoxUnit
 
 def get_display_pic_choices():
@@ -17,6 +18,18 @@ class PreferencesForm(forms.ModelForm):
         fields = ['display_pic', 'single_mode']
 
 class BoxForm(forms.ModelForm):
+    clan = forms.ModelChoiceField(queryset=None, required=False, empty_label="---None---")
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["clan"].queryset = user.clanmember_set.select_related('clan').order_by('clan__name')
+        if self.instance.id:
+            # edit - clan can be its current value or any clan without an associated box
+            self.fields["clan"].queryset = self.fields["clan"].queryset.filter(models.Q(box__isnull=True) | models.Q(box=self.instance))
+        else:
+            # create - clan can be any clan without an associated box
+            self.fields["clan"].queryset = self.fields["clan"].queryset.filter(box__isnull=True)
+            self.instance.user = user
+
     class Meta:
         model = Box
         fields = ['name']

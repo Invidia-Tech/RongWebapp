@@ -7,6 +7,9 @@ class ClanMember(models.Model):
     group_num = models.PositiveIntegerField(null=True)
     box = models.OneToOneField('Box', null=True, on_delete=models.SET_NULL)
 
+    def __str__(self) -> str:
+        return self.clan.name
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['user', 'clan'], name='unique user clan')

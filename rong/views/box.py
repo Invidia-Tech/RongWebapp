@@ -56,15 +56,18 @@ def alter_box(request : HttpRequest, box_id):
         raise SuspiciousOperation("Trying to edit/delete box in single mode")
     box = get_object_or_404(request.user.box_set, pk=box_id)
     if request.method == 'POST':
-        form = BoxForm(request.POST, instance=box)
+        form = BoxForm(request.user, request.POST, instance=box)
         if form.is_valid():
             form.save()
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "box": box.meta_json()})
         else:
             return JsonResponse({"success": False, "error": "Invalid box"})
     elif request.method == 'DELETE':
         box.delete()
         return JsonResponse({"success": True})
+    elif request.method == 'GET':
+        form = BoxForm(request.user, instance=box)
+        return JsonResponse({"name": box.name, "clan": box.clanmember.id if hasattr(box, 'clanmember') else None, "clan_options": [(cm.id, str(cm)) for cm in form.fields["clan"].queryset]})
     else:
         raise SuspiciousOperation()
 
@@ -73,13 +76,20 @@ def create_box(request : HttpRequest):
     if request.user.single_mode:
         raise SuspiciousOperation("Trying to create box in single mode")
     if request.method == 'POST':
-        form = BoxForm(request.POST)
+        form = BoxForm(request.user, request.POST)
         if form.is_valid():
-            form.instance.user = request.user
             form.save()
-            return JsonResponse({"success": True, "id": form.instance.id})
+            # clan?
+            if "clan" in form.data and form.data["clan"]:
+                cm = request.user.clanmember_set.get(pk=form.data["clan"])
+                cm.box = form.instance
+                cm.save()
+            return JsonResponse({"success": True, "box": form.instance.meta_json()})
         else:
             return JsonResponse({"success": False, "error": "Invalid box"})
+    elif request.method == 'GET':
+        form = BoxForm(request.user)
+        return JsonResponse({"clan_options": [(cm.id, str(cm)) for cm in form.fields["clan"].queryset]})
     else:
         raise SuspiciousOperation()
 
