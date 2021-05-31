@@ -217,9 +217,9 @@ $(document).ready(function () {
     }
 
     function editUnitRenderPreview() {
-        let unit_el = '<div class="unit-icon unit-icon-' + icon_id(current_unit.unit.id, current_unit.star) + '">';
+        let unit_el = '<div class="unit-icon u-' + icon_id(current_unit.unit.id, current_unit.star) + '">';
         unit_el += '<i class="unit-icon-border ' + rank_color(current_unit.rank) + '"></i>';
-        unit_el += '<div class="unit-icon-stars stars-' + current_unit.star + '"></div>';
+        unit_el += '<div class="unit-icon-stars s-' + current_unit.star + '"></div>';
         unit_el += '</div>';
         $('#editUnitForm .unit-preview-holder').html(unit_el);
     }
@@ -393,9 +393,9 @@ $(document).ready(function () {
                 for (unit of data.units) {
                     let unit_selector = '<label class="image-radio position-' + unit_position(unit.range) + '" title="' + unit.name + '">';
                     unit_selector += '<input type="radio" name="unit" value="' + unit.id + '" />';
-                    unit_selector += '<div class="unit-icon unit-icon-' + icon_id(unit.id, unit.rarity) + '">';
+                    unit_selector += '<div class="unit-icon u-' + icon_id(unit.id, unit.rarity) + '">';
                     unit_selector += '<i class="unit-icon-border white"></i>';
-                    unit_selector += '<div class="unit-icon-stars stars-' + unit.rarity + '"></div>';
+                    unit_selector += '<div class="unit-icon-stars s-' + unit.rarity + '"></div>';
                     unit_selector += '</div>';
                     unit_selector += '</label>';
                     addunit_form.append(unit_selector);
@@ -415,10 +415,10 @@ $(document).ready(function () {
         let box_units_el = $(box_selector + ' .box-units');
         box_units_el.html('');
         for (const unit of box_data) {
-            let unit_el = '<div class="unit-icon unit-icon-' + icon_id(unit.unit_id, unit.star) + '" data-id="' + unit.id + '">';
+            let unit_el = '<div class="unit-icon u-' + icon_id(unit.unit_id, unit.star) + '" data-id="' + unit.id + '">';
             unit_el += '<i class="unit-icon-border ' + rank_color(unit.rank) + '"></i>';
             if (unit.star) {
-                unit_el += '<div class="unit-icon-stars stars-' + unit.star + '"></div>';
+                unit_el += '<div class="unit-icon-stars s-' + unit.star + '"></div>';
             }
             unit_el += '</div>';
             box_units_el.append(unit_el);

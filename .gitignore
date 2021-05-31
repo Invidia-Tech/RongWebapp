@@ -120,4 +120,3 @@ assets/*/*.unity3d
 # npm
 node_modules
 rong/static/rong/styles/**/*.css
-!rong/static/rong/styles/unit_icons.css

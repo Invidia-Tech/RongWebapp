@@ -21,19 +21,19 @@ def _generate_icon(is_pfp, identifier, border=None, stars=None):
         border_str = ''
 
     if stars is not None:
-        star_str = format_html('<div class="unit-icon-stars stars-{}"></div>', stars)
+        star_str = format_html('<div class="unit-icon-stars s-{}"></div>', stars)
     else:
         star_str = ''
 
     
     if is_pfp:
-        return format_html('<div class="unit-pfp unit-pfp-{}">{}{}</div>',
+        return format_html('<div class="unit-pfp u-{}">{}{}</div>',
             identifier,
             border_str,
             star_str
         )
     else:
-        return format_html('<div class="unit-icon unit-icon-{}">{}{}</div>',
+        return format_html('<div class="unit-icon u-{}">{}{}</div>',
             identifier,
             border_str,
             star_str
