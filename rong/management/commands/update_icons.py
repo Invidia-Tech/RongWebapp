@@ -8,21 +8,7 @@ import glob
 from PIL import Image
 import math
 import re
-
-def interested_unit(filename):
-    interested = False
-    if filename.startswith("unit_icon_unit_") and filename.endswith(".unity3d"):
-        icon_of_what = filename[15:-8]
-        # interested in 'unknown' or an id between 100000 and 200000
-        if icon_of_what == "unknown":
-            interested = True
-        else:
-            try:
-                uid = int(icon_of_what)
-                interested = uid >= 100000 and uid < 200000
-            except:
-                pass
-    return interested
+from django.db import connection
 
 def download_icons(manifest, interested_func):
     # check current icons folder and download missing ones or checksum mismatches
@@ -40,7 +26,7 @@ def download_icons(manifest, interested_func):
                     continue
             
             # download new file
-            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/pool/AssetBundles/%s/%s' % (md5sum[:2], md5sum)) as rf:
+            with requests.get('http://prd-priconne-redive.akamaized.net/dl/pool/AssetBundles/%s/%s' % (md5sum[:2], md5sum)) as rf:
                 with open('assets/icons/%s' % filename, 'wb') as fh:
                     fh.write(rf.content)
 
@@ -50,10 +36,20 @@ class Command(BaseCommand):
         parser.add_argument('--download', action='store_true', help='Download latest icons from PCRD servers')
 
     def process_unit_icons(self):
-        # compile unit icon spritesheet
-        icon_files = glob.glob("assets/icons/unit_icon_unit_*.unity3d")
+        # select only current units
+        icon_files = []
+        with connection.cursor() as cur:
+            cur.execute('SELECT "unit_id" FROM "redive_en"."unit_data" WHERE "unit_id" BETWEEN 100000 AND 199999')
+            valid_ids = cur.fetchall()
+            for [id] in valid_ids:
+                for star in [1,3,6]:
+                    fn = "assets/icons/unit_icon_unit_%d.unity3d" % (id + star*10)
+                    if os.path.exists(fn):
+                        icon_files.append(fn)
+        icon_files.append("assets/icons/unit_icon_unit_unknown.unity3d")
+        num_tiles = len(icon_files)
         tile_width = tile_height = 64
-        sheet = Image.new(mode = "RGBA", size = (tile_width * 10, tile_height*math.ceil(len(icon_files)/10)))
+        sheet = Image.new(mode = "RGBA", size = (tile_width * 10, tile_height*math.ceil(num_tiles/10)))
         positions = {}
 
         for index, image_path in enumerate(icon_files):
@@ -97,6 +93,26 @@ class Command(BaseCommand):
             css.write("}\n")
         
         return positions
+
+    def process_enemy_icons(self):
+        # save enemy icons to individual files because there are too many of them
+        icon_files = glob.glob("assets/icons/unit_icon_unit_*.unity3d")
+        tile_width = tile_height = 64
+        enemy_files = []
+        regex = re.compile("[^a-zA-Z0-9]+")
+
+        for image_path in icon_files:
+            icon_of = regex.sub("-", os.path.basename(image_path)[15:-8])
+            if icon_of.startswith("1") or icon_of.startswith("9"):
+                # playable unit or NPC unit, not interested
+                continue
+            env = UnityPy.load(image_path)
+            for object in env.objects:
+                if object.type == 'Texture2D':
+                    object.read().image.resize((tile_width, tile_height)).save("rong/static/rong/images/enemies/%s.png" % icon_of, format='png')
+            enemy_files.append(icon_of)
+        
+        return enemy_files
     
     def process_equip_icons(self):
         # save equip icons to individual files because there are too many of them
@@ -118,24 +134,25 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['download']:
-            if not os.path.exists('./redive_dbs/truthversion_en'):
+            if not os.path.exists('./redive_dbs/truthversion_jp'):
                 raise CommandError("Execution out of order: run update_database --download en first")
             
-            with open('./redive_dbs/truthversion_en', "r", encoding="utf-8") as f:
+            with open('./redive_dbs/truthversion_jp', "r", encoding="utf-8") as f:
                 truth_version = json.load(f)
             
             # download unit manifest
-            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/unit_assetmanifest' % truth_version) as rm:
+            with requests.get('http://prd-priconne-redive.akamaized.net/dl/Resources/%s/Jpn/AssetBundles/iOS/manifest/unit_assetmanifest' % truth_version) as rm:
                 unit_manifest = rm.text.splitlines()
-            download_icons(unit_manifest, interested_unit)
+            download_icons(unit_manifest, lambda fn: (fn.startswith("unit_icon_unit_") and fn.endswith(".unity3d")))
 
             # download equipment icons
-            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/icon_assetmanifest' % truth_version) as rm:
+            with requests.get('http://prd-priconne-redive.akamaized.net/dl/Resources/%s/Jpn/AssetBundles/iOS/manifest/icon_assetmanifest' % truth_version) as rm:
                 icon_manifest = rm.text.splitlines()
             download_icons(icon_manifest, lambda fn: (fn.startswith("icon_icon_equipment_") and fn.endswith(".unity3d")))
 
         sprite_data = {
             "units": self.process_unit_icons(),
+            "enemies": self.process_enemy_icons(),
             "equipment": self.process_equip_icons()
         }
 
