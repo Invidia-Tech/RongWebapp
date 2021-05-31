@@ -6,6 +6,15 @@ $(document).ready(function () {
     let refined_all_slots = false;
     let dirty = false;
     let MAX_STAR = 5;
+    let equipment = {};
+
+    function loadEquipment(equips) {
+        for(const eid in equips) {
+            if(!(eid in equipment)) {
+                equipment[eid] = equips[eid];
+            }
+        }
+    }
 
     $('#rankField').change(function () {
         if (setting_up) {
@@ -159,7 +168,7 @@ $(document).ready(function () {
                 current_unit["equip" + slot] = null;
             }
             else {
-                let stars = equipment_stars(current_unit.equipment[current_equips[slot - 1]].promotion_level);
+                let stars = equipment_stars(equipment[current_equips[slot - 1]].promotion_level);
                 if (refine) {
                     current_unit["equip" + slot] = stars;
                 }
@@ -186,7 +195,7 @@ $(document).ready(function () {
             }
             else {
                 // make sure both images are loaded at once
-                let equip_info = current_unit.equipment[equip];
+                let equip_info = equipment[equip];
                 $("#equip-" + slot + " img.unequipped").hide().attr("src", "/static/rong/images/equipment/invalid-" + equip + ".png").attr("title", equip_info.name);
                 $("#equip-" + slot + " img.equipped").hide().attr("src", "/static/rong/images/equipment/" + equip + ".png").attr("title", equip_info.name);
                 let equip_stars = equipment_stars(equip_info.promotion_level);
@@ -293,6 +302,12 @@ $(document).ready(function () {
         setting_up = true;
         dirty = false;
         current_unit = JSON.parse(JSON.stringify(boxes[box_id].units[unit_id]));
+
+        // load any extra equipment data
+        if('equipment' in current_unit) {
+            loadEquipment(current_unit.equipment);
+        }
+
         $('#editUnitModalLabel').text('Edit Unit - ' + current_unit.unit.name);
 
         if (!current_unit.rank) {
@@ -536,6 +551,10 @@ $(document).ready(function () {
         $('#boxes').empty();
         for (const id in boxes) {
             const box = boxes[id];
+            // Load equipment if present
+            if('equipment' in box) {
+                loadEquipment(box.equipment);
+            }
             // Render the box itself
             let boxEle = $("#boxTemplate").clone().removeClass("template").attr("id", "box-" + box.id);
             boxEle.find(".name").text(box.name);
