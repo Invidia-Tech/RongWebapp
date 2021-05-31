@@ -17,7 +17,7 @@ def alter_boxunit(request : HttpRequest, box_id, boxunit_id):
         form = EditBoxUnitForm(request.POST, instance=boxunit)
         if form.is_valid():
             form.save()
-            return JsonResponse({"success": True, "unit": boxunit.box_json()})
+            return JsonResponse({"success": True, "unit": boxunit.edit_json()})
         else:
             return JsonResponse({"success": False, "errors": form.errors.get_json_data()})
     elif request.method == 'DELETE':
@@ -40,7 +40,7 @@ def create_boxunit(request : HttpRequest, box_id):
             try:
                 box_unit.validate_unique()
                 form.save()
-                return JsonResponse({"success": True, "unit": box_unit.box_json()})
+                return JsonResponse({"success": True, "unit": box_unit.edit_json()})
             except ValidationError as ex:
                 return JsonResponse({"success": False, "errors": [str(ex)]})
         else:

@@ -241,16 +241,7 @@ $(document).ready(function () {
                             type: 'DELETE',
                             success: function (data) {
                                 if (data.success) {
-                                    let idx = -1;
-                                    for (let i = 0; i < boxes[current_unit.box].units.length; i++) {
-                                        if (boxes[current_unit.box].units[i].id == current_unit.id) {
-                                            idx = i;
-                                            break;
-                                        }
-                                    }
-                                    if (idx > -1) {
-                                        boxes[current_unit.box].units.splice(idx, 1);
-                                    }
+                                    delete boxes[current_unit.box].units[current_unit.id];
                                     renderBoxUnits(current_unit.box);
                                     make_alert($('#mainContent'), 'success', 'Unit removed from box successfully.');
                                 }
@@ -287,12 +278,7 @@ $(document).ready(function () {
         show_loading();
         $.post("/box/" + current_unit.box + "/unit/" + current_unit.id + "/", form_data, function (data) {
             if (data.success) {
-                for (let i = 0; i < boxes[current_unit.box].units.length; i++) {
-                    if (boxes[current_unit.box].units[i].id == data.unit.id) {
-                        boxes[current_unit.box].units[i] = data.unit;
-                        break;
-                    }
-                }
+                boxes[current_unit.box].units[data.unit.id] = data.unit;
                 renderBoxUnits(current_unit.box);
                 make_alert($('#mainContent'), 'success', 'Unit edited successfully.');
             }
@@ -304,37 +290,33 @@ $(document).ready(function () {
     }
 
     function editUnit(box_id, unit_id) {
-        show_loading();
-        $.get("/box/" + box_id + "/unit/" + unit_id + "/", function (data) {
-            hide_loading();
-            setting_up = true;
-            dirty = false;
-            current_unit = data.unit;
-            $('#editUnitModalLabel').text('Edit Unit - ' + current_unit.unit.name);
+        setting_up = true;
+        dirty = false;
+        current_unit = JSON.parse(JSON.stringify(boxes[box_id].units[unit_id]));
+        $('#editUnitModalLabel').text('Edit Unit - ' + current_unit.unit.name);
 
-            if (!current_unit.rank) {
-                current_unit.rank = 1;
-            }
-            if (current_unit.rank > current_unit.ranks.length) {
-                current_unit.rank = current_unit.ranks.length;
-            }
-            if (!current_unit.level) {
-                current_unit.level = 1;
-            }
+        if (!current_unit.rank) {
+            current_unit.rank = 1;
+        }
+        if (current_unit.rank > current_unit.ranks.length) {
+            current_unit.rank = current_unit.ranks.length;
+        }
+        if (!current_unit.level) {
+            current_unit.level = 1;
+        }
 
-            editUnitRenderEquips();
-            populateNumericDropdown('rankField', 1, current_unit.ranks.length, current_unit.rank);
-            populateNumericDropdown('starField', current_unit.unit.rarity, MAX_STAR, current_unit.star);
+        editUnitRenderEquips();
+        populateNumericDropdown('rankField', 1, current_unit.ranks.length, current_unit.rank);
+        populateNumericDropdown('starField', current_unit.unit.rarity, MAX_STAR, current_unit.star);
 
-            let level_field = $('#levelField');
-            level_field.attr("min", 1);
-            level_field.attr("max", current_unit.max_level);
-            level_field.val(current_unit.level);
+        let level_field = $('#levelField');
+        level_field.attr("min", 1);
+        level_field.attr("max", current_unit.max_level);
+        level_field.val(current_unit.level);
 
-            // done
-            setting_up = false;
-            $('#editUnitModal').modal();
-        }, "json");
+        // done
+        setting_up = false;
+        $('#editUnitModal').modal();
     }
 
     function doAddUnit(id) {
@@ -347,7 +329,7 @@ $(document).ready(function () {
         show_loading();
         $.post("/box/" + id + "/unit/create/", $('#addUnitForm').serialize(), function (data) {
             if (data.success) {
-                boxes[id].units.push(data.unit);
+                boxes[id].units[data.unit.id] = data.unit;
                 renderBoxUnits(id);
                 make_alert($('#mainContent'), 'success', 'Unit added to box.');
             }
@@ -414,8 +396,9 @@ $(document).ready(function () {
         let box_data = boxes[id].units;
         let box_units_el = $(box_selector + ' .box-units');
         box_units_el.empty();
-        for (const unit of box_data) {
-            let unit_el = $("<div class='unit-icon'></div>").addClass('u-'+ icon_id(unit.unit_id, unit.star));
+        for (const uid in box_data) {
+            const unit = box_data[uid];
+            let unit_el = $("<div class='unit-icon'></div>").addClass('u-'+ icon_id(unit.unit.id, unit.star));
             unit_el.append($("<i class='unit-icon-border'></i>").addClass(rank_color(unit.rank)));
             if (unit.star) {
                 unit_el.append($('<div class="unit-icon-stars"></div>').addClass('s-' + unit.star));

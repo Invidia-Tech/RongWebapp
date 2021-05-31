@@ -1,6 +1,7 @@
+from typing import OrderedDict
 from django.db import models
 from .redive_models import Unit
-import json
+
 
 class Box(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
@@ -13,10 +14,15 @@ class Box(models.Model):
 
     def clan_name(self):
         return self.clanmember.clan.name if hasattr(self, "clanmember") else "None"
-    
+
     def unit_json(self):
-        return [unit.box_json() for unit in self.boxunit_set.all().select_related('unit')]
-    
+        # use a consistent order for NOW
+        # can be removed if wanted after sorts implemented on frontend
+        units = OrderedDict()
+        for unit in self.boxunit_set.all().select_related('unit').order_by('pk'):
+            units[unit.id] = unit.edit_json()
+        return units
+
     def meta_json(self):
         return {
             "id": self.id,
