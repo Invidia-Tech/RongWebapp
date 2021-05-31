@@ -44,15 +44,13 @@ function unit_position(range) {
     }
 }
 
-let alert_id = 0;
-
 function make_alert(dest, type, text) {
-    alert_id ++;
-    let alertBox = $('<div class="alert alert-' + type + ' alert-dismissible fade show" id="alert-'+alert_id+'" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="close">&#215;</button><span class="alert-text"></span></div>');
+    let alertBox = $('<div class="alert alert-dismissible fade show" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="close">&#215;</button><span class="alert-text"></span></div>');
+    alertBox.addClass('alert-'+type);
+    alertBox.find('.alert-text').text(text);
     dest.prepend(alertBox);
-    $('#alert-'+alert_id+' .alert-text').text(text);
     setTimeout(function() {
-        $('#alert-'+alert_id).fadeOut(1000);
+        alertBox.fadeOut(1000);
     }, 5000);
 }
 

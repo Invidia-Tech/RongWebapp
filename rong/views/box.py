@@ -59,6 +59,18 @@ def alter_box(request : HttpRequest, box_id):
         form = BoxForm(request.user, request.POST, instance=box)
         if form.is_valid():
             form.save()
+            # clan change? must be done manually
+            clanUnchanged = hasattr(box, 'clanmember') and form.data.get("clan", "") and int(form.data["clan"]) == int(box.clanmember.id)
+            if hasattr(box, 'clanmember') and not clanUnchanged:
+                # clear old clan
+                cm = box.clanmember
+                cm.box = None
+                cm.save()
+            if form.data.get("clan", "") and not clanUnchanged:
+                # set new clan
+                cm = request.user.clanmember_set.get(pk=form.data["clan"])
+                cm.box = box
+                cm.save()
             return JsonResponse({"success": True, "box": box.meta_json()})
         else:
             return JsonResponse({"success": False, "error": "Invalid box"})
@@ -96,4 +108,5 @@ def create_box(request : HttpRequest):
 @login_required
 def index(request : HttpRequest):
     request.user.check_single_mode()
-    return render(request, 'rong/box/index.html', {})
+    boxes = [box.meta_json() for box in request.user.box_set.all()]
+    return render(request, 'rong/box/index.html', {"boxes": boxes})

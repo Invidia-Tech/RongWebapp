@@ -242,14 +242,14 @@ $(document).ready(function () {
                             success: function (data) {
                                 if (data.success) {
                                     let idx = -1;
-                                    for (let i = 0; i < boxes[current_unit.box].length; i++) {
-                                        if (boxes[current_unit.box][i].id == current_unit.id) {
+                                    for (let i = 0; i < boxes[current_unit.box].units.length; i++) {
+                                        if (boxes[current_unit.box].units[i].id == current_unit.id) {
                                             idx = i;
                                             break;
                                         }
                                     }
                                     if (idx > -1) {
-                                        boxes[current_unit.box].splice(idx, 1);
+                                        boxes[current_unit.box].units.splice(idx, 1);
                                     }
                                     renderBoxUnits(current_unit.box);
                                     make_alert($('#mainContent'), 'success', 'Unit removed from box successfully.');
@@ -287,9 +287,9 @@ $(document).ready(function () {
         show_loading();
         $.post("/box/" + current_unit.box + "/unit/" + current_unit.id + "/", form_data, function (data) {
             if (data.success) {
-                for (let i = 0; i < boxes[current_unit.box].length; i++) {
-                    if (boxes[current_unit.box][i].id == data.unit.id) {
-                        boxes[current_unit.box][i] = data.unit;
+                for (let i = 0; i < boxes[current_unit.box].units.length; i++) {
+                    if (boxes[current_unit.box].units[i].id == data.unit.id) {
+                        boxes[current_unit.box].units[i] = data.unit;
                         break;
                     }
                 }
@@ -347,7 +347,7 @@ $(document).ready(function () {
         show_loading();
         $.post("/box/" + id + "/unit/create/", $('#addUnitForm').serialize(), function (data) {
             if (data.success) {
-                boxes[id].push(data.unit);
+                boxes[id].units.push(data.unit);
                 renderBoxUnits(id);
                 make_alert($('#mainContent'), 'success', 'Unit added to box.');
             }
@@ -411,41 +411,182 @@ $(document).ready(function () {
 
     function renderBoxUnits(id) {
         let box_selector = '#box-' + id;
-        let box_data = boxes[id];
+        let box_data = boxes[id].units;
         let box_units_el = $(box_selector + ' .box-units');
-        box_units_el.html('');
+        box_units_el.empty();
         for (const unit of box_data) {
-            let unit_el = '<div class="unit-icon u-' + icon_id(unit.unit_id, unit.star) + '" data-id="' + unit.id + '">';
-            unit_el += '<i class="unit-icon-border ' + rank_color(unit.rank) + '"></i>';
+            let unit_el = $("<div class='unit-icon'></div>").addClass('u-'+ icon_id(unit.unit_id, unit.star));
+            unit_el.append($("<i class='unit-icon-border'></i>").addClass(rank_color(unit.rank)));
             if (unit.star) {
-                unit_el += '<div class="unit-icon-stars s-' + unit.star + '"></div>';
+                unit_el.append($('<div class="unit-icon-stars"></div>').addClass('s-' + unit.star));
             }
-            unit_el += '</div>';
+            unit_el.click(function() {
+                editUnit(id, unit.id);
+            });
             box_units_el.append(unit_el);
         }
-        box_units_el.append("<div class='box-units-add'></div>");
-        $(box_selector + ' .unit-icon').click(function () {
-            editUnit(id, $(this).attr("data-id"));
-        });
-        $(box_selector + ' .box-units-add').click(function () {
+        let box_unit_add = $("<div class='box-units-add'></div>");
+        box_unit_add.click(function () {
             addUnit(id);
         });
+        box_units_el.append(box_unit_add);
     }
 
-    $('.box').each(function () {
-        let id = $(this).attr("data-id");
-        boxes[id] = JSON.parse($(this).attr("data-units"));
-        renderBoxUnits(id);
-    });
+    function doDeleteBox(id) {
+        const box = boxes[id];
+        let dialogText = $('<div><p>Are you sure you want to delete box <b></b> entirely?</p><p>ALL DATA WILL BE LOST.</p></div>');
+        dialogText.find('b').text(box.name);
+        let dialog = dialogText.dialog(
+            {
+                buttons: {
+                    "Yes": function () {
+                        dialog.dialog('destroy');
+                        show_loading();
+                        $.ajax({
+                            url: "/box/" + id + "/",
+                            beforeSend: function (xhr) {
+                                xhr.setRequestHeader("X-CSRFToken", $('#editUnitForm input[name="csrfmiddlewaretoken"]').val());
+                            },
+                            type: 'DELETE',
+                            success: function (data) {
+                                if (data.success) {
+                                    delete boxes[id];
+                                    renderBoxes();
+                                    make_alert($('#mainContent'), 'success', 'Box deleted successfully.');
+                                }
+                                else {
+                                    make_alert($('#mainContent'), 'danger', 'Box could not be removed.');
+                                }
+                                hide_loading();
+                            }
+                        });
+                    },
+                    "No": function () { dialog.dialog('destroy'); },
+                },
+                modal: true,
+            }
+        );
+    }
+
+    function doEditBox(id) {
+        $('#boxForm').validate();
+        if ($('#boxForm').valid()) {
+            $('#boxModal').modal('hide');
+            show_loading();
+            $.post("/box/" + id + "/", $('#boxForm').serialize(), function (data) {
+                if (data.success) {
+                    boxes[data.box.id] = data.box;
+                    renderBoxes();
+                    make_alert($('#mainContent'), 'success', 'Box edited successfully.');
+                }
+                else {
+                    make_alert($('#mainContent'), 'danger', 'Could not edit box.');
+                }
+                hide_loading();
+            });
+        }
+    }
+
+    function editBox(id) {
+        show_loading();
+        $.get("/box/" + id + "/", function (data) {
+            hide_loading();
+            $('#boxModalLabel').text('Edit Box');
+            bcf = $('#boxClanField');
+            bcf.empty();
+            bcf.append($("<option selected></option>").attr("value", "").text("--None--"));
+            for (let clan of data.clan_options) {
+                bcf.append($("<option></option>").attr("value", clan[0]).text(clan[1]));
+            }
+            bcf.prop("disabled", data.clan_options.length == 0 ? "disabled" : false);
+            if (data.clan) {
+                bcf.val(data.clan);
+            }
+            $('#boxNameField').val(data.name);
+            $('#boxSaveBtn').off('click');
+            $('#boxSaveBtn').click(function () {
+                doEditBox(id);
+            });
+            $('#boxModal').modal();
+        }, "json");
+    }
+
+    function doCreateBox() {
+        $('#boxForm').validate();
+        if ($('#boxForm').valid()) {
+            $('#boxModal').modal('hide');
+            show_loading();
+            $.post("/box/create/", $('#boxForm').serialize(), function (data) {
+                if (data.success) {
+                    boxes[data.box.id] = data.box;
+                    renderBoxes();
+                    make_alert($('#mainContent'), 'success', 'Box created successfully.');
+                }
+                else {
+                    make_alert($('#mainContent'), 'danger', 'Could not create box.');
+                }
+                hide_loading();
+            });
+        }
+    }
+
+    function createBox() {
+        show_loading();
+        $.get("/box/create/", function (data) {
+            hide_loading();
+            $('#boxModalLabel').text('Create Box');
+            bcf = $('#boxClanField');
+            bcf.empty();
+            bcf.append($("<option selected></option>").attr("value", "").text("--None--"));
+            for (let clan of data.clan_options) {
+                bcf.append($("<option></option>").attr("value", clan[0]).text(clan[1]));
+            }
+            bcf.prop("disabled", data.clan_options.length == 0 ? "disabled" : false);
+            $('#boxNameField').val("");
+            $('#boxSaveBtn').off('click');
+            $('#boxSaveBtn').click(doCreateBox);
+            $('#boxModal').modal();
+        }, "json");
+    }
+
+    function renderBoxes() {
+        $('#boxes').empty();
+        for (const id in boxes) {
+            const box = boxes[id];
+            // Render the box itself
+            let boxEle = $("#boxTemplate").clone().removeClass("template").attr("id", "box-" + box.id);
+            boxEle.find(".name").text(box.name);
+            boxEle.find(".box-clan-name").text(box.clan);
+            boxEle.find(".box-load-screenshot").click(function () {
+                alert("Soon™");
+            });
+            boxEle.find(".box-edit").click(function () {
+                editBox(id);
+            });
+            boxEle.find(".box-delete").click(function () {
+                doDeleteBox(id);
+            });
+            boxEle.appendTo("#boxes");
+            renderBoxUnits(id);
+        }
+    }
+
+    function setupBoxes() {
+        rawBoxes = JSON.parse(document.getElementById('boxData').textContent);
+        for (const box of rawBoxes) {
+            boxes[box.id] = box;
+        }
+        renderBoxes();
+    }
 
     $('#addUnitModal ul.position-selector li').click(function () {
         addUnitFilter($(this).attr('data-filter'));
     });
 
-    $('.box-load-screenshot').click(function () {
-        alert("Soon™");
-    });
-
     $('#editUnitSaveBtn').click(doEditUnit);
     $('#editUnitRemoveBtn').click(doDeleteUnit);
+
+    $('#createBoxBtn').click(createBox);
+
+    setupBoxes();
 });

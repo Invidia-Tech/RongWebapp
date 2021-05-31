@@ -16,18 +16,29 @@
 
 {% block content %}
 {% if not user.single_mode %}
-<h2>My Boxes</h2>
+<div class="row header mb-3">
+    <div class="col-md-6">
+        <h2>My Boxes</h2>
+    </div>
+    <div class="col-md-6 text-right"><button type="button" class="btn btn-primary box-create" id="createBoxBtn">Create
+            Box</button></div>
+</div>
 {% endif %}
 
-{% for box in user.box_set.all %}
-<div id="box-{{ box.id }}" data-id="{{box.id}}" data-title="{{box.name}}" data-units="{{ box.unit_json }}" class="box">
+<div id="boxes">
+</div>
+
+{{ boxes|json_script:"boxData" }}
+
+
+<div class="template box" id="boxTemplate">
     <div class="row header box-header">
         <div class="col-md-5">
-            <h2>{{ box.name }}</h2>
+            <h2 class="name"></h2>
         </div>
         <div class="col-md-2">
             {% if not user.single_mode %}
-            Clan: <span class="box-clan-name">{{ box.clan_name }}</span>
+            Clan: <span class="box-clan-name"></span>
             {% endif %}
         </div>
         <div class="col-md-5 actions">
@@ -40,7 +51,6 @@
     </div>
     <div class="box-units"></div>
 </div>
-{% endfor %}
 
 <!-- Add Unit modal -->
 <div class="modal fade" id="addUnitModal" tabindex="-1" aria-labelledby="addUnitModalLabel" aria-hidden="true">
@@ -68,7 +78,6 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary add-button">Add</button>
             </div>
         </div>
@@ -155,9 +164,47 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-danger" id="editUnitRemoveBtn">Remove</button>
                 <button type="button" class="btn btn-primary" id="editUnitSaveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Box modal -->
+<div class="modal fade" id="boxModal" tabindex="-1" aria-labelledby="boxModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="boxModalLabel">Edit Box</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="boxForm">
+                    {% csrf_token %}
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label" for="boxNameField">Name:</label>
+                        <div class="col-md-9">
+                            <div class="input-group">
+                                <input class="form-control" name="name" id="boxNameField" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label" for="boxClanField">Clan:</label>
+                        <div class="col-md-9">
+                            <div class="input-group">
+                                <select class="form-control" name="clan" id="boxClanField"></select>
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="boxSaveBtn">Save</button>
             </div>
         </div>
     </div>

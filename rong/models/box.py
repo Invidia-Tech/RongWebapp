@@ -15,11 +15,12 @@ class Box(models.Model):
         return self.clanmember.clan.name if hasattr(self, "clanmember") else "None"
     
     def unit_json(self):
-        return json.dumps([unit.box_json() for unit in self.boxunit_set.all().select_related('unit')])
+        return [unit.box_json() for unit in self.boxunit_set.all().select_related('unit')]
     
     def meta_json(self):
         return {
             "id": self.id,
             "name": self.name,
             "clan": self.clan_name(),
+            "units": self.unit_json()
         }
