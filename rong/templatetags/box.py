@@ -3,8 +3,16 @@ from django import template
 register = template.Library()
 
 @register.simple_tag
+def equip_star_range():
+    return range(1, 5 + 1)
+
+@register.simple_tag
+def unit_star_range():
+    return range(1, 5 + 1)
+
+@register.simple_tag
 def equip_range():
-    return range(1, 7)
+    return range(1, 6 + 1)
 
 @register.simple_tag
 def equip_align(slot):

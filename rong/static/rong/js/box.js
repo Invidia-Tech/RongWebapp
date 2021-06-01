@@ -9,8 +9,8 @@ $(document).ready(function () {
     let equipment = {};
 
     function loadEquipment(equips) {
-        for(const eid in equips) {
-            if(!(eid in equipment)) {
+        for (const eid in equips) {
+            if (!(eid in equipment)) {
                 equipment[eid] = equips[eid];
             }
         }
@@ -32,17 +32,24 @@ $(document).ready(function () {
         $('#rankField').val(current_unit.ranks.length).change();
     });
 
-    $('#starField').change(function () {
+    function editUnitRenderUnitStars() {
+        for (let star = 1; star <= MAX_STAR; star++) {
+            $(".unit-star-holder span.star[data-num='" + star + "']").toggleClass("active", current_unit.star >= star);
+        }
+    }
+
+    $('.unit-star-holder span.star').click(function () {
+        let star = parseInt($(this).attr('data-num'));
         if (setting_up) {
             return;
         }
-        current_unit.star = parseInt($('#starField').val());
+        if (star < current_unit.unit.rarity) {
+            return;
+        }
+        current_unit.star = parseInt(star);
         dirty = true;
+        editUnitRenderUnitStars();
         editUnitRenderPreview();
-    });
-
-    $('#starMaxBtn').click(function () {
-        $('#starField').val(MAX_STAR).change();
     });
 
     $('#levelField').change(function () {
@@ -59,14 +66,16 @@ $(document).ready(function () {
 
     $('#editUnitMaxAllBtn').click(function () {
         $('#rankField').val(current_unit.ranks.length).change();
-        $('#starField').val(MAX_STAR).change();
+        current_unit.star = MAX_STAR;
+        editUnitRenderUnitStars();
         $('#levelField').val(current_unit.max_level).change();
         equipAll(true);
     });
 
     $('#editUnitMinAllBtn').click(function () {
         $('#rankField').val(1).change();
-        $('#starField').val(current_unit.unit.rarity).change();
+        current_unit.star = current_unit.unit.rarity;
+        editUnitRenderUnitStars();
         $('#levelField').val(1).change();
     });
 
@@ -304,7 +313,7 @@ $(document).ready(function () {
         current_unit = JSON.parse(JSON.stringify(boxes[box_id].units[unit_id]));
 
         // load any extra equipment data
-        if('equipment' in current_unit) {
+        if ('equipment' in current_unit) {
             loadEquipment(current_unit.equipment);
         }
 
@@ -321,8 +330,15 @@ $(document).ready(function () {
         }
 
         editUnitRenderEquips();
-        populateNumericDropdown('rankField', 1, current_unit.ranks.length, current_unit.rank);
-        populateNumericDropdown('starField', current_unit.unit.rarity, MAX_STAR, current_unit.star);
+        let rank_field = $('#rankField');
+        rank_field.attr("min", 1);
+        rank_field.attr("max", current_unit.ranks.length);
+        rank_field.val(current_unit.rank);
+
+        for (let star = 1; star <= MAX_STAR; star++) {
+            $(".unit-star-holder span.star[data-num='" + star + "']").toggleClass("selectable", current_unit.unit.rarity <= star);
+        }
+        editUnitRenderUnitStars();
 
         let level_field = $('#levelField');
         level_field.attr("min", 1);
@@ -413,12 +429,12 @@ $(document).ready(function () {
         box_units_el.empty();
         for (const uid in box_data) {
             const unit = box_data[uid];
-            let unit_el = $("<div class='unit-icon'></div>").addClass('u-'+ icon_id(unit.unit.id, unit.star));
+            let unit_el = $("<div class='unit-icon'></div>").addClass('u-' + icon_id(unit.unit.id, unit.star));
             unit_el.append($("<i class='unit-icon-border'></i>").addClass(rank_color(unit.rank)));
             if (unit.star) {
                 unit_el.append($('<div class="unit-icon-stars"></div>').addClass('s-' + unit.star));
             }
-            unit_el.click(function() {
+            unit_el.click(function () {
                 editUnit(id, unit.id);
             });
             box_units_el.append(unit_el);
@@ -552,7 +568,7 @@ $(document).ready(function () {
         for (const id in boxes) {
             const box = boxes[id];
             // Load equipment if present
-            if('equipment' in box) {
+            if ('equipment' in box) {
                 loadEquipment(box.equipment);
             }
             // Render the box itself

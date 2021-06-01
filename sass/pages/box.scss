@@ -96,4 +96,17 @@
             display: none;
         }
     }
+
+    .unit-star-holder {
+        border: none;
+        line-height: 1;
+
+        .star {
+            cursor: default;
+            font-size: 150%;
+            &.selectable {
+                cursor: pointer;
+            }
+        }
+    }
 }

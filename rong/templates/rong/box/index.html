@@ -100,13 +100,12 @@
                     <div class="equipment">
                         <div class="row">
                             {% equip_range as er %}
+                            {% equip_star_range as es %}
                             {% for slot in er %}
                             <div class="col-md-{% equip_size slot %} mb-1 text-{% equip_align slot %}">
                                 <span class="equip-holder" id="equip-{{ slot }}" data-slot="{{ slot }}">
                                     <img class="unequipped" /><img class="equipped" /><br />
-                                    <span class="star" data-num="1">★</span><span class="star"
-                                        data-num="2">★</span><span class="star" data-num="3">★</span><span class="star"
-                                        data-num="4">★</span><span class="star" data-num="5">★</span>
+                                    {% for estar in es %}<span class="star" data-num="{{ estar }}">★</span>{% endfor %}
                                 </span>
                             </div>
                             {% if slot == 3 %}
@@ -131,7 +130,7 @@
                         <label class="col-md-3 col-form-label" for="rankField">Rank:</label>
                         <div class="col-md-9">
                             <div class="input-group">
-                                <select class="form-control" name="rank" id="rankField"></select>
+                                <input type="number" class="form-control" name="rank" id="rankField">
                                 <span class="input-group-append">
                                     <button type="button" class="btn btn-secondary" id="rankMaxBtn">Max</button>
                                 </span>
@@ -143,9 +142,9 @@
                         <label class="col-md-3 col-form-label" for="starField">Star:</label>
                         <div class="col-md-9">
                             <div class="input-group">
-                                <select class="form-control" name="star" id="starField"></select>
-                                <span class="input-group-append">
-                                    <button type="button" class="btn btn-secondary" id="starMaxBtn">Max</button>
+                                {% unit_star_range as us %}
+                                <span class="form-control unit-star-holder">
+                                    {% for ustar in us %}<span class="star" data-num="{{ ustar }}">★</span>{% endfor %}
                                 </span>
                             </div>
                         </div>
