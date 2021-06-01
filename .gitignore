@@ -120,3 +120,6 @@ assets/*/*.unity3d
 # npm
 node_modules
 rong/static/rong/styles/**/*.css
+
+# dev
+/dev_scripts
