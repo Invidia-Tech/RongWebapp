@@ -6,6 +6,7 @@ from .box import Box
 from .clan import Clan
 from .bot_models import DiscordRoleMember
 from .clan_member import ClanMember
+from typing import Union
 
 
 class User(models.Model):
@@ -85,11 +86,14 @@ WHERE (
         self.load_managed_clans()
         return Clan.objects.filter(id__in=self.managed_clan_ids)
 
-    def can_manage(self, clan: Clan):
+    def can_manage(self, managed: Union[Clan, ClanBattle]):
         self.load_managed_clans()
-        return clan.id in self.managed_clan_ids
-    
-    def can_view(self, clan_battle : ClanBattle):
+        if type(managed) == Clan:
+            return managed.id in self.managed_clan_ids
+        else:
+            return managed.clan_id in self.managed_clan_ids
+
+    def can_view(self, clan_battle: ClanBattle):
         self.load_managed_clans()
         return clan_battle.clan_id in self.managed_clan_ids or self.clanmember_set.filter(clan_id=clan_battle.clan_id).exists()
 
