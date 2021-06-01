@@ -1,5 +1,5 @@
 from rong.models.clan_battle import ClanBattle
-from django.db import models
+from django.db import connection, models
 from requests_oauthlib import OAuth2Session
 from django.conf import settings
 from .box import Box
@@ -64,15 +64,34 @@ class User(models.Model):
         user.sync_clans()
         return user
 
+    def load_managed_clans(self):
+        if not hasattr(self, 'managed_clan_ids'):
+            with connection.cursor() as cur:
+                cur.execute("""
+SELECT cl."id"
+FROM "rong_clan" cl
+JOIN "rong_clancollection" cc ON cl."collection_id" = cc."id"
+LEFT JOIN "rong_clanmember" cm ON (cl."id" = cm."clan_id" AND cm."user_id" = %s)
+WHERE (
+	(cm."id" IS NOT NULL AND cm."is_lead" IS TRUE)
+	OR cl."admin_id" = %s
+	OR cc."owner_id" = %s
+);
+                """, [self.id] * 3)
+                self.managed_clan_ids = [row[0] for row in cur.fetchall()]
+
+    @property
+    def managed_clans(self):
+        self.load_managed_clans()
+        return Clan.objects.filter(id__in=self.managed_clan_ids)
+
     def can_manage(self, clan: Clan):
-        if clan.admin == self:
-            return True
-        if clan.collection.owner == self:
-            return True
-        return self.clanmember_set.filter(clan=clan, is_lead=True).exists()
+        self.load_managed_clans()
+        return clan.id in self.managed_clan_ids
     
     def can_view(self, clan_battle : ClanBattle):
-        return self.clanmember_set.filter(clan_id=clan_battle.clan_id).exists()
+        self.load_managed_clans()
+        return clan_battle.clan_id in self.managed_clan_ids or self.clanmember_set.filter(clan_id=clan_battle.clan_id).exists()
 
     @property
     def is_authenticated(self):
