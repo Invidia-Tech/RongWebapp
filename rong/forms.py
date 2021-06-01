@@ -1,8 +1,10 @@
+from rong.models.redive_models import CNClanBattlePeriod, ENClanBattlePeriod, JPClanBattlePeriod
 from django import forms
 from django.conf import settings
 from django.forms import RadioSelect
 from django.db import models
-from rong.models import User, Box, BoxUnit
+from rong.models import User, Box, BoxUnit, ClanBattle
+from rong.models.clan_battle import CB_DATA_SOURCES
 
 def get_display_pic_choices():
     return [(x, x) for x in settings.SPRITE_DATA["units"] if x != 'unknown']
@@ -49,3 +51,19 @@ class EditBoxUnitForm(forms.ModelForm):
     class Meta:
         model = BoxUnit
         fields = ['level', 'star', 'rank', 'equip1', 'equip2', 'equip3', 'equip4', 'equip5', 'equip6']
+
+def get_cb_data_source_choices():
+    output = []
+    for source in CB_DATA_SOURCES:
+        out_choice = [source["name"], []]
+        for cb_period in source["periodModel"].objects.all().order_by('id'):
+            cb_id = "%s-%d" % (source["prefix"], cb_period.id)
+            cb_desc = "%s CB %d (%s-%s)" % (source["name"], cb_period.id - 1000, cb_period.start_time[:cb_period.start_time.index(" ")], cb_period.end_time[:cb_period.end_time.index(" ")])
+            out_choice[1].append([cb_id, cb_desc])
+        output.append(out_choice)
+    return output
+
+class AddClanBattleForm(forms.ModelForm):
+    class Meta:
+        model = ClanBattle
+        fields = ['name', 'begin_time', 'end_time']
