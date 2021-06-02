@@ -47,6 +47,8 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'rong:box_index' %}">My Box</a>
                         </li>
+
+                        {# Clan Battle #}
                         {% if user.clans.all|length == 1 %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'rong:cb_list' user.clans.first.slug %}">Clan Battle</a>
@@ -58,6 +60,33 @@
                                 {% for clan in user.clans.all %}
                                 <li><a class="dropdown-item" href="{% url 'rong:cb_list' clan.slug %}">{{clan.name}}</a></li>
                                 {% endfor %}
+                            </ul>
+                        </li>
+                        {% endif %}
+
+                        {# Clan Management #}
+                        {% if user.managed_clans|length %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#">Manage Clans</a>
+                            <ul class="dropdown-menu">
+                                {% if user.managed_clans|length < 3 %}
+                                {% for clan in user.managed_clans %}
+                                {% if not forloop.first %}
+                                <li class="dropdown-divider"></li>
+                                {% endif %}
+                                <li class="dropdown-header">{{ clan.name }}</li>
+                                {% include "./includes/clan_management_menu_items.html" %}
+                                {% endfor %}
+                                {% else %}
+                                {% for clan in user.managed_clans %}
+                                <li class="dropdown">
+                                    <a class="dropdown-item dropdown-toggle" href="#">{{ clan.name }}</a>
+                                    <ul class="dropdown-menu">
+                                        {% include "./includes/clan_management_menu_items.html" %}
+                                    </ul>
+                                </li>
+                                {% endfor %}
+                                {% endif %}
                             </ul>
                         </li>
                         {% endif %}
