@@ -27,7 +27,7 @@ class Team(models.Model):
     unit5_star = models.PositiveIntegerField(null=True)
     uid = models.CharField(max_length=40, db_index=True)
 
-    def create_team(units: list[Unit], stars: Optional[list[int]], levels: Optional[list[int]], power: Optional[int]):
+    def create_team(units, stars=None, levels=None, power=None):
         t = Team(power=power)
         unit_data = [{"unit": units[u], "star": None if stars is None else stars[u],
                       "level": None if levels is None else levels[u]} for u in range(5)]
