@@ -25,6 +25,7 @@ class Team(models.Model):
         'Unit', related_name='unit5teams', on_delete=models.DO_NOTHING)
     unit5_level = models.PositiveIntegerField(null=True)
     unit5_star = models.PositiveIntegerField(null=True)
+    uid = models.CharField(max_length=40, db_index=True)
 
     def create_team(units: list[Unit], stars: Optional[list[int]], levels: Optional[list[int]], power: Optional[int]):
         t = Team(power=power)
