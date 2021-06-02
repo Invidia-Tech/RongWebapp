@@ -16,10 +16,13 @@
     {% bootstrap_css %}
 
     {% load static %}
-    <link rel='shortcut icon' type='image/x-icon' href='{% static "rong/favicon.ico" %}' />
+    <link rel='shortcut icon' type='image/x-icon' href='{% static "rong/favicon.ico" %}'/>
     <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/main.css' %}">
     <link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/addons/bootstrap-4/jquery.smartmenus.bootstrap-4.min.css" integrity="sha512-OA47rpkKasrYmbufD0p/c2gqiPc2ACGctbXHY4F2+478e+qTH27X4JHkQdoMRjCexhjdyuofoQxutqRGKDg0Ow==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/addons/bootstrap-4/jquery.smartmenus.bootstrap-4.min.css"
+          integrity="sha512-OA47rpkKasrYmbufD0p/c2gqiPc2ACGctbXHY4F2+478e+qTH27X4JHkQdoMRjCexhjdyuofoQxutqRGKDg0Ow=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     {% block extra_css %}{% endblock %}
 
     <!-- Bootstrap JavaScript if it is in head -->
@@ -28,115 +31,122 @@
     <script src="{% static 'rong/js/common.js' %}"></script>
     <script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/jquery.smartmenus.min.js" integrity="sha512-QDsq6P94BSSC6OE3BZ8S0lkYFK8zvM9s/JHM0u89nEKLOJhYFQ+AcfyWoyYs6hDPtRc9wUpgo61u6ePDhwbGFw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/addons/bootstrap-4/jquery.smartmenus.bootstrap-4.min.js" integrity="sha512-Hjmyl74CEDNjC2VvAwV3IesBmwZk9yqeH+9tWqTi3z3rL5WLBGlz2360qRRwkd2J8eA7hDC3ETe5E/5zQ/vaYg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/jquery.smartmenus.min.js"
+            integrity="sha512-QDsq6P94BSSC6OE3BZ8S0lkYFK8zvM9s/JHM0u89nEKLOJhYFQ+AcfyWoyYs6hDPtRc9wUpgo61u6ePDhwbGFw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/addons/bootstrap-4/jquery.smartmenus.bootstrap-4.min.js"
+            integrity="sha512-Hjmyl74CEDNjC2VvAwV3IesBmwZk9yqeH+9tWqTi3z3rL5WLBGlz2360qRRwkd2J8eA7hDC3ETe5E/5zQ/vaYg=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     {% block extra_js %}{% endblock %}
 
 </head>
 
 <body>
-    <nav class="navbar navbar-dark bg-dark fixed-top navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'rong:index' %}">Rong</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-              </button>
-              <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="nav navbar-nav mr-auto">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'rong:box_index' %}">My Box</a>
-                        </li>
+<nav class="navbar navbar-dark bg-dark fixed-top navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'rong:index' %}">Rong</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="nav navbar-nav mr-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'rong:box_index' %}">My Box</a>
+                    </li>
 
-                        {# Clan Battle #}
-                        {% if user.clans.all|length == 1 %}
+                    {# Clan Battle #}
+                    {% if user.clans.all|length == 1 %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'rong:cb_list' user.clans.first.slug %}">Clan Battle</a>
                         </li>
-                        {% elif user.clans.all|length > 1 %}
+                    {% elif user.clans.all|length > 1 %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#">Clan Battle</a>
                             <ul class="dropdown-menu">
                                 {% for clan in user.clans.all %}
-                                <li><a class="dropdown-item" href="{% url 'rong:cb_list' clan.slug %}">{{clan.name}}</a></li>
+                                    <li><a class="dropdown-item"
+                                           href="{% url 'rong:cb_list' clan.slug %}">{{ clan.name }}</a></li>
                                 {% endfor %}
                             </ul>
                         </li>
-                        {% endif %}
+                    {% endif %}
 
-                        {# Clan Management #}
-                        {% if user.managed_clans|length %}
+                    {# Clan Management #}
+                    {% if user.managed_clans|length %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#">Manage Clans</a>
                             <ul class="dropdown-menu">
                                 {% if user.managed_clans|length < 3 %}
-                                {% for clan in user.managed_clans %}
-                                {% if not forloop.first %}
-                                <li class="dropdown-divider"></li>
-                                {% endif %}
-                                <li class="dropdown-header">{{ clan.name }}</li>
-                                {% include "./includes/clan_management_menu_items.html" %}
-                                {% endfor %}
-                                {% else %}
-                                {% for clan in user.managed_clans %}
-                                <li class="dropdown">
-                                    <a class="dropdown-item dropdown-toggle" href="#">{{ clan.name }}</a>
-                                    <ul class="dropdown-menu">
+                                    {% for clan in user.managed_clans %}
+                                        {% if not forloop.first %}
+                                            <li class="dropdown-divider"></li>
+                                        {% endif %}
+                                        <li class="dropdown-header">{{ clan.name }}</li>
                                         {% include "./includes/clan_management_menu_items.html" %}
-                                    </ul>
-                                </li>
-                                {% endfor %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% for clan in user.managed_clans %}
+                                        <li class="dropdown">
+                                            <a class="dropdown-item dropdown-toggle" href="#">{{ clan.name }}</a>
+                                            <ul class="dropdown-menu">
+                                                {% include "./includes/clan_management_menu_items.html" %}
+                                            </ul>
+                                        </li>
+                                    {% endfor %}
                                 {% endif %}
                             </ul>
                         </li>
-                        {% endif %}
                     {% endif %}
-                  </ul>
-                  <ul class="navbar-nav align-items-center">
-                    {% if user.is_authenticated %}
-                        <!-- display pic here -->
-                        <li class="nav-item">
-                            {% unit_icon user.display_pic pfp=True %}
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userSettingsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                
-                                {{ user.name }}
-                            </a>
-                            <div class="dropdown-menu" aria-labelledby="userSettingsDropdown">
-                                <a class="dropdown-item" href="{% url 'rong:preferences' %}">Preferences</a>
-                                <a class="dropdown-item" href="{% url 'rong:logout' %}">Logout</a>
-                            </div>
-                        </li>
-                      {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'rong:discordlogin' %}">Login</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav align-items-center">
+                {% if user.is_authenticated %}
+                    <!-- display pic here -->
+                    <li class="nav-item">
+                        {% unit_icon user.display_pic pfp=True %}
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userSettingsDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+                            {{ user.name }}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="userSettingsDropdown">
+                            <a class="dropdown-item" href="{% url 'rong:preferences' %}">Preferences</a>
+                            <a class="dropdown-item" href="{% url 'rong:logout' %}">Logout</a>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'rong:discordlogin' %}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
         </div>
-    </nav>
-    
-    <div class="container" id="mainContent">
-        
-        {% bootstrap_messages %}
-        
-        {% block content %}{% endblock %}
     </div>
-    
-    <hr />
+</nav>
 
-    <div class="container">
-        Princess Connect Re;Dive &copy; Cygames &amp; licensed by Crunchyroll Games.<br />
-        The creator of this website is not affiliated with either of these entities.
-    </div>
+<div class="container" id="mainContent">
 
-    <div class="loading-overlay"></div>
-    <div class="loading-spanner">
-        <div class="loader"></div>
-        <p>Loading...</p>
-    </div>
+    {% bootstrap_messages %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<hr/>
+
+<div class="container">
+    Princess Connect Re;Dive &copy; Cygames &amp; licensed by Crunchyroll Games.<br/>
+    The creator of this website is not affiliated with either of these entities.
+</div>
+
+<div class="loading-overlay"></div>
+<div class="loading-spanner">
+    <div class="loader"></div>
+    <p>Loading...</p>
+</div>
 
 <!-- Bootstrap JavaScript if it is in body -->
 

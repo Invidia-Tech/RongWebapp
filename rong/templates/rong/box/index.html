@@ -5,208 +5,213 @@
 {% load bootstrap4 %}
 
 {% block extra_js %}
-<script src="{% static 'rong/js/box.js' %}"></script>
+    <script src="{% static 'rong/js/box.js' %}"></script>
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" type="text/css" href="{% static 'rong/styles/pages/box.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/pages/box.css' %}">
 {% endblock %}
 
 {% block title %}My Boxes{% endblock %}
 
 {% block content %}
-{% if not user.single_mode %}
-<div class="row header mb-3">
-    <div class="col-md-6">
-        <h2>My Boxes</h2>
-    </div>
-    <div class="col-md-6 text-right"><button type="button" class="btn btn-primary box-create" id="createBoxBtn">Create
-            Box</button></div>
-</div>
-{% endif %}
-
-<div id="boxes">
-</div>
-
-{{ boxes|json_script:"boxData" }}
-
-
-<div class="template box" id="boxTemplate">
-    <div class="row header box-header">
-        <div class="col-md-5">
-            <h2 class="name"></h2>
-        </div>
-        <div class="col-md-2">
-            {% if not user.single_mode %}
-            Clan: <span class="box-clan-name"></span>
-            {% endif %}
-        </div>
-        <div class="col-md-5 actions">
-            <button type="button" class="btn btn-primary box-load-screenshot">Load From Screenshot</button>
-            {% if not user.single_mode %}
-            <button type="button" class="btn btn-primary box-edit">Edit</button>
-            <button type="button" class="btn btn-danger box-delete">Delete</button>
-            {% endif %}
-        </div>
-    </div>
-    <div class="box-units"></div>
-</div>
-
-<!-- Add Unit modal -->
-<div class="modal fade" id="addUnitModal" tabindex="-1" aria-labelledby="addUnitModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addUnitModalLabel">Add Unit</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+    {% if not user.single_mode %}
+        <div class="row header mb-3">
+            <div class="col-md-6">
+                <h2>My Boxes</h2>
+            </div>
+            <div class="col-md-6 text-right">
+                <button type="button" class="btn btn-primary box-create" id="createBoxBtn">Create
+                    Box
                 </button>
             </div>
-            <div class="modal-header unit-filter-header">
-                <ul class="position-selector">
-                    <li class="active" data-filter="all">All</li>
-                    <li data-filter="front"><img src="{% static 'rong/images/position_front.png' %}" /> Front</li>
-                    <li data-filter="middle"><img src="{% static 'rong/images/position_middle.png' %}" /> Middle</li>
-                    <li data-filter="back"><img src="{% static 'rong/images/position_back.png' %}" /> Back</li>
-                </ul>
-            </div>
-            <div class="modal-body">
+        </div>
+    {% endif %}
 
-                <form id="addUnitForm">
-                    {% csrf_token %}
-                    <div class="units"></div>
-                </form>
+    <div id="boxes">
+    </div>
+
+    {{ boxes|json_script:"boxData" }}
+
+
+    <div class="template box" id="boxTemplate">
+        <div class="row header box-header">
+            <div class="col-md-5">
+                <h2 class="name"></h2>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary add-button">Add</button>
+            <div class="col-md-2">
+                {% if not user.single_mode %}
+                    Clan: <span class="box-clan-name"></span>
+                {% endif %}
+            </div>
+            <div class="col-md-5 actions">
+                <button type="button" class="btn btn-primary box-load-screenshot">Load From Screenshot</button>
+                {% if not user.single_mode %}
+                    <button type="button" class="btn btn-primary box-edit">Edit</button>
+                    <button type="button" class="btn btn-danger box-delete">Delete</button>
+                {% endif %}
+            </div>
+        </div>
+        <div class="box-units"></div>
+    </div>
+
+    <!-- Add Unit modal -->
+    <div class="modal fade" id="addUnitModal" tabindex="-1" aria-labelledby="addUnitModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUnitModalLabel">Add Unit</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-header unit-filter-header">
+                    <ul class="position-selector">
+                        <li class="active" data-filter="all">All</li>
+                        <li data-filter="front"><img src="{% static 'rong/images/position_front.png' %}"/> Front</li>
+                        <li data-filter="middle"><img src="{% static 'rong/images/position_middle.png' %}"/> Middle</li>
+                        <li data-filter="back"><img src="{% static 'rong/images/position_back.png' %}"/> Back</li>
+                    </ul>
+                </div>
+                <div class="modal-body">
+
+                    <form id="addUnitForm">
+                        {% csrf_token %}
+                        <div class="units"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary add-button">Add</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Edit Unit modal -->
-<div class="modal fade" id="editUnitModal" tabindex="-1" aria-labelledby="editUnitModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editUnitModalLabel">Edit Unit</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="editUnitForm">
-                    {% csrf_token %}
-                    <div class="equipment">
-                        <div class="row">
-                            {% equip_range as er %}
-                            {% equip_star_range as es %}
-                            {% for slot in er %}
-                            <div class="col-md-{% equip_size slot %} mb-1 text-{% equip_align slot %}">
+    <!-- Edit Unit modal -->
+    <div class="modal fade" id="editUnitModal" tabindex="-1" aria-labelledby="editUnitModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editUnitModalLabel">Edit Unit</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUnitForm">
+                        {% csrf_token %}
+                        <div class="equipment">
+                            <div class="row">
+                                {% equip_range as er %}
+                                {% equip_star_range as es %}
+                                {% for slot in er %}
+                                    <div class="col-md-{% equip_size slot %} mb-1 text-{% equip_align slot %}">
                                 <span class="equip-holder" id="equip-{{ slot }}" data-slot="{{ slot }}">
-                                    <img class="unequipped" /><img class="equipped" /><br />
+                                    <img class="unequipped"/><img class="equipped"/><br/>
                                     {% for estar in es %}<span class="star" data-num="{{ estar }}">★</span>{% endfor %}
                                 </span>
-                            </div>
-                            {% if slot == 3 %}
-                            <div class="col-md-4 mb-1 text-center">
+                                    </div>
+                                    {% if slot == 3 %}
+                                        <div class="col-md-4 mb-1 text-center">
                                 <span class="unit-preview-holder">
 
                                 </span>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
                             </div>
-                            {% endif %}
-                            {% endfor %}
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 text-center mb-2">
-                            <button type="button" class="btn btn-primary" id="editUnitMaxAllBtn">Max All</button>
-                            <button type="button" class="btn btn-primary" id="editUnitMinAllBtn">Min All</button>
-                            <button type="button" class="btn btn-primary" id="editUnitEquipAllBtn">Equip All</button>
-                            <button type="button" class="btn btn-primary" id="editUnitRefineAllBtn">Refine All</button>
+                        <div class="row">
+                            <div class="col-md-12 text-center mb-2">
+                                <button type="button" class="btn btn-primary" id="editUnitMaxAllBtn">Max All</button>
+                                <button type="button" class="btn btn-primary" id="editUnitMinAllBtn">Min All</button>
+                                <button type="button" class="btn btn-primary" id="editUnitEquipAllBtn">Equip All
+                                </button>
+                                <button type="button" class="btn btn-primary" id="editUnitRefineAllBtn">Refine All
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-md-3 col-form-label" for="rankField">Rank:</label>
-                        <div class="col-md-9">
-                            <div class="input-group">
-                                <input type="number" class="form-control" name="rank" id="rankField">
-                                <span class="input-group-append">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="rankField">Rank:</label>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="rank" id="rankField">
+                                    <span class="input-group-append">
                                     <button type="button" class="btn btn-secondary" id="rankMaxBtn">Max</button>
                                 </span>
-                            </div>
+                                </div>
 
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-md-3 col-form-label" for="starField">Star:</label>
-                        <div class="col-md-9">
-                            <div class="input-group">
-                                {% unit_star_range as us %}
-                                <span class="form-control unit-star-holder">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="starField">Star:</label>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    {% unit_star_range as us %}
+                                    <span class="form-control unit-star-holder">
                                     {% for ustar in us %}<span class="star" data-num="{{ ustar }}">★</span>{% endfor %}
                                 </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-md-3 col-form-label" for="levelField">Level:</label>
-                        <div class="col-md-9">
-                            <div class="input-group">
-                                <input type="number" class="form-control" name="level" id="levelField">
-                                <span class="input-group-append">
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="levelField">Level:</label>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    <input type="number" class="form-control" name="level" id="levelField">
+                                    <span class="input-group-append">
                                     <button type="button" class="btn btn-secondary" id="levelMaxBtn">Max</button>
                                 </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="editUnitRemoveBtn">Remove</button>
-                <button type="button" class="btn btn-primary" id="editUnitSaveBtn">Save</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="editUnitRemoveBtn">Remove</button>
+                    <button type="button" class="btn btn-primary" id="editUnitSaveBtn">Save</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Create/Edit Box modal -->
-<div class="modal fade" id="boxModal" tabindex="-1" aria-labelledby="boxModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="boxModalLabel">Edit Box</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="boxForm">
-                    {% csrf_token %}
-                    <div class="form-group row">
-                        <label class="col-md-3 col-form-label" for="boxNameField">Name:</label>
-                        <div class="col-md-9">
-                            <div class="input-group">
-                                <input class="form-control" name="name" id="boxNameField" required>
+    <!-- Create/Edit Box modal -->
+    <div class="modal fade" id="boxModal" tabindex="-1" aria-labelledby="boxModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="boxModalLabel">Edit Box</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="boxForm">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="boxNameField">Name:</label>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    <input class="form-control" name="name" id="boxNameField" required>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-md-3 col-form-label" for="boxClanField">Clan:</label>
-                        <div class="col-md-9">
-                            <div class="input-group">
-                                <select class="form-control" name="clan" id="boxClanField"></select>
-                            </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="boxClanField">Clan:</label>
+                            <div class="col-md-9">
+                                <div class="input-group">
+                                    <select class="form-control" name="clan" id="boxClanField"></select>
+                                </div>
 
+                            </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="boxSaveBtn">Save</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="boxSaveBtn">Save</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 {% endblock %}
