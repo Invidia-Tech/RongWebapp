@@ -209,3 +209,6 @@ class ClanBattle(models.Model):
                     boss_data[difficulty_idx], 'boss%d_hp' % self.current_boss)
         # done
         self.save()
+    
+    def get_clan_id(self):
+        return self.clan_id

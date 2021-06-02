@@ -10,3 +10,6 @@ class Clan(models.Model):
         'User', null=True, on_delete=models.SET_NULL, related_name='clans_administrated')
     members = models.ManyToManyField('User', through='ClanMember')
     slug = AutoSlugField(populate_from='name', unique=True)
+
+    def get_clan_id(self):
+        return self.id

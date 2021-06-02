@@ -19,6 +19,7 @@
     <link rel='shortcut icon' type='image/x-icon' href='{% static "rong/favicon.ico" %}' />
     <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/main.css' %}">
     <link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/addons/bootstrap-4/jquery.smartmenus.bootstrap-4.min.css" integrity="sha512-OA47rpkKasrYmbufD0p/c2gqiPc2ACGctbXHY4F2+478e+qTH27X4JHkQdoMRjCexhjdyuofoQxutqRGKDg0Ow==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     {% block extra_css %}{% endblock %}
 
     <!-- Bootstrap JavaScript if it is in head -->
@@ -27,6 +28,8 @@
     <script src="{% static 'rong/js/common.js' %}"></script>
     <script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/jquery.smartmenus.min.js" integrity="sha512-QDsq6P94BSSC6OE3BZ8S0lkYFK8zvM9s/JHM0u89nEKLOJhYFQ+AcfyWoyYs6hDPtRc9wUpgo61u6ePDhwbGFw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/addons/bootstrap-4/jquery.smartmenus.bootstrap-4.min.js" integrity="sha512-Hjmyl74CEDNjC2VvAwV3IesBmwZk9yqeH+9tWqTi3z3rL5WLBGlz2360qRRwkd2J8eA7hDC3ETe5E/5zQ/vaYg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     {% block extra_js %}{% endblock %}
 
 </head>
@@ -39,17 +42,25 @@
                 <span class="navbar-toggler-icon"></span>
               </button>
               <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
+                <ul class="nav navbar-nav mr-auto">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'rong:box_index' %}">My Box</a>
                         </li>
+                        {% if user.clans.all|length == 1 %}
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Clan Battle</a>
+                            <a class="nav-link" href="{% url 'rong:cb_list' user.clans.first.slug %}">Clan Battle</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">PvP</a>
+                        {% elif user.clans.all|length > 1 %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#">Clan Battle</a>
+                            <ul class="dropdown-menu">
+                                {% for clan in user.clans.all %}
+                                <li><a class="dropdown-item" href="{% url 'rong:cb_list' clan.slug %}">{{clan.name}}</a></li>
+                                {% endfor %}
+                            </ul>
                         </li>
+                        {% endif %}
                     {% endif %}
                   </ul>
                   <ul class="navbar-nav align-items-center">

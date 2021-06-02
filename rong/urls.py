@@ -1,8 +1,10 @@
 from django.urls import path
-from .views import core, box
+from .views import core, box, clanbattle
 
 app_name = 'rong'
 urlpatterns = [
+    path('clanbattle/list/<slug:clan>/', clanbattle.list_battles, name='cb_list'),
+    path('clanbattle/<slug:battle>/', clanbattle.view_battle, name='cb_view'),
     path('box/', box.index, name='box_index'),
     path('box/create/', box.create_box, name='box_create'),
     path('box/<int:box_id>/', box.alter_box, name='box_alter'),

@@ -86,16 +86,14 @@ WHERE (
         self.load_managed_clans()
         return Clan.objects.filter(id__in=self.managed_clan_ids)
 
-    def can_manage(self, managed: Union[Clan, ClanBattle]):
+    def can_manage(self, entity: Union[Clan, ClanBattle]):
         self.load_managed_clans()
-        if type(managed) == Clan:
-            return managed.id in self.managed_clan_ids
-        else:
-            return managed.clan_id in self.managed_clan_ids
+        return entity.get_clan_id() in self.managed_clan_ids
 
-    def can_view(self, clan_battle: ClanBattle):
+    def can_view(self, entity: Union[Clan, ClanBattle]):
         self.load_managed_clans()
-        return clan_battle.clan_id in self.managed_clan_ids or self.clanmember_set.filter(clan_id=clan_battle.clan_id).exists()
+        cl_id = entity.get_clan_id()
+        return cl_id in self.managed_clan_ids or self.clanmember_set.filter(clan_id=cl_id).exists()
 
     @property
     def is_authenticated(self):
