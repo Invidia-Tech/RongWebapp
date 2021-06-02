@@ -13,9 +13,27 @@
 
 {% block content %}
 <h2>{{ clan.name }}'s Clan Battles</h2>
+{% if not clan.current_cb and not clan.past_cbs %}
+<p><i>This clan has no Clan Battles defined!</i></p>
+{% endif %}
+{% if clan.current_cb %}
+<h3>{% if clan.current_cb.in_progress %}Current{% else %}Upcoming{% endif %} Clan Battle</h3>
+<a href="{% url 'rong:cb_view' clan.current_cb.slug %}">{{ clan.current_cb.name }}</a>
+{% endif %}
+{% if clan.future_cbs %}
+<h3>Future Clan Battles</h3>
 <ul>
-{% for battle in clan.clanbattle_set.all %}
-<li><a href="{% url 'rong:cb_view' battle.slug %}">{{ battle.name }}</a></li>
-{% endfor %}
+    {% for battle in clan.future_cbs %}
+    <li><a href="{% url 'rong:cb_view' battle.slug %}">{{ battle.name }}</a></li>
+    {% endfor %}
 </ul>
+{% endif %}
+{% if clan.past_cbs %}
+<h3>Past Clan Battles</h3>
+<ul>
+    {% for battle in clan.past_cbs %}
+    <li><a href="{% url 'rong:cb_view' battle.slug %}">{{ battle.name }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% endblock %}

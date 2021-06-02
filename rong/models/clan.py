@@ -1,5 +1,6 @@
 from django.db import models
 from django_extensions.db.fields import AutoSlugField
+from django.utils import timezone
 
 
 class Clan(models.Model):
@@ -13,3 +14,12 @@ class Clan(models.Model):
 
     def get_clan_id(self):
         return self.id
+
+    def current_cb(self):
+        return self.clanbattle_set.filter(end_time__gt=timezone.now()).order_by('start_time').first()
+    
+    def future_cbs(self):
+        return self.clanbattle_set.filter(end_time__gt=timezone.now()).order_by('start_time')[1:]
+    
+    def past_cbs(self):
+        return self.clanbattle_set.filter(end_time__lte=timezone.now()).order_by('-start_time')

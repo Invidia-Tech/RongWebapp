@@ -66,4 +66,4 @@ def get_cb_data_source_choices():
 class AddClanBattleForm(forms.ModelForm):
     class Meta:
         model = ClanBattle
-        fields = ['name', 'begin_time', 'end_time']
+        fields = ['name', 'start_time', 'end_time']

@@ -3,6 +3,7 @@ from rong.models.redive_models import CNClanBattleMapData, CNClanBattlePeriod, C
 from django.db import models
 from .clan_battle_score import ClanBattleHitType
 from django_extensions.db.fields import AutoSlugField
+from django.utils import timezone
 
 CB_DATA_SOURCES = [
     {
@@ -40,7 +41,7 @@ class ClanBattle(models.Model):
     clan = models.ForeignKey('Clan', on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     slug = AutoSlugField(populate_from=['clan__name', 'name'], unique=True)
-    begin_time = models.DateTimeField()
+    start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     boss1_name = models.CharField(max_length=50)
     boss2_name = models.CharField(max_length=50)
@@ -212,3 +213,8 @@ class ClanBattle(models.Model):
     
     def get_clan_id(self):
         return self.clan_id
+
+    @property
+    def in_progress(self):
+        now = timezone.now()
+        return self.start_time <= now and self.end_time > now
