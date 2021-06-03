@@ -1,78 +1,93 @@
 .unit-icon,
-.unit-pfp {
-    display: inline-block;
-    position: relative;
+.unit-pfp, .unit-ddicon {
+  display: inline-block;
+  position: relative;
 }
 
 .unit-icon {
-    width: 64px;
-    height: 64px;
-    background-size: 640px;
+  width: 64px;
+  height: 64px;
+  background-size: 640px;
+}
+
+.unit-ddicon {
+  width: 32px;
+  height: 32px;
+  background-size: 320px;
 }
 
 .unit-pfp {
-    width: 48px;
-    height: 48px;
-    background-size: 480px;
-    border-radius: 24px;
-    border: 1px solid transparent;
+  width: 48px;
+  height: 48px;
+  background-size: 480px;
+  border-radius: 24px;
+  border: 1px solid transparent;
 }
 
 html.nowebp {
-    .unit-icon,
-    .unit-pfp {
-        background-image: url("../images/unit_icon_sheet.png");
-    }
+  .unit-icon,
+  .unit-pfp, .unit-ddicon {
+    background-image: url("../images/unit_icon_sheet.png");
+  }
 }
 
 html.webp {
-    .unit-icon,
-    .unit-pfp {
-        background-image: url("../images/unit_icon_sheet.webp");
-    }
+  .unit-icon,
+  .unit-pfp, .unit-ddicon {
+    background-image: url("../images/unit_icon_sheet.webp");
+  }
 }
 
 .unit-icon-border {
-    width: 64px;
-    height: 64px;
-    border-radius: 5px;
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: block;
-    background-size: 64px;
-    border: none;
+  width: 64px;
+  height: 64px;
+  border-radius: 5px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  background-size: 64px;
+  border: none;
 
-    &.white {
-        background-image: url("../images/border_white.png");
-    }
+  &.white {
+    background-image: url("../images/border_white.png");
+  }
 
-    &.blue {
-        background-image: url("../images/border_blue.png");
-    }
+  &.blue {
+    background-image: url("../images/border_blue.png");
+  }
 
-    &.bronze {
-        background-image: url("../images/border_bronze.png");
-    }
+  &.bronze {
+    background-image: url("../images/border_bronze.png");
+  }
 
-    &.silver {
-        background-image: url("../images/border_silver.png");
-    }
+  &.silver {
+    background-image: url("../images/border_silver.png");
+  }
 
-    &.gold {
-        background-image: url("../images/border_gold.png");
-    }
+  &.gold {
+    background-image: url("../images/border_gold.png");
+  }
 
-    &.purple {
-        background-image: url("../images/border_purple.png");
-    }
+  &.purple {
+    background-image: url("../images/border_purple.png");
+  }
 }
 
 .unit-icon-stars {
-    position: absolute;
-    left: 5.58%;
-    bottom: 5%;
-    width: 42px;
-    height: 10px;
-    background-image: url("../images/icon_stars.png");
+  position: absolute;
+  left: 5.58%;
+  bottom: 5%;
+  width: 42px;
+  height: 10px;
+  background-image: url("../images/icon_stars.png");
+}
+
+.unit-dropdown-item {
+  display: flex;
+  align-items: center;
+
+  div.unit-ddicon {
+    margin-right: 10px;
+  }
 }

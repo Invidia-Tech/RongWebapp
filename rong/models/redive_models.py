@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.fields import IntegerField
 
 
 class Unit(models.Model):
@@ -9,6 +8,7 @@ class Unit(models.Model):
     search_area_width = models.IntegerField()
     rarity = models.IntegerField()
 
+    @staticmethod
     def valid_units():
         return Unit.objects.filter(id__gt=100000, id__lt=200000).exclude(cutin_1=0)
 

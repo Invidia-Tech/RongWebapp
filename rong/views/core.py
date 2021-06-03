@@ -4,7 +4,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 from rong.discord import make_session
-from rong.models import User
+from rong.models import User, Unit
 from django.db import connection
 from django.utils.http import url_has_allowed_host_and_scheme
 from rong.decorators import login_required
@@ -12,10 +12,11 @@ from requests.exceptions import HTTPError
 from django.contrib import messages
 from rong.forms import PreferencesForm
 
+
 # Create your views here.
 
 @login_required
-def preferences(request : HttpRequest):
+def preferences(request: HttpRequest):
     if request.method == 'POST':
         form = PreferencesForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -27,12 +28,14 @@ def preferences(request : HttpRequest):
         form = PreferencesForm(instance=request.user)
     return render(request, 'rong/preferences.html', {'form': form})
 
+
 @login_required
 def logout(request: HttpRequest):
     del request.session['user_id']
     return redirect(reverse('rong:index'))
 
-def discordcallback(request : HttpRequest):
+
+def discordcallback(request: HttpRequest):
     if request.method == 'GET':
         if request.GET.get('error'):
             return HttpResponse('HeyGuys %s' % request.GET['error'])
@@ -58,7 +61,8 @@ def discordcallback(request : HttpRequest):
     else:
         raise PermissionDenied
 
-def discordlogin(request : HttpRequest):
+
+def discordlogin(request: HttpRequest):
     discord = make_session(request, scope=['identify', 'guilds'])
     authorization_url, state = discord.authorization_url(settings.DISCORD_OAUTH_URL)
     request.session['oauth2_state'] = state
@@ -71,9 +75,14 @@ def discordlogin(request : HttpRequest):
         )
         if safe:
             request.session['redirect_url'] = request.GET['next']
-    
+
     request.session.set_expiry(3600)
     return redirect(authorization_url)
 
-def index(request : HttpRequest):
+
+def index(request: HttpRequest):
     return render(request, 'rong/index.html', {})
+
+
+def unitselect(request: HttpRequest):
+    return render(request, 'rong/test_unitselect.html', {"units": Unit.valid_units()})

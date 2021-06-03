@@ -14,5 +14,6 @@ urlpatterns = [
     path('auth/logout/', core.logout, name='logout'),
     path('auth/login/discord/', core.discordlogin, name='discordlogin'),
     path('auth/login/discord/callback/', core.discordcallback, name='discordcallback'),
+    path('unitselect/', core.unitselect, name='unitselect'),
     path('', core.index, name='index'),
 ]
