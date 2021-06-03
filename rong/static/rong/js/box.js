@@ -20,7 +20,14 @@ $(document).ready(function () {
         if (setting_up) {
             return;
         }
-        current_unit.rank = parseInt($('#rankField').val());
+        let new_rank = $('#rankField').val();
+        if(new_rank <= 0 || new_rank > current_unit.ranks.length) {
+            setting_up = true;
+            new_rank = Math.min(Math.max(1, new_rank), current_unit.ranks.length);
+            $('#rankField').val(new_rank);
+            setting_up = false;
+        }
+        current_unit.rank = new_rank;
         for (let slot = 1; slot <= 6; slot++) {
             current_unit["equip" + slot] = null;
         }
@@ -56,7 +63,14 @@ $(document).ready(function () {
         if (setting_up) {
             return;
         }
-        current_unit.level = $('#levelField').val();
+        let new_level = $('#levelField').val();
+        if(new_level <= 0 || new_level > current_unit.max_level) {
+            setting_up = true;
+            new_level = Math.min(Math.max(1, new_level), current_unit.max_level);
+            $('#levelField').val(new_level);
+            setting_up = false;
+        }
+        current_unit.level = new_level;
         dirty = true;
     });
 
