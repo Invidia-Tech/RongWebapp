@@ -85,4 +85,7 @@ def index(request: HttpRequest):
 
 
 def unitselect(request: HttpRequest):
-    return render(request, 'rong/test_unitselect.html', {"units": Unit.valid_units()})
+    ctx = {
+        "units": Unit.valid_units()
+    }
+    return render(request, 'rong/test_unitselect.html', ctx)

@@ -36,11 +36,7 @@
     }
 
     // @TODO load real nicknames from rongbot db
-    let nicknames = [
-        {unit: "100701", "name": "Pudding"},
-        {unit: "106001", "name": "Kyaru"},
-        {unit: "106301", "name": "Miss"},
-    ];
+    let nicknames = [];
 
     function matchCustom(params, data) {
         // If there are no search terms, return all of the data
@@ -97,5 +93,11 @@
 
     // option defaults
     $.UnitSelectorMulti.defaults = {};
+
+    $(document).ready(function() {
+        if($("#unitNicknames").length > 0) {
+            nicknames = JSON.parse(document.getElementById('unitNicknames').textContent);
+        }
+    });
 
 })(jQuery);
