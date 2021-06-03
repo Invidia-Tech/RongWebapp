@@ -20,6 +20,7 @@
     <orderEntry type="library" name="jquery.validate" level="application" />
     <orderEntry type="library" name="jquery.smartmenus" level="application" />
     <orderEntry type="library" name="select2" level="application" />
+    <orderEntry type="library" name="@ttskch/select2-bootstrap4-theme" level="application" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="format" value="PLAIN" />

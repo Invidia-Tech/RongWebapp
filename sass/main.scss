@@ -15,3 +15,8 @@ body {
 .template {
     display: none;
 }
+
+.select2-container--bootstrap4 .select2-selection__clear {
+    text-align: center;
+    padding-left: 0;
+}

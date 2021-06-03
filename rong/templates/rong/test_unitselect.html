@@ -17,7 +17,7 @@
             <label class="col-md-3 col-form-label" for="unitTest">Test unit</label>
             <div class="col-md-9">
                 <select name="unit_test" id="unitTest" class="form-control unit-selector">
-                <option selected value>N/A</option>
+                <option selected value></option>
                     {% for unit in units %}
                         <option value="{{ unit.id }}">{{ unit.name }}</option>
                     {% endfor %}
@@ -28,6 +28,7 @@
             <label class="col-md-1 col-form-label" for="unitTestD">Unit 1</label>
             <div class="col-md-3">
                 <select name="unit_test3" id="unitTestD" class="form-control unit-selector">
+                    <option selected value></option>
                     {% for unit in units %}
                         <option value="{{ unit.id }}">{{ unit.name }}</option>
                     {% endfor %}
