@@ -105,17 +105,15 @@
                                 {% equip_range as er %}
                                 {% equip_star_range as es %}
                                 {% for slot in er %}
-                                    <div class="col-md-{% equip_size slot %} mb-1 text-{% equip_align slot %}">
+                                    <div class="col-{% equip_size slot %} mb-1 text-{% equip_align slot %}">
                                 <span class="equip-holder" id="equip-{{ slot }}" data-slot="{{ slot }}">
                                     <img class="unequipped"/><img class="equipped"/><br/>
                                     {% for estar in es %}<span class="star" data-num="{{ estar }}">★</span>{% endfor %}
                                 </span>
                                     </div>
                                     {% if slot == 3 %}
-                                        <div class="col-md-4 mb-1 text-center">
-                                <span class="unit-preview-holder">
-
-                                </span>
+                                        <div class="col-4 mb-1 text-center">
+                                            <span class="unit-preview-holder"></span>
                                         </div>
                                     {% endif %}
                                 {% endfor %}

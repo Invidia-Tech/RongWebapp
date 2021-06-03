@@ -3,10 +3,7 @@
 .box {
     border: 1px solid black;
     border-radius: 5px;
-    padding-left: 15px;
-    padding-right: 5px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding: 5px 5px 5px 15px;
     margin-bottom: 20px;
 
     .box-header {
@@ -59,6 +56,7 @@
 }
 
 #editUnitModal {
+
     .equipment {
         margin-left: 40px;
         margin-right: 40px;
@@ -69,12 +67,15 @@
         display: inline-block;
         position: relative;
         text-align: center;
-        width: 84px;
+        width: 104px;
         height: 94px;
 
         img,
         span {
             cursor: pointer;
+        }
+        span.star {
+            font-size: 125%;
         }
     }
 
@@ -103,7 +104,7 @@
 
         .star {
             cursor: default;
-            font-size: 150%;
+            font-size: 200%;
             &.selectable {
                 cursor: pointer;
             }
