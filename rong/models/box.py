@@ -1,5 +1,7 @@
-from typing import OrderedDict
+from collections import OrderedDict
+
 from django.db import models
+
 from .redive_models import Unit
 
 

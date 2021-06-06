@@ -1,9 +1,12 @@
-from rong.models.clan_battle_boss_info import ClanBattleBossInfo
-from rong.models.redive_models import CNClanBattleMapData, CNClanBattlePeriod, CNEnemyParameter, CNWaveGroupData, ENClanBattleBossGroup, ENClanBattleMapData, ENClanBattlePeriod, EnemyParameter, JPClanBattleMapData, JPClanBattlePeriod, JPEnemyParameter, JPWaveGroupData, WaveGroupData
 from django.db import models
-from .clan_battle_score import ClanBattleHitType
-from django_extensions.db.fields import AutoSlugField
 from django.utils import timezone
+from django_extensions.db.fields import AutoSlugField
+
+from rong.models.clan_battle_boss_info import ClanBattleBossInfo
+from rong.models.redive_models import CNClanBattleMapData, CNClanBattlePeriod, CNEnemyParameter, CNWaveGroupData, \
+    ENClanBattleBossGroup, ENClanBattleMapData, ENClanBattlePeriod, EnemyParameter, JPClanBattleMapData, \
+    JPClanBattlePeriod, JPEnemyParameter, JPWaveGroupData, WaveGroupData
+from .clan_battle_score import ClanBattleHitType
 
 CB_DATA_SOURCES = [
     {
@@ -48,9 +51,22 @@ class ClanBattle(models.Model):
     boss3_name = models.CharField(max_length=50)
     boss4_name = models.CharField(max_length=50)
     boss5_name = models.CharField(max_length=50)
+    boss1_iconid = models.PositiveIntegerField(null=True)
+    boss2_iconid = models.PositiveIntegerField(null=True)
+    boss3_iconid = models.PositiveIntegerField(null=True)
+    boss4_iconid = models.PositiveIntegerField(null=True)
+    boss5_iconid = models.PositiveIntegerField(null=True)
     current_lap = models.PositiveIntegerField(null=True)
     current_boss = models.PositiveIntegerField(null=True)
     current_hp = models.PositiveIntegerField(null=True)
+
+    def _load_boss(self, map_info, boss_index, enemy_data, multiplier, force_load_names):
+        field_prefix = 'boss%d_' % (boss_index + 1)
+        map_info.populate_boss(boss_index + 1, enemy_data, multiplier)
+        setattr(self, field_prefix + 'iconid', enemy_data.unit_id)
+
+        if not getattr(self, field_prefix + 'name') or force_load_names:
+            setattr(self, field_prefix + 'name', enemy_data.name)
 
     def load_boss_info(self, source: str, force_load_names: bool = False):
         try:
@@ -58,7 +74,7 @@ class ClanBattle(models.Model):
                 si for si in CB_DATA_SOURCES if source.startswith(si["prefix"])][0]
         except:
             raise ValueError("Unknown CB source")
-        cb_id = int(source[source.index("-")+1:])
+        cb_id = int(source[source.index("-") + 1:])
         map_entries = source_info["mapModel"].objects.filter(
             id=cb_id).order_by('lap_num_from')
         self.bosses.all().delete()
@@ -85,26 +101,12 @@ class ClanBattle(models.Model):
                     boss_groups = list(source_info["bossGroupModel"].objects.filter(
                         id=map_entry.boss_group_id).order_by('order_num'))
                     for boss_index, boss_group in enumerate(boss_groups):
-                        field_prefix = 'boss%d_' % (boss_index + 1)
-                        setattr(map_info, field_prefix + 'multiplier',
-                                boss_group.score_coefficient)
                         wave_group = source_info["waveGroupModel"].objects.get(
                             id=boss_group.wave_group_id)
                         enemy_data = source_info["enemyModel"].objects.get(
                             id=wave_group.enemy_id_1)
-                        setattr(map_info, field_prefix +
-                                'level', enemy_data.level)
-                        setattr(map_info, field_prefix + 'hp', enemy_data.hp)
-                        setattr(map_info, field_prefix +
-                                'pdef', enemy_data.pdef)
-                        setattr(map_info, field_prefix +
-                                'mdef', enemy_data.mdef)
-                        setattr(map_info, field_prefix +
-                                'iconid', enemy_data.unit_id)
-
-                        if not getattr(self, field_prefix + 'name') or force_load_names:
-                            setattr(self, field_prefix +
-                                    'name', enemy_data.name)
+                        self._load_boss(map_info, boss_index, enemy_data, boss_group.score_coefficient,
+                                        force_load_names)
 
                     map_info.save()
                     difficulty += 1
@@ -114,7 +116,7 @@ class ClanBattle(models.Model):
                 curr_boss_id_mults = []
                 for boss in range(5):
                     curr_boss_id_mults += [getattr(map_entry, 'wave_group_id_%d' % (
-                        boss+1)), getattr(map_entry, 'score_coefficient_%d' % (boss+1))]
+                            boss + 1)), getattr(map_entry, 'score_coefficient_%d' % (boss + 1))]
 
                 if curr_boss_id_mults == last_id:
                     # identical boss info and scoring, so this only changed rewards
@@ -132,33 +134,20 @@ class ClanBattle(models.Model):
 
                     # populate boss info
                     for boss_index in range(5):
-                        field_prefix = 'boss%d_' % (boss_index + 1)
-                        setattr(map_info, field_prefix + 'multiplier',
-                                curr_boss_id_mults[boss_index*2 + 1])
                         wave_group = source_info["waveGroupModel"].objects.get(
-                            id=curr_boss_id_mults[boss_index*2])
+                            id=curr_boss_id_mults[boss_index * 2])
                         enemy_data = source_info["enemyModel"].objects.get(
                             id=wave_group.enemy_id_1)
-                        setattr(map_info, field_prefix +
-                                'level', enemy_data.level)
-                        setattr(map_info, field_prefix + 'hp', enemy_data.hp)
-                        setattr(map_info, field_prefix +
-                                'pdef', enemy_data.pdef)
-                        setattr(map_info, field_prefix +
-                                'mdef', enemy_data.mdef)
-                        setattr(map_info, field_prefix +
-                                'iconid', enemy_data.unit_id)
-
-                        if not getattr(self, field_prefix + 'name') or force_load_names:
-                            setattr(self, field_prefix +
-                                    'name', enemy_data.name)
+                        self._load_boss(map_info, boss_index, enemy_data, curr_boss_id_mults[boss_index * 2 + 1],
+                                        force_load_names)
 
                     map_info.save()
                     difficulty += 1
                     last_id = curr_boss_id_mults
 
     def lap_info(self, lap):
-        return self.bosses.get(models.Q(lap_from__lte=lap) & (models.Q(lap_to__isnull=True) | models.Q(lap_to__gte=lap)))
+        return self.bosses.get(
+            models.Q(lap_from__lte=lap) & (models.Q(lap_to__isnull=True) | models.Q(lap_to__gte=lap)))
 
     def spawn_next_boss(self):
         # called from hit when hp=0 to load new boss's hp, doesn't call save itself
@@ -202,7 +191,8 @@ class ClanBattle(models.Model):
                 if self.current_boss == 5:
                     self.current_lap += 1
                     self.current_boss = 1
-                    if boss_data[difficulty_idx].lap_to is not None and boss_data[difficulty_idx].lap_to < self.current_lap:
+                    if boss_data[difficulty_idx].lap_to is not None and boss_data[
+                        difficulty_idx].lap_to < self.current_lap:
                         difficulty_idx += 1
                 else:
                     self.current_boss += 1
@@ -210,7 +200,7 @@ class ClanBattle(models.Model):
                     boss_data[difficulty_idx], 'boss%d_hp' % self.current_boss)
         # done
         self.save()
-    
+
     def get_clan_id(self):
         return self.clan_id
 

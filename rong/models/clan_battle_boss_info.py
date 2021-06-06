@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class ClanBattleBossInfo(models.Model):
     clan_battle = models.ForeignKey('ClanBattle', on_delete=models.CASCADE, related_name='bosses')
     difficulty = models.PositiveIntegerField()
@@ -10,28 +11,31 @@ class ClanBattleBossInfo(models.Model):
     boss1_hp = models.PositiveIntegerField()
     boss1_pdef = models.PositiveIntegerField()
     boss1_mdef = models.PositiveIntegerField()
-    boss1_iconid = models.PositiveIntegerField(null=True)
     boss2_level = models.PositiveIntegerField()
     boss2_multiplier = models.DecimalField(max_digits=3, decimal_places=2)
     boss2_hp = models.PositiveIntegerField()
     boss2_pdef = models.PositiveIntegerField()
     boss2_mdef = models.PositiveIntegerField()
-    boss2_iconid = models.PositiveIntegerField(null=True)
     boss3_level = models.PositiveIntegerField()
     boss3_multiplier = models.DecimalField(max_digits=3, decimal_places=2)
     boss3_hp = models.PositiveIntegerField()
     boss3_pdef = models.PositiveIntegerField()
     boss3_mdef = models.PositiveIntegerField()
-    boss3_iconid = models.PositiveIntegerField(null=True)
     boss4_level = models.PositiveIntegerField()
     boss4_multiplier = models.DecimalField(max_digits=3, decimal_places=2)
     boss4_hp = models.PositiveIntegerField()
     boss4_pdef = models.PositiveIntegerField()
     boss4_mdef = models.PositiveIntegerField()
-    boss4_iconid = models.PositiveIntegerField(null=True)
     boss5_level = models.PositiveIntegerField()
     boss5_multiplier = models.DecimalField(max_digits=3, decimal_places=2)
     boss5_hp = models.PositiveIntegerField()
     boss5_pdef = models.PositiveIntegerField()
     boss5_mdef = models.PositiveIntegerField()
-    boss5_iconid = models.PositiveIntegerField(null=True)
+
+    def populate_boss(self, boss_num, enemy_data, multiplier):
+        field_prefix = 'boss%d_' % boss_num
+        setattr(self, field_prefix + 'level', enemy_data.level)
+        setattr(self, field_prefix + 'hp', enemy_data.hp)
+        setattr(self, field_prefix + 'pdef', enemy_data.pdef)
+        setattr(self, field_prefix + 'mdef', enemy_data.mdef)
+        setattr(self, field_prefix + 'multiplier', multiplier)
