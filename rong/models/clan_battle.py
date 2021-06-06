@@ -60,14 +60,6 @@ class ClanBattle(models.Model):
     current_boss = models.PositiveIntegerField(null=True)
     current_hp = models.PositiveIntegerField(null=True)
 
-    def _load_boss(self, map_info, boss_index, enemy_data, multiplier, force_load_names):
-        field_prefix = 'boss%d_' % (boss_index + 1)
-        map_info.populate_boss(boss_index + 1, enemy_data, multiplier)
-        setattr(self, field_prefix + 'iconid', enemy_data.unit_id)
-
-        if not getattr(self, field_prefix + 'name') or force_load_names:
-            setattr(self, field_prefix + 'name', enemy_data.name)
-
     def load_boss_info(self, source: str, force_load_names: bool = False):
         try:
             source_info = [
@@ -83,67 +75,48 @@ class ClanBattle(models.Model):
         difficulty = 1
         for map_entry in map_entries:
             if source_info["dataType"] == "old":
-                if last_id == map_entry.boss_group_id:
-                    # identical boss info and scoring, so this only changed rewards
-                    # we don't care about rewards - so collapse this row into the last
-                    map_info.lap_to = None if map_entry.lap_num_to == -1 else map_entry.lap_num_to
-                    map_info.save()
-                else:
-                    # make a new entry
-                    map_info = ClanBattleBossInfo(
-                        clan_battle=self,
-                        difficulty=difficulty,
-                        lap_from=map_entry.lap_num_from,
-                        lap_to=None if map_entry.lap_num_to == -1 else map_entry.lap_num_to
-                    )
-
-                    # populate boss info
-                    boss_groups = list(source_info["bossGroupModel"].objects.filter(
-                        id=map_entry.boss_group_id).order_by('order_num'))
-                    for boss_index, boss_group in enumerate(boss_groups):
-                        wave_group = source_info["waveGroupModel"].objects.get(
-                            id=boss_group.wave_group_id)
-                        enemy_data = source_info["enemyModel"].objects.get(
-                            id=wave_group.enemy_id_1)
-                        self._load_boss(map_info, boss_index, enemy_data, boss_group.score_coefficient,
-                                        force_load_names)
-
-                    map_info.save()
-                    difficulty += 1
-                    last_id = map_entry.boss_group_id
+                current_id = map_entry.boss_group_id
             else:
-                # new data
-                curr_boss_id_mults = []
+                current_id = []
                 for boss in range(5):
-                    curr_boss_id_mults += [getattr(map_entry, 'wave_group_id_%d' % (
+                    current_id += [getattr(map_entry, 'wave_group_id_%d' % (
                             boss + 1)), getattr(map_entry, 'score_coefficient_%d' % (boss + 1))]
 
-                if curr_boss_id_mults == last_id:
-                    # identical boss info and scoring, so this only changed rewards
-                    # we don't care about rewards - so collapse this row into the last
-                    map_info.lap_to = None if map_entry.lap_num_to == -1 else map_entry.lap_num_to
-                    map_info.save()
+            if current_id == last_id:
+                # identical boss info and scoring, so this only changed rewards
+                # we don't care about rewards - so collapse this row into the last
+                map_info.lap_to = None if map_entry.lap_num_to == -1 else map_entry.lap_num_to
+                map_info.save()
+            else:
+                # new entry
+                map_info = ClanBattleBossInfo(
+                    clan_battle=self,
+                    difficulty=difficulty,
+                    lap_from=map_entry.lap_num_from,
+                    lap_to=None if map_entry.lap_num_to == -1 else map_entry.lap_num_to
+                )
+                if source_info["dataType"] == "old":
+                    boss_groups = [{"wave_group": bg.wave_group_id, "multiplier": bg.score_coefficient} for bg in
+                                   source_info["bossGroupModel"].objects.filter(
+                                       id=map_entry.boss_group_id).order_by('order_num')]
                 else:
-                    # make a new entry
-                    map_info = ClanBattleBossInfo(
-                        clan_battle=self,
-                        difficulty=difficulty,
-                        lap_from=map_entry.lap_num_from,
-                        lap_to=None if map_entry.lap_num_to == -1 else map_entry.lap_num_to
-                    )
+                    boss_groups = [{"wave_group": current_id[i * 2], "multiplier": current_id[i * 2 + 1]} for i in
+                                   range(5)]
+                assert len(boss_groups) == 5
+                for boss_index, boss_group in enumerate(boss_groups):
+                    wave_group = source_info["waveGroupModel"].objects.get(id=boss_group["wave_group"])
+                    enemy_data = source_info["enemyModel"].objects.get(
+                        id=wave_group.enemy_id_1)
+                    field_prefix = 'boss%d_' % (boss_index + 1)
+                    map_info.populate_boss(boss_index + 1, enemy_data, boss_group["multiplier"])
+                    setattr(self, field_prefix + 'iconid', enemy_data.unit_id)
 
-                    # populate boss info
-                    for boss_index in range(5):
-                        wave_group = source_info["waveGroupModel"].objects.get(
-                            id=curr_boss_id_mults[boss_index * 2])
-                        enemy_data = source_info["enemyModel"].objects.get(
-                            id=wave_group.enemy_id_1)
-                        self._load_boss(map_info, boss_index, enemy_data, curr_boss_id_mults[boss_index * 2 + 1],
-                                        force_load_names)
+                    if not getattr(self, field_prefix + 'name') or force_load_names:
+                        setattr(self, field_prefix + 'name', enemy_data.name)
 
-                    map_info.save()
-                    difficulty += 1
-                    last_id = curr_boss_id_mults
+                map_info.save()
+                difficulty += 1
+                last_id = current_id
 
     def lap_info(self, lap):
         return self.bosses.get(
