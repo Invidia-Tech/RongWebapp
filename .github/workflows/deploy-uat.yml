@@ -38,6 +38,7 @@ jobs:
           port: 22
           script: |
             source ~/django-env/bin/activate
+            cp ~/config.uat.py ~/django/rongdjango/config.py
             cd ~/django
             pip install -r requirements.txt
             python manage.py update_database en
