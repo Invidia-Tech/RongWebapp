@@ -1,5 +1,7 @@
-function rank_color(rank) {
-    rank_num = parseInt(rank);
+import $ from 'jquery';
+
+export function rank_color(rank) {
+    let rank_num = parseInt(rank);
     if (isNaN(rank_num)) {
         return 'white';
     }
@@ -9,8 +11,8 @@ function rank_color(rank) {
     return ['white', 'blue', 'bronze', 'bronze', 'silver', 'silver', 'silver', 'gold', 'gold', 'gold', 'gold', 'purple', 'purple', 'purple', 'purple'][rank_num];
 }
 
-function icon_id(unit_id, star) {
-    star_num = parseInt(star);
+export function icon_id(unit_id, star) {
+    let star_num = parseInt(star);
     if (star_num < 3 || star_num > 5) {
         return Math.floor(unit_id / 100) * 100 + 11;
     }
@@ -19,7 +21,7 @@ function icon_id(unit_id, star) {
     }
 }
 
-function show_loading(text) {
+export function show_loading(text) {
     if (text) {
         $('.loading-spanner p').text(text);
     }
@@ -27,12 +29,12 @@ function show_loading(text) {
     $("div.loading-overlay").addClass("show");
 }
 
-function hide_loading() {
+export function hide_loading() {
     $("div.loading-spanner").removeClass("show");
     $("div.loading-overlay").removeClass("show");
 }
 
-function unit_position(range) {
+export function unit_position(range) {
     if (range < 300) {
         return 'front';
     }
@@ -44,7 +46,7 @@ function unit_position(range) {
     }
 }
 
-function make_alert(dest, type, text) {
+export function make_alert(dest, type, text) {
     let alertBox = $('<div class="alert alert-dismissible fade show" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="close">&#215;</button><span class="alert-text"></span></div>');
     alertBox.addClass('alert-'+type);
     alertBox.find('.alert-text').text(text);
@@ -54,7 +56,7 @@ function make_alert(dest, type, text) {
     }, 5000);
 }
 
-function equipment_stars(promotion_level) {
+export function equipment_stars(promotion_level) {
     if(promotion_level >= 4) {
         return 5;
     }
@@ -69,7 +71,7 @@ function equipment_stars(promotion_level) {
     }
 }
 
-function populateNumericDropdown(id, min, max, value) {
+export function populateNumericDropdown(id, min, max, value) {
     let select_el = $('#' + id);
     select_el.empty();
     for (let choice = min; choice <= max; choice++) {

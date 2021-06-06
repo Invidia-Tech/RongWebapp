@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import core, box, clanbattle
+from .views import core, box, clanbattle, manageclan
 
 app_name = 'rong'
 urlpatterns = [
+    path('clan/<slug:clan>/members', manageclan.list_members, name='clan_list_members'),
     path('clanbattle/list/<slug:clan>/', clanbattle.list_battles, name='cb_list'),
     path('clanbattle/<slug:battle>/', clanbattle.view_battle, name='cb_view'),
     path('box/', box.index, name='box_index'),

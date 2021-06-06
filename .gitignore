@@ -124,6 +124,7 @@ assets/*/*.unity3d
 # npm
 node_modules
 rong/static/rong/styles/**/*.css
+rong/static/rong/js/**/*.js*
 
 # dev
 /dev_scripts

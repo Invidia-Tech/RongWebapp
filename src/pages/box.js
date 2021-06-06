@@ -1,45 +1,15 @@
+import $ from 'jquery';
+import {
+    show_loading, hide_loading, make_alert, icon_id, rank_color, unit_position
+} from '../modules/common';
+import {boxUnitModal} from "../modules/box-unit-modal";
+import 'jquery-validation';
+
 $(document).ready(function () {
     let boxes = {};
 
-    function doDeleteUnit() {
-        let dialog = $('<p>Are you sure you want to remove <b>' + $('<span />').text(current_unit.unit.name).html() + '</b> from your box?</p>').dialog(
-            {
-                buttons: {
-                    "Yes": function () {
-                        dialog.dialog('destroy');
-                        dirty = false;
-                        $('#boxUnitModal').modal('hide');
-                        show_loading();
-                        $.ajax({
-                            url: "/box/" + current_unit.box + "/unit/" + current_unit.id + "/",
-                            beforeSend: function (xhr) {
-                                xhr.setRequestHeader("X-CSRFToken", $('#boxUnitForm input[name="csrfmiddlewaretoken"]').val());
-                            },
-                            type: 'DELETE',
-                            success: function (data) {
-                                if (data.success) {
-                                    delete boxes[current_unit.box].units[current_unit.id];
-                                    renderBoxUnits(current_unit.box);
-                                    make_alert($('#mainContent'), 'success', 'Unit removed from box successfully.');
-                                } else {
-                                    make_alert($('#mainContent'), 'danger', 'Unit could not be removed.');
-                                }
-                                hide_loading();
-                            }
-                        });
-                    },
-                    "No": function () {
-                        dialog.dialog('destroy');
-                    },
-                },
-                appendTo: '#boxUnitModal',
-                modal: true,
-            }
-        );
-    }
-
     function editUnit(box_id, unit_id) {
-        $.boxUnitModal(boxes[box_id].units[unit_id], {
+        boxUnitModal(boxes[box_id].units[unit_id], {
             editable: true,
             titleText: "Edit Unit - <span class='unit-name'></span>",
             saveFunction: function (form_data) {
@@ -57,6 +27,7 @@ $(document).ready(function () {
             },
             deleteText: '<p>Are you sure you want to remove <b class="unit-name"></b> from your box?</p>',
             deleteFunction: function () {
+                show_loading();
                 $.ajax({
                     url: "/box/" + box_id + "/unit/" + unit_id + "/",
                     beforeSend: function (xhr) {
@@ -128,7 +99,7 @@ $(document).ready(function () {
                 $('#addUnitModal .add-button').prop('disabled', false);
                 let addunit_form = $('#addUnitForm .units');
                 addunit_form.html('');
-                for (unit of data.units) {
+                for (let unit of data.units) {
                     let unit_selector = '<label class="image-radio position-' + unit_position(unit.range) + '" title="' + unit.name + '">';
                     unit_selector += '<input type="radio" name="unit" value="' + unit.id + '" />';
                     unit_selector += '<div class="unit-icon u-' + icon_id(unit.id, unit.rarity) + '">';
@@ -184,7 +155,7 @@ $(document).ready(function () {
                         $.ajax({
                             url: "/box/" + id + "/",
                             beforeSend: function (xhr) {
-                                xhr.setRequestHeader("X-CSRFToken", $('#editUnitForm input[name="csrfmiddlewaretoken"]').val());
+                                xhr.setRequestHeader("X-CSRFToken", $('#boxUnitForm input[name="csrfmiddlewaretoken"]').val());
                             },
                             type: 'DELETE',
                             success: function (data) {
@@ -231,7 +202,7 @@ $(document).ready(function () {
         $.get("/box/" + id + "/", function (data) {
             hide_loading();
             $('#boxModalLabel').text('Edit Box');
-            bcf = $('#boxClanField');
+            let bcf = $('#boxClanField');
             bcf.empty();
             bcf.append($("<option selected></option>").attr("value", "").text("--None--"));
             for (let clan of data.clan_options) {
@@ -273,7 +244,7 @@ $(document).ready(function () {
         $.get("/box/create/", function (data) {
             hide_loading();
             $('#boxModalLabel').text('Create Box');
-            bcf = $('#boxClanField');
+            let bcf = $('#boxClanField');
             bcf.empty();
             bcf.append($("<option selected></option>").attr("value", "").text("--None--"));
             for (let clan of data.clan_options) {
@@ -310,18 +281,20 @@ $(document).ready(function () {
     }
 
     function setupBoxes() {
-        rawBoxes = JSON.parse(document.getElementById('boxData').textContent);
+        let rawBoxes = JSON.parse(document.getElementById('boxData').textContent);
         for (const box of rawBoxes) {
             boxes[box.id] = box;
         }
         renderBoxes();
     }
 
-    $('#addUnitModal ul.position-selector li').click(function () {
-        addUnitFilter($(this).attr('data-filter'));
-    });
+    if($("#boxes").length && $("#boxData").length) {
+        $('#addUnitModal ul.position-selector li').click(function () {
+            addUnitFilter($(this).attr('data-filter'));
+        });
 
-    $('#createBoxBtn').click(createBox);
+        $('#createBoxBtn').click(createBox);
 
-    setupBoxes();
+        setupBoxes();
+    }
 });

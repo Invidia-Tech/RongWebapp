@@ -1,17 +1,10 @@
-from rong.models import Clan, ClanBattle
-from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponse, HttpRequest
-from django.conf import settings
-from django.urls import reverse
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
-from rong.discord import make_session
-from rong.models import User
-from django.db import connection
-from django.utils.http import url_has_allowed_host_and_scheme
+from django.core.exceptions import SuspiciousOperation
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
+
 from rong.decorators import login_required
-from requests.exceptions import HTTPError
-from django.contrib import messages
-from rong.forms import PreferencesForm
+from rong.models import Clan, ClanBattle
+
 
 # Create your views here.
 
@@ -21,6 +14,7 @@ def view_battle(request, battle):
         raise SuspiciousOperation()
     # do something
     return HttpResponse('Pasta')
+
 
 @login_required
 def list_battles(request, clan):
