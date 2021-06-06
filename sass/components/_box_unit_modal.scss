@@ -1,0 +1,56 @@
+#boxUnitModal {
+
+  .equipment {
+    margin-left: 40px;
+    margin-right: 40px;
+    font-size: 125%;
+  }
+
+  .equip-holder {
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    width: 104px;
+    height: 94px;
+
+    img,
+    span {
+      cursor: pointer;
+    }
+    span.star {
+      font-size: 125%;
+    }
+  }
+
+  .unit-preview-holder {
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    height: 94px;
+  }
+
+  .star {
+    color: gray;
+
+    &.active {
+      color: gold;
+    }
+
+    &.disabled {
+      display: none;
+    }
+  }
+
+  .unit-star-holder {
+    border: none;
+    line-height: 1;
+
+    .star {
+      cursor: default;
+      font-size: 200%;
+      &.selectable {
+        cursor: pointer;
+      }
+    }
+  }
+}

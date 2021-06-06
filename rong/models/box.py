@@ -25,15 +25,9 @@ class Box(models.Model):
 
     def meta_json(self):
         units = self.unit_json()
-        # collate equipment data instead of having it in the separate units
-        equips = {}
-        for unit in units:
-            equips.update(units[unit]["equipment"])
-            del units[unit]["equipment"]
         return {
             "id": self.id,
             "name": self.name,
             "clan": self.clan_name(),
-            "units": units,
-            "equipment": equips
+            "units": units
         }
