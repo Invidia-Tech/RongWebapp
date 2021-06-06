@@ -17,6 +17,7 @@
     span {
       cursor: pointer;
     }
+
     span.star {
       font-size: 125%;
     }
@@ -48,6 +49,7 @@
     .star {
       cursor: default;
       font-size: 200%;
+
       &.selectable {
         cursor: pointer;
       }

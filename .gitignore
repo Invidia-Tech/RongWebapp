@@ -123,8 +123,9 @@ assets/*/*.unity3d
 
 # npm
 node_modules
-rong/static/rong/styles/**/*.css
-rong/static/rong/js/**/*.js*
+rong/static/rong/styles
+rong/static/rong/js
+webpack-stats.json
 
 # dev
 /dev_scripts

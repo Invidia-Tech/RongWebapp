@@ -15,9 +15,7 @@ jobs:
       
       - run: npm ci
 
-      - run: gulp prod
-
-      - run: npm run prod
+      - run: npm run build
 
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
@@ -29,7 +27,7 @@ jobs:
         run: ssh-keyscan -H ${{ secrets.UAT_SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy with rsync
-        run: rsync -avz --exclude '.git' --exclude '.github' --exclude '.gitignore' --exclude 'node_modules' --exclude 'sass' --exclude 'package.json' --exclude 'package-lock.json' --exclude 'src' ./ ${{ secrets.UAT_SSH_USERNAME }}@${{ secrets.UAT_SSH_HOST }}:/home/${{ secrets.UAT_SSH_USERNAME }}/django/
+        run: rsync -avz --checksum --exclude '.git' --exclude '.github' --exclude '.gitignore' --exclude 'node_modules' --exclude 'package.json' --exclude 'package-lock.json' --exclude 'src' --exclude 'webpack' --exclude 'webpack-stats.json' ./ ${{ secrets.UAT_SSH_USERNAME }}@${{ secrets.UAT_SSH_HOST }}:/home/${{ secrets.UAT_SSH_USERNAME }}/django/
       
       - name: Update deps and migrate
         uses: appleboy/ssh-action@master

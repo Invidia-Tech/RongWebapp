@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {% load bootstrap4 %}
 {% load unit_icons %}
+{% load render_bundle from webpack_loader %}
 <html lang="en-US">
 
 <head>
@@ -12,23 +13,12 @@
     <!-- Page title -->
     <title>Rong - {% block title %}{% endblock %}</title>
 
-    <!-- Bootstrap CSS -->
-    {% bootstrap_css %}
-
     {% load static %}
     <link rel='shortcut icon' type='image/x-icon' href='{% static "rong/favicon.ico" %}'/>
-    <link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/jquery.smartmenus/1.1.1/addons/bootstrap-4/jquery.smartmenus.bootstrap-4.min.css"
-          integrity="sha512-OA47rpkKasrYmbufD0p/c2gqiPc2ACGctbXHY4F2+478e+qTH27X4JHkQdoMRjCexhjdyuofoQxutqRGKDg0Ow=="
-          crossorigin="anonymous" referrerpolicy="no-referrer"/>
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
-    <link rel="stylesheet" type="text/css" href="{% static 'rong/styles/main.css' %}">
+    {% render_bundle 'app' 'css' %}
     {% block extra_css %}{% endblock %}
 
     <!-- Bootstrap JavaScript if it is in head -->
-    <script src="{% static 'rong/js/main.js' %}"></script>
 
 </head>
 
@@ -147,5 +137,7 @@
 {% nicknames %}
 
 </body>
+
+{% render_bundle 'app' 'js' %}
 
 </html>

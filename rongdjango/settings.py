@@ -32,8 +32,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rong.apps.RongConfig',
-    'bootstrap4'
+    'bootstrap4',
+    'webpack_loader'
 ]
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'STATS_FILE': str(BASE_DIR / 'webpack-stats.json'),
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

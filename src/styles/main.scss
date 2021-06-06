@@ -4,19 +4,22 @@
 @import "components/unit_icon_positions";
 @import "components/box_header";
 
+@import "pages/box";
+
 body {
-    padding-top: 80px;
+  padding-top: 80px;
 }
+
 .inline-button,
 .clickable {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .template {
-    display: none;
+  display: none;
 }
 
 .select2-container--bootstrap4 .select2-selection__clear {
-    text-align: center;
-    padding-left: 0;
+  text-align: center;
+  padding-left: 0;
 }
