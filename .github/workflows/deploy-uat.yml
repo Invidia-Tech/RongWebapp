@@ -30,7 +30,7 @@ jobs:
         run: rsync -avzh --checksum --exclude '.git' --exclude '.github' --exclude '.gitignore' --exclude 'node_modules' --exclude 'package.json' --exclude 'package-lock.json' --exclude 'src' --exclude 'webpack' --exclude 'rong/static' ./ ${{ secrets.UAT_SSH_USERNAME }}@${{ secrets.UAT_SSH_HOST }}:/home/${{ secrets.UAT_SSH_USERNAME }}/django/
 
       - name: Deploy static files with rsync
-        run: rsync -rpvzh --checksum ./rong/static/ ${{ secrets.UAT_SSH_USERNAME }}@${{ secrets.UAT_SSH_HOST }}:/home/${{ secrets.UAT_SSH_USERNAME }}/django/rong/static/
+        run: rsync -rpvzh --checksum --delete ./rong/static/ ${{ secrets.UAT_SSH_USERNAME }}@${{ secrets.UAT_SSH_HOST }}:/home/${{ secrets.UAT_SSH_USERNAME }}/django/rong/static/
       
       - name: Update deps and migrate
         uses: appleboy/ssh-action@master
