@@ -11,10 +11,10 @@ class DiscordRoleMember(models.Model):
         db_table = u'rongbot"."discord_role_members'
 
 
-class DiscordServerRoles(models.Model):
+class DiscordServerRole(models.Model):
     server_id = models.CharField(max_length=30, primary_key=True)  # hack
     role_id = models.CharField(max_length=30)
-    role_name = models.TextField()
+    name = models.TextField()
 
     class Meta():
         managed = False

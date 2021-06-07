@@ -1,11 +1,10 @@
+from django.apps import apps
 from django.db import models
 from django.utils import timezone
 from django_extensions.db.fields import AutoSlugField
 
 from .bot_models import DiscordRoleMember
 from .clan_member import ClanMember
-
-from django.apps import apps
 
 
 class Clan(models.Model):
@@ -14,7 +13,6 @@ class Clan(models.Model):
     platform_id = models.CharField(max_length=30, db_index=True)
     admin = models.ForeignKey(
         'User', null=True, on_delete=models.SET_NULL, related_name='clans_administrated')
-    members = models.ManyToManyField('User', through='ClanMember')
     slug = AutoSlugField(populate_from='name', unique=True)
 
     def get_clan_id(self):
@@ -34,7 +32,7 @@ class Clan(models.Model):
             return
         intended_members = DiscordRoleMember.objects.filter(role_id=self.platform_id).select_related('member').all()
         member_id_list = [m.member_id for m in intended_members]
-        current_intended_members = self.clanmember_set.filter(user__platform_id__in=member_id_list).select_related(
+        current_intended_members = self.members.filter(user__platform_id__in=member_id_list).select_related(
             'user').all()
         current_mem_id_list = [cm.user.platform_id for cm in current_intended_members]
         User = apps.get_model("rong", "User")
@@ -50,4 +48,4 @@ class Clan(models.Model):
                 cm = ClanMember(user=u, clan=self)
                 cm.save()
         # delete unwanted members
-        self.clanmember_set.exclude(user__platform_id__in=member_id_list).delete()
+        self.members.exclude(user__platform_id__in=member_id_list).delete()

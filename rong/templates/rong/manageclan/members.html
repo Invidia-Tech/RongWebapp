@@ -1,4 +1,5 @@
 {% extends 'rong/layout.html' %}
+{% load unit_icons %}
 
 {% load static %}
 {% load bootstrap4 %}
@@ -24,10 +25,20 @@
     </tr>
     </thead>
     <tbody>
-    {% for member in clan.clanmember_set.all %}
+    {% for member in clan.members.all %}
         <tr>
         <td>{{ member.user.discordname }}</td>
-        <td>{% if member.is_lead %}Yes{% else %}No{% endif %}</td>
+        <td>
+            {% if member.user_id == clan.collection.owner_id %}
+            Owner
+            {% elif member.user_id == clan.admin_id %}
+            Leader
+            {% elif member.is_lead %}
+            Yes
+            {% else %}
+            No
+            {% endif %}
+        </td>
         <td>{{ member.group_num }}</td>
         <td>{{ member.box.id }}</td>
         <td>Do Shit</td>

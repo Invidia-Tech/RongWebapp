@@ -15,15 +15,15 @@ class User(models.Model):
     platform_id = models.CharField(max_length=30, db_index=True)
     discriminator = models.IntegerField()
     name = models.CharField(max_length=50)
-    clans = models.ManyToManyField('Clan', through='ClanMember')
     display_pic = models.CharField(max_length=6, default='105811')
     single_mode = models.BooleanField(default=True)
+    clans = models.ManyToManyField('Clan', through='ClanMember')
 
     def check_single_mode(self):
         if not self.single_mode:
             return
 
-        num_clans = self.clans.count()
+        num_clans = self.clan_memberships.count()
         num_boxes = self.box_set.count()
 
         if num_clans > 1 or num_boxes > 1:
@@ -37,7 +37,7 @@ class User(models.Model):
             box = self.box_set.get()
 
         if num_clans:
-            clanmemb = ClanMember.objects.get(user=self)
+            clanmemb = self.clan_memberships.get()
             clanmemb.box = box
             clanmemb.save()
 
@@ -46,15 +46,14 @@ class User(models.Model):
         roles_member_of = [rolemember.role_id for rolemember in DiscordRoleMember.objects.filter(
             member_id=self.platform_id, role_id__in=all_clans.keys())]
         current_membership_roles = [
-            membership.platform_id for membership in self.clans.all()]
+            membership.clan.platform_id for membership in self.clan_memberships.select_related('clan')]
         # add missing clanmembers
         for role in roles_member_of:
             if role not in current_membership_roles:
-                membership = ClanMember(
-                    user=self, clan=all_clans[role], is_lead=False)
+                membership = ClanMember(user=self, clan=all_clans[role])
                 membership.save()
         # remove incorrect clanmembers
-        self.clanmember_set.exclude(
+        self.clan_memberships.exclude(
             clan__platform_id__in=roles_member_of).delete()
 
     def for_discord_session(session: OAuth2Session):
@@ -97,7 +96,7 @@ WHERE (
     def can_view(self, entity: Union[Clan, ClanBattle]):
         self.load_managed_clans()
         cl_id = entity.get_clan_id()
-        return cl_id in self.managed_clan_ids or self.clanmember_set.filter(clan_id=cl_id).exists()
+        return cl_id in self.managed_clan_ids or self.clan_memberships.filter(clan_id=cl_id).exists()
 
     @property
     def is_authenticated(self):
