@@ -13,4 +13,26 @@
 
 {% block content %}
     <h2>{{ clan.name }} &gt; Members</h2>
+    <table class="table dt w-100 dt-noPaging">
+    <thead>
+    <tr>
+        <th>Member</th>
+        <th>Lead?</th>
+        <th>Group</th>
+        <th>Box</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for member in clan.clanmember_set.all %}
+        <tr>
+        <td>{{ member.user.discordname }}</td>
+        <td>{% if member.is_lead %}Yes{% else %}No{% endif %}</td>
+        <td>{{ member.group_num }}</td>
+        <td>{{ member.box.id }}</td>
+        <td>Do Shit</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
 {% endblock %}

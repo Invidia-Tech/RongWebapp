@@ -1,16 +1,19 @@
-from rong.models.clan_battle import ClanBattle
-from django.db import connection, models
-from requests_oauthlib import OAuth2Session
-from django.conf import settings
-from .box import Box
-from .clan import Clan
-from .bot_models import DiscordRoleMember
-from .clan_member import ClanMember
 from typing import Union
+
+from django.conf import settings
+from django.db import connection, models
+from django.utils.safestring import mark_safe
+from requests_oauthlib import OAuth2Session
+
+from .bot_models import DiscordRoleMember
+from .clan import Clan
+from .clan_battle import ClanBattle
+from .clan_member import ClanMember
 
 
 class User(models.Model):
     platform_id = models.CharField(max_length=30, db_index=True)
+    discriminator = models.IntegerField()
     name = models.CharField(max_length=50)
     clans = models.ManyToManyField('Clan', through='ClanMember')
     display_pic = models.CharField(max_length=6, default='105811')
@@ -57,11 +60,12 @@ class User(models.Model):
     def for_discord_session(session: OAuth2Session):
         r = session.get('%s/users/@me' % settings.DISCORD_BASE_URL)
         user_data = r.json()
-        user, created = User.objects.get_or_create(
-            platform_id=user_data['id'], defaults={'name': user_data['username']})
-        if user.name != user_data['username']:
-            user.name = user_data['username']
-            user.save()
+        user = User.objects.filter(platform_id=user_data['id']).first()
+        if not user:
+            user = User(platform_id=user_data['id'])
+        user.name = user_data['username']
+        user.discriminator = user_data['discriminator']
+        user.save()
         user.sync_clans()
         return user
 
@@ -98,6 +102,10 @@ WHERE (
     @property
     def is_authenticated(self):
         return True
+
+    @property
+    def discordname(self):
+        return mark_safe('%s<span class="discriminator">#%04d</span>' % (self.name, self.discriminator))
 
 
 class AnonymousUser:

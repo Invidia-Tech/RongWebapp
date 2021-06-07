@@ -12,4 +12,5 @@ def list_members(request, clan):
     if not request.user.can_manage(clan):
         raise SuspiciousOperation()
     # do something
+    clan.sync_members()
     return render(request, 'rong/manageclan/members.html', {"clan": clan})

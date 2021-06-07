@@ -30,6 +30,8 @@
     "bootstrap": "^4.6.0",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "css-loader": "^5.2.6",
+    "datatables.net": "^1.10.25",
+    "datatables.net-bs4": "^1.10.25",
     "ignore-loader": "^0.1.2",
     "jquery": "^3.6.0",
     "jquery-ui": "^1.12.1",
