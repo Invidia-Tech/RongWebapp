@@ -79,3 +79,18 @@ export function populateNumericDropdown(id, min, max, value) {
     }
     select_el.val(value);
 }
+
+export function formatDiscordName(name, discriminator) {
+    let $template = $("<span><span class='name'></span><span class='discriminator'></span></span>");
+    $template.find(".name").text(name);
+    $template.find(".discriminator").text("#" + discriminator.toString().padStart(4, "0"));
+    return $template.html();
+}
+
+export function formatPlayerId(id) {
+    if(!id) {
+        return "N/A";
+    }
+    let rawId = id.toString().padStart(9, "0");
+    return rawId.substr(0, 3)+" "+rawId.substr(3, 3)+" "+rawId.substr(6, 3);
+}

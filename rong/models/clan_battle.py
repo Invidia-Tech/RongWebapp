@@ -107,6 +107,7 @@ class ClanBattle(models.Model):
                     wave_group = source_info["waveGroupModel"].objects.get(id=boss_group["wave_group"])
                     enemy_data = source_info["enemyModel"].objects.get(
                         id=wave_group.enemy_id_1)
+                    print(enemy_data.__dict__)
                     field_prefix = 'boss%d_' % (boss_index + 1)
                     map_info.populate_boss(boss_index + 1, enemy_data, boss_group["multiplier"])
                     setattr(self, field_prefix + 'iconid', enemy_data.unit_id)

@@ -7,6 +7,7 @@ require('datatables.net')
 require('./modules/equipment');
 require('./modules/unit-selector');
 require('./pages/box');
+require('./pages/memberlist');
 
 import './styles/main.scss';
 import $ from 'jquery';

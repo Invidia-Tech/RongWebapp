@@ -109,7 +109,7 @@
     </div>
 </nav>
 
-<div class="container" id="mainContent">
+<div class="container {{ request.resolver_match.url_name }}" id="mainContent">
 
     {% bootstrap_messages %}
 

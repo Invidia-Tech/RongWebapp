@@ -2,7 +2,7 @@ from typing import Union
 
 from django.conf import settings
 from django.db import connection, models
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 from requests_oauthlib import OAuth2Session
 
 from .bot_models import DiscordRoleMember
@@ -89,6 +89,9 @@ WHERE (
         self.load_managed_clans()
         return Clan.objects.filter(id__in=self.managed_clan_ids)
 
+    def can_administrate(self, clan: Clan):
+        return clan.admin_id == self.id or clan.collection.owner_id == self.id
+
     def can_manage(self, entity: Union[Clan, ClanBattle]):
         self.load_managed_clans()
         return entity.get_clan_id() in self.managed_clan_ids
@@ -104,7 +107,7 @@ WHERE (
 
     @property
     def discordname(self):
-        return mark_safe('%s<span class="discriminator">#%04d</span>' % (self.name, self.discriminator))
+        return format_html('{}<span class="discriminator">#{}</span>', self.name, '%04d' % self.discriminator)
 
 
 class AnonymousUser:

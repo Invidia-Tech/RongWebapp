@@ -15,35 +15,73 @@
 {% block content %}
     <h2>{{ clan.name }} &gt; Members</h2>
     <table class="table dt w-100 dt-noPaging">
-    <thead>
-    <tr>
-        <th>Member</th>
-        <th>Lead?</th>
-        <th>Group</th>
-        <th>Box</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for member in clan.members.all %}
+        <thead>
         <tr>
-        <td>{{ member.user.discordname }}</td>
-        <td>
-            {% if member.user_id == clan.collection.owner_id %}
-            Owner
-            {% elif member.user_id == clan.admin_id %}
-            Leader
-            {% elif member.is_lead %}
-            Yes
-            {% else %}
-            No
-            {% endif %}
-        </td>
-        <td>{{ member.group_num }}</td>
-        <td>{{ member.box.id }}</td>
-        <td>Do Shit</td>
+            <th>Member</th>
+            <th>IGN</th>
+            <th>Player ID</th>
+            <th>Lead?</th>
+            <th>Group</th>
+            <th>Box</th>
+            <th>Actions</th>
         </tr>
-    {% endfor %}
-    </tbody>
+        </thead>
+        <tbody>
+        {% for member in clan.members.all %}
+            <tr data-id="{{ member.id }}">
+                <td class="member-name">{{ member.user.discordname }}</td>
+                <td class="member-ign">{% if member.ign %}{{ member.ign }}{% else %}N/A{% endif %}</td>
+                <td class="member-pid">{{ member.formatted_id }}</td>
+                <td class="member-lead">
+                    {% if member.user_id == clan.collection.owner_id %}
+                        Owner
+                    {% elif member.user_id == clan.admin_id %}
+                        Leader
+                    {% elif member.is_lead %}
+                        Yes
+                    {% else %}
+                        No
+                    {% endif %}
+                </td>
+                <td class="member-group">{{ member.group_num }}</td>
+                <td>{{ member.box.id }}</td>
+                <td><button type="button" class="btn btn-primary edit-member">Edit Details</button></td>
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
+
+    <div class="modal fade" id="editMemberModal" tabindex="-1" aria-labelledby="editMemberModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editMemberModalLabel">Edit Member Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editMemberForm">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <div class="col-md-3 col-form-label">Member:</div>
+                            <div class="col-md-9" id="editMemberName"><b class="name"></b><span class="discriminator"></span></div>
+                        </div>
+                        {% bootstrap_field form.ign layout='horizontal' %}
+                        {% bootstrap_field form.player_id layout='horizontal' %}
+                        {% bootstrap_field form.group_num layout='horizontal' %}
+                        {% if form.is_lead %}
+                            {% bootstrap_field form.is_lead layout='horizontal' %}
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="editMemberSaveBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-none api" data-api-url="{{ request.path }}"></div>
 {% endblock %}

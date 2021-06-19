@@ -72,7 +72,7 @@ def alter_box(request: HttpRequest, box_id):
                 cm.save()
             if form.data.get("clan", "") and not clanUnchanged:
                 # set new clan
-                cm = request.user.clanmember_set.get(pk=form.data["clan"])
+                cm = request.user.clan_memberships.get(pk=form.data["clan"])
                 cm.box = box
                 cm.save()
             return JsonResponse({"success": True, "box": box.meta_json()})
@@ -98,7 +98,7 @@ def create_box(request: HttpRequest):
             form.save()
             # clan?
             if "clan" in form.data and form.data["clan"]:
-                cm = request.user.clanmember_set.get(pk=form.data["clan"])
+                cm = request.user.clan_memberships.get(pk=form.data["clan"])
                 cm.box = form.instance
                 cm.save()
             return JsonResponse({"success": True, "box": form.instance.meta_json()})

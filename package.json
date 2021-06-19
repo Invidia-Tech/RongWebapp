@@ -34,6 +34,7 @@
     "datatables.net-bs4": "^1.10.25",
     "ignore-loader": "^0.1.2",
     "jquery": "^3.6.0",
+    "jquery-mask-plugin": "^1.14.16",
     "jquery-ui": "^1.12.1",
     "jquery-validation": "^1.19.3",
     "mini-css-extract-plugin": "^1.6.0",
