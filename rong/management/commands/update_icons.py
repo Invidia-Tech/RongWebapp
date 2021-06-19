@@ -80,7 +80,7 @@ class Command(BaseCommand):
         star_sheet.save("rong/static/rong/images/icon_stars.png", format='png')
 
         # generate CSS
-        with open('sass/components/_unit_icon_positions.scss', 'w', encoding='utf-8') as css:
+        with open('src/styles/components/_unit_icon_positions.scss', 'w', encoding='utf-8') as css:
             css.write(".unit-icon {\n")
             for unit in positions:
                 css.write("&.u-%s {background-position: -%dpx -%dpx; }\n" % (unit, positions[unit][0], positions[unit][1]))

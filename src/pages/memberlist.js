@@ -47,7 +47,14 @@ $(document).ready(function () {
                 $("#id_player_id").mask('000 000 000');
                 $("#id_group_num").val(member.group_num ?? "");
                 if ($("#id_is_lead").length) {
-                    $("#id_is_lead").prop("checked", member.is_lead);
+                    if(member.is_owner || member.is_admin) {
+                        $("#id_is_lead").prop("checked", true);
+                        $("#id_is_lead").prop("disabled", true);
+                    }
+                    else {
+                        $("#id_is_lead").prop("checked", member.is_lead);
+                        $("#id_is_lead").prop("disabled", false);
+                    }
                 }
                 $('#editMemberModal').modal();
                 $('#editMemberSaveBtn').off('click');
