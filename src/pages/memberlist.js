@@ -4,7 +4,7 @@ import 'jquery-validation';
 import 'jquery-mask-plugin';
 
 $(document).ready(function () {
-    if ($('.clan_list_members')) {
+    if ($('.page__clan_list_members').length) {
         let $api = $('.api');
 
         function saveMemberDetails(id) {

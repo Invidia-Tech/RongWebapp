@@ -288,7 +288,7 @@ $(document).ready(function () {
         renderBoxes();
     }
 
-    if($("#boxes").length && $("#boxData").length) {
+    if($(".page__box_index").length) {
         $('#addUnitModal ul.position-selector li').click(function () {
             addUnitFilter($(this).attr('data-filter'));
         });
