@@ -1,6 +1,6 @@
 name: deploy-prod
 on:
-  pull_request:
+  push:
     branches:
       - prod
 jobs:
@@ -25,6 +25,7 @@ jobs:
           port: ${{ secrets.PROD_SSH_PORT }}
           script: |
             cd RongWebapp
+            git pull
             source venv/bin/activate
             npm ci
             npm run build
