@@ -1,11 +1,9 @@
 import $ from 'jquery';
-import {
-    show_loading, hide_loading, make_alert, icon_id, rank_color, unit_position
-} from '../modules/common';
+import {hide_loading, icon_id, make_alert, page, rank_color, show_loading, unit_position} from '../modules/common';
 import {boxUnitModal} from "../modules/box-unit-modal";
 import 'jquery-validation';
 
-$(document).ready(function () {
+page('box_index', function () {
     let boxes = {};
 
     function editUnit(box_id, unit_id) {
@@ -288,13 +286,11 @@ $(document).ready(function () {
         renderBoxes();
     }
 
-    if($(".page__box_index").length) {
-        $('#addUnitModal ul.position-selector li').click(function () {
-            addUnitFilter($(this).attr('data-filter'));
-        });
+    $('#addUnitModal ul.position-selector li').click(function () {
+        addUnitFilter($(this).attr('data-filter'));
+    });
 
-        $('#createBoxBtn').click(createBox);
+    $('#createBoxBtn').click(createBox);
 
-        setupBoxes();
-    }
+    setupBoxes();
 });

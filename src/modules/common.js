@@ -94,3 +94,11 @@ export function formatPlayerId(id) {
     let rawId = id.toString().padStart(9, "0");
     return rawId.substr(0, 3)+" "+rawId.substr(3, 3)+" "+rawId.substr(6, 3);
 }
+
+export function page(name, cb) {
+    $(document).ready(function() {
+        if($('.page__'+name).length) {
+            cb();
+        }
+    });
+}
