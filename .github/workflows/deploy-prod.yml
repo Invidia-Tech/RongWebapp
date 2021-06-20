@@ -25,6 +25,7 @@ jobs:
           port: ${{ secrets.PROD_SSH_PORT }}
           script: |
             cd RongWebapp
+            git checkout prod
             git pull
             touch rongdjango/wsgi.py
             source venv/bin/activate
