@@ -39,3 +39,18 @@ class ClanBattleBossInfo(models.Model):
         setattr(self, field_prefix + 'pdef', enemy_data.pdef)
         setattr(self, field_prefix + 'mdef', enemy_data.mdef)
         setattr(self, field_prefix + 'multiplier', multiplier)
+
+    def boss_list(self):
+        boss_l = []
+        for num in range(1, 6):
+            boss_l.append({
+                "level": getattr(self, 'boss%d_level' % num),
+                "hp": getattr(self, 'boss%d_hp' % num),
+                "multiplier": getattr(self, 'boss%d_multiplier' % num),
+                "pdef": getattr(self, 'boss%d_pdef' % num),
+                "mdef": getattr(self, 'boss%d_mdef' % num),
+            })
+        return boss_l
+
+    class Meta:
+        ordering = ('difficulty',)

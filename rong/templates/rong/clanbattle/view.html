@@ -1,0 +1,151 @@
+{% extends 'rong/layout.html' %}
+{% load clan_battle %}
+{% load humanize %}
+
+{% load static %}
+{% load bootstrap4 %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block title %}{{ battle.name }} - {{ battle.clan.name }}{% endblock %}
+
+{% block content %}
+    <div class="w-100 text-center mb-3"><h2 class="display-2">{{ battle.name }}</h2></div>
+    {% if battle.in_progress %}
+        <div class="jumbotron text-center position-relative">
+            <div class="row align-items-center">
+                <div class="col-md-4 text-center">
+                    <img src="{% static 'rong/images/enemies/' %}{{ battle.current_boss_icon }}.png"/>
+                    <p>
+                        Lap {{ battle.current_lap }} {{ battle.current_boss_name }}<br>
+                        {{ battle.current_hp|intcomma }} HP left<br>
+                        {{ battle.hits_today|format_hits }}/{{ battle.total_daily_hits|format_hits }} clan hits today
+                        {% if battle.damage_dealt_today %}
+                            <br>{{ battle.damage_dealt_today|intcomma }} damage dealt today
+                            {% if battle.bosses_killed_today %}
+                                <br>{{ battle.bosses_killed_today }} bosses killed today
+                            {% endif %}
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-md-8 text-left">
+                    <div class="row">
+                        <div class="col">Day {{ battle.current_day }}/{{ battle.total_days }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {% if battle.next_reset < battle.end_time %}
+                                Reset in <b>{{ battle.next_reset|timeuntil }}</b>
+                            {% else %}
+                                Ends in <b>{{ battle.end_time|timeuntil }}</b>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col"><p>Placeholder for plans once implemented</p></div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row align-items-start">
+                <div class="col-md-6">
+                    <div class="row header align-items-center">
+                        <div class="col-md-8 text-left"><h4>Clan Hit Log</h4></div>
+                        <div class="col-md-4"><a href="#" class="btn btn-primary">Details</a></div>
+                    </div>
+                    <div class="row">
+                        <div class="col hitlog">
+                            {% if hits %}
+                                {% for hit in hits %}
+                                    <div class="hit">
+                                        <div class="info"><b>{{ hit.user.name }}</b> attacked
+                                            <b>{% boss_name battle hit %}</b> for
+                                            <b>{{ hit.damage|intcomma }}</b> damage{% if hit.killing_blow %}
+                                                (Victory){% endif %}
+                                        </div>
+                                        <div class="timestamp">XX hours ago</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="d-flex align-items-center h-100">
+                                    <p class="w-100"><i>No hits registered... yet!</i></p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% if in_clan %}
+                    <div class="col-md-6">
+                        <div class="row header align-items-center">
+                            <div class="col-md-4 text-left"><h4>My Hits</h4></div>
+                            <div class="col-md-4">{% user_hits_today battle request.user %} hits
+                                used, {% user_hits_left_today battle request.user %} left
+                            </div>
+                            <div class="col-md-4"><a href="#" class="btn btn-primary">Personal Logs</a></div>
+                        </div>
+                        <div class="row">
+                            <div class="col hitlog">
+                                {% if myhits %}
+                                    {% for hit in myhits %}
+                                        <div class="hit">
+                                            <div class="info">You attacked <b>{% boss_name battle hit %}</b> for
+                                                <b>{{ hit.damage|intcomma }}</b> damage{% if hit.killing_blow %}
+                                                    (Victory){% endif %}
+                                            </div>
+                                            <div class="timestamp">XX hours ago</div>
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="d-flex align-items-center h-100">
+                                        <p class="w-100"><i>No hits registered... yet!</i></p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <hr>
+    {% endif %}
+    <h2>Boss Info</h2>
+    <table class="table w-100">
+        <thead>
+        <tr>
+            <th></th>
+            {% for boss in battle.boss_list %}
+                <th class="text-center">
+                    <img src="{% static 'rong/images/enemies/' %}{{ boss.icon }}.png"/><br>
+                    {{ boss.name }}
+                </th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody>
+        {% for phase in battle.bosses.all %}
+            <tr>
+                <th>Phase {{ forloop.counter }}<br>
+                    {% if not phase.lap_to %}
+                        Lap {{ phase.lap_from }}+
+                    {% elif phase.lap_from == phase.lap_to %}
+                        Lap {{ phase.lap_from }}
+                    {% else %}
+                        Laps {{ phase.lap_from }}-{{ phase.lap_to }}
+                    {% endif %}</th>
+                {% for boss in phase.boss_list %}
+                    <td class="text-center">
+                        Lv{{ boss.level }}<br>
+                        HP {{ boss.hp|intcomma }}<br>
+                        {{ boss.pdef }} PDEF / {{ boss.mdef }} MDEF
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

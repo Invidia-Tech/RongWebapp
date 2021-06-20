@@ -38,3 +38,16 @@ body {
 div.slidable {
   display: none;
 }
+
+.w-15 {
+  width: 15%;
+}
+
+.w-55 {
+  width: 55%;
+}
+
+.elevated-button-holder {
+  z-index: 3;
+  position: relative;
+}

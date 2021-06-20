@@ -3,3 +3,24 @@
   max-width: 20%;
   text-align: center;
 }
+
+.hitlog {
+  height: 140px;
+  overflow: auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  .hit {
+    height: 40px;
+    border-bottom: 1px solid gray;
+    font-size: 90%;
+    .info {
+      text-align: left;
+    }
+    .timestamp {
+      text-align: right;
+      font-size: 80%;
+      color: gray;
+      font-style: italic;
+    }
+  }
+}
