@@ -4,6 +4,7 @@ import math
 from django.db import models, connection
 from django.db.models import Sum
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
 
 from rong.models.clan_battle_boss_info import ClanBattleBossInfo
@@ -184,7 +185,7 @@ class ClanBattle(models.Model):
     def get_clan_id(self):
         return self.clan_id
 
-    @property
+    @cached_property
     def in_progress(self):
         now = timezone.now()
         return self.start_time <= now and self.end_time > now
@@ -195,36 +196,36 @@ class ClanBattle(models.Model):
             boss_l.append({"icon": getattr(self, 'boss%d_iconid' % num), "name": getattr(self, 'boss%d_name' % num)})
         return boss_l
 
-    @property
+    @cached_property
     def current_day(self):
         now = timezone.now()
         first_day_reset = self.start_time.replace(hour=13, minute=0, second=0, microsecond=0)
         started_before_reset = self.start_time.hour < 13
         return math.floor((now - first_day_reset).total_seconds() / 86400) + (2 if started_before_reset else 1)
 
-    @property
+    @cached_property
     def total_days(self):
         first_day_reset = self.start_time.replace(hour=13, minute=0, second=0, microsecond=0)
         started_before_reset = self.start_time.hour < 13
         return math.floor((self.end_time - first_day_reset).total_seconds() / 86400) + (
             2 if started_before_reset else 1)
 
-    @property
+    @cached_property
     def next_reset(self):
         now = timezone.now()
         if now.hour >= 13:
             now = now + datetime.timedelta(days=1)
         return now.replace(hour=13, minute=0, second=0, microsecond=0)
 
-    @property
+    @cached_property
     def current_boss_icon(self):
         return getattr(self, 'boss%d_iconid' % self.current_boss)
 
-    @property
+    @cached_property
     def current_boss_name(self):
         return getattr(self, 'boss%d_name' % self.current_boss)
 
-    @property
+    @cached_property
     def hits_today(self):
         return self.hits_on_day(self.current_day)
 
@@ -237,11 +238,11 @@ class ClanBattle(models.Model):
             """, [self.id, day])
             return cur.fetchone()[0]
 
-    @property
+    @cached_property
     def total_daily_hits(self):
         return self.clan.members.count() * ClanBattle.HITS_PER_DAY
 
-    @property
+    @cached_property
     def hits_left_today(self):
         return self.total_daily_hits - self.hits_today
 
@@ -257,14 +258,14 @@ class ClanBattle(models.Model):
             """, [self.id, day, user_id])
             return cur.fetchone()[0]
 
-    @property
+    @cached_property
     def damage_dealt_today(self):
         return self.damage_dealt_on_day(self.current_day)
 
     def damage_dealt_on_day(self, day):
         return self.hits.filter(day=day).aggregate(Sum('actual_damage'))["actual_damage__sum"] or 0
 
-    @property
+    @cached_property
     def bosses_killed_today(self):
         return self.bosses_killed_on_day(self.current_day)
 

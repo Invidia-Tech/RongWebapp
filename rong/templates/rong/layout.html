@@ -38,21 +38,23 @@
                     </li>
 
                     {# Clan Battle #}
-                    {% if user.clans.all|length == 1 %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'rong:cb_list' user.clans.first.slug %}">Clan Battle</a>
-                        </li>
-                    {% elif user.clans.all|length > 1 %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#">Clan Battle</a>
-                            <ul class="dropdown-menu">
-                                {% for clan in user.clans.all %}
-                                    <li><a class="dropdown-item"
-                                           href="{% url 'rong:cb_list' clan.slug %}">{{ clan.name }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
-                    {% endif %}
+                    {% with user.clans.all as clans %}
+                        {% if clans|length == 1 %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'rong:cb_list' clans.first.slug %}">Clan Battle</a>
+                            </li>
+                        {% elif clans|length > 1 %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#">Clan Battle</a>
+                                <ul class="dropdown-menu">
+                                    {% for clan in clans %}
+                                        <li><a class="dropdown-item"
+                                               href="{% url 'rong:cb_list' clan.slug %}">{{ clan.name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endif %}
+                    {% endwith %}
 
                     {# Clan Management #}
                     {% if user.managed_clans|length %}

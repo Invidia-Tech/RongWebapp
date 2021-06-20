@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import connection, models
 from django.utils.html import format_html
 from requests_oauthlib import OAuth2Session
+from django.utils.functional import cached_property
 
 from .bot_models import DiscordRoleMember
 from .clan import Clan
@@ -68,10 +69,10 @@ class User(models.Model):
         user.sync_clans()
         return user
 
-    def load_managed_clans(self):
-        if not hasattr(self, 'managed_clan_ids'):
-            with connection.cursor() as cur:
-                cur.execute("""
+    @cached_property
+    def managed_clan_ids(self):
+        with connection.cursor() as cur:
+            cur.execute("""
 SELECT cl."id"
 FROM "rong_clan" cl
 JOIN "rong_clancollection" cc ON cl."collection_id" = cc."id"
@@ -81,23 +82,20 @@ WHERE (
 	OR cl."admin_id" = %s
 	OR cc."owner_id" = %s
 );
-                """, [self.id] * 3)
-                self.managed_clan_ids = [row[0] for row in cur.fetchall()]
+            """, [self.id] * 3)
+            return [row[0] for row in cur.fetchall()]
 
-    @property
+    @cached_property
     def managed_clans(self):
-        self.load_managed_clans()
         return Clan.objects.filter(id__in=self.managed_clan_ids)
 
     def can_administrate(self, clan: Clan):
         return clan.admin_id == self.id or clan.collection.owner_id == self.id
 
     def can_manage(self, entity: Union[Clan, ClanBattle]):
-        self.load_managed_clans()
         return entity.get_clan_id() in self.managed_clan_ids
 
     def can_view(self, entity: Union[Clan, ClanBattle]):
-        self.load_managed_clans()
         cl_id = entity.get_clan_id()
         return cl_id in self.managed_clan_ids or self.clan_memberships.filter(clan_id=cl_id).exists()
 

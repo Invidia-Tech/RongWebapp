@@ -85,13 +85,15 @@ def edit_member(request, clan, member_id):
 def list_members(request, clan):
     clan.sync_members()
     boxes = {}
-    for member in clan.members.prefetch_related('box'):
+    members = clan.members.select_related('box', 'user').prefetch_related('box__boxunit_set')
+    for member in members:
         if member.box is not None and member.box.boxunit_set.count() > 0:
             boxes[member.id] = member.box.meta_json()
         else:
             boxes[member.id] = None
     ctx = {
         "clan": clan,
+        "members": members,
         "form": member_form(request, clan)(),
         "boxes": boxes
     }

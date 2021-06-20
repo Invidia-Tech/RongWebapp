@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django_extensions',
 ]
 
+if 'EXTRA_APPS' in locals():
+    INSTALLED_APPS += EXTRA_APPS
+
 WEBPACK_LOADER = {
     'DEFAULT': {
         'STATS_FILE': str(BASE_DIR / 'webpack-stats.json'),
@@ -54,6 +57,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'rong.middleware.AuthenticationMiddleware'
 ]
+
+if 'EXTRA_MIDDLEWARE' in locals():
+    MIDDLEWARE += EXTRA_MIDDLEWARE
 
 ROOT_URLCONF = 'rongdjango.urls'
 

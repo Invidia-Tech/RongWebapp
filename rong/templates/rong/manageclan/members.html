@@ -29,7 +29,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for member in clan.members.all %}
+        {% for member in members %}
             <tr data-id="{{ member.id }}">
                 <td class="member-name">{{ member.user.discordname }}</td>
                 <td class="member-ign">{% if member.ign %}{{ member.ign }}{% else %}N/A{% endif %}</td>

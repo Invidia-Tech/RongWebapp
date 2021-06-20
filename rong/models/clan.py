@@ -1,6 +1,7 @@
 from django.apps import apps
 from django.db import models
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django_extensions.db.fields import AutoSlugField
 
 from .bot_models import DiscordRoleMember
@@ -18,12 +19,15 @@ class Clan(models.Model):
     def get_clan_id(self):
         return self.id
 
+    @cached_property
     def current_cb(self):
         return self.clanbattle_set.filter(end_time__gt=timezone.now()).order_by('start_time').first()
 
+    @cached_property
     def future_cbs(self):
         return self.clanbattle_set.filter(end_time__gt=timezone.now()).order_by('start_time')[1:]
 
+    @cached_property
     def past_cbs(self):
         return self.clanbattle_set.filter(end_time__lte=timezone.now()).order_by('-start_time')
 

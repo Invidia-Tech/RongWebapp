@@ -1,3 +1,5 @@
+import functools
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Max
@@ -20,6 +22,7 @@ def valid_level(value):
     if value <= 0 or value > BoxUnit.max_level():
         raise ValidationError('Invalid unit level')
 
+promotion_cache = {}
 
 class BoxUnit(models.Model):
     box = models.ForeignKey('Box', on_delete=models.CASCADE)
@@ -38,6 +41,7 @@ class BoxUnit(models.Model):
     equip6 = models.PositiveIntegerField(null=True)
 
     @staticmethod
+    @functools.lru_cache
     def max_level():
         return SkillCost.objects.aggregate(Max('target_level'))['target_level__max']
 
@@ -49,7 +53,9 @@ class BoxUnit(models.Model):
     def edit_json(self):
         base = model_to_dict(self)
         base["unit"] = model_to_dict(self.unit)
-        ranks = UnitPromotion.objects.filter(unit_id=self.unit_id).order_by('promotion_level')
+        if self.unit_id not in promotion_cache:
+            promotion_cache[self.unit_id] = list(UnitPromotion.objects.filter(unit_id=self.unit_id).order_by('promotion_level'))
+        ranks = promotion_cache[self.unit_id]
         base["ranks"] = [[rk.equip1, rk.equip2, rk.equip3, rk.equip4, rk.equip5, rk.equip6] for rk in ranks]
         base["max_level"] = BoxUnit.max_level()
         return base
