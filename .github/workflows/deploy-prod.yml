@@ -26,6 +26,7 @@ jobs:
           script: |
             cd RongWebapp
             git pull
+            touch rongdjango/wsgi.py
             source venv/bin/activate
             npm ci
             npm run build
