@@ -1,25 +1,14 @@
-from functools import wraps
-
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.core.exceptions import SuspiciousOperation
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
+from rong.decorators import clan_lead_view
 from rong.forms import EditClanMemberForm, FullEditClanMemberForm, AddClanBattleForm, EditClanBattleForm
-from rong.models import Clan, ClanBattle
+from rong.models import ClanBattle
 
 
-def clan_lead_required(func):
-    @wraps(func)
-    def _wrapped_view(request, clan, *args, **kwargs):
-        clan = get_object_or_404(Clan, slug=clan)
-        if request.user.is_authenticated and request.user.can_manage(clan):
-            return func(request, clan, *args, **kwargs)
-        raise PermissionDenied()
-
-    return _wrapped_view
-
-@clan_lead_required
+@clan_lead_view
 def edit_battle(request, clan, battle_id):
     battle = get_object_or_404(clan.clanbattle_set, pk=battle_id)
     if request.method == 'POST':
@@ -40,7 +29,7 @@ def edit_battle(request, clan, battle_id):
     return render(request, 'rong/manageclan/edit_battle.html', ctx)
 
 
-@clan_lead_required
+@clan_lead_view
 def add_battle(request, clan):
     if request.method == 'POST':
         cb = ClanBattle(clan=clan)
@@ -48,7 +37,7 @@ def add_battle(request, clan):
         if form.is_valid():
             form.save()
             cb.load_boss_info(form.data["data_source"])
-            cb.save()
+            cb.recalculate()
             messages.add_message(request, messages.SUCCESS, "Clan Battle successfully added.")
             return redirect('rong:clan_list_battles', clan.slug)
     else:
@@ -59,7 +48,8 @@ def add_battle(request, clan):
     }
     return render(request, 'rong/manageclan/add_battle.html', ctx)
 
-@clan_lead_required
+
+@clan_lead_view
 def list_battles(request, clan):
     ctx = {
         "clan": clan,
@@ -73,7 +63,8 @@ def member_form(request, clan):
     else:
         return EditClanMemberForm
 
-@clan_lead_required
+
+@clan_lead_view
 def edit_member(request, clan, member_id):
     member = get_object_or_404(clan.members, pk=member_id)
     form_class = member_form(request, clan)
@@ -90,7 +81,7 @@ def edit_member(request, clan, member_id):
         raise SuspiciousOperation()
 
 
-@clan_lead_required
+@clan_lead_view
 def list_members(request, clan):
     clan.sync_members()
     boxes = {}

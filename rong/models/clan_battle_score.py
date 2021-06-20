@@ -24,6 +24,7 @@ class ClanBattleScore(models.Model):
     boss_lap = models.PositiveIntegerField()
     boss_number = models.PositiveIntegerField()
     actual_damage = models.PositiveIntegerField()
+    killing_blow = models.BooleanField(default=False)
     hit_type = EnumChoiceField(ClanBattleHitType, default=ClanBattleHitType.NORMAL)
 
     def save(self, *args, **kwargs):
@@ -47,7 +48,8 @@ class ClanBattleScore(models.Model):
             else:
                 self.hit_type = ClanBattleHitType.NORMAL
             self.clan_battle.current_hp -= self.actual_damage
-            if self.clan_battle.current_hp == 0:
+            self.killing_blow = self.clan_battle.current_hp == 0
+            if self.killing_blow:
                 self.clan_battle.spawn_next_boss()
             self.clan_battle.save()
         super().save(*args, **kwargs)

@@ -1,4 +1,8 @@
-from django.db import models
+import datetime
+import math
+
+from django.db import models, connection
+from django.db.models import Sum
 from django.utils import timezone
 from django_extensions.db.fields import AutoSlugField
 
@@ -59,6 +63,8 @@ class ClanBattle(models.Model):
     current_lap = models.PositiveIntegerField(null=True)
     current_boss = models.PositiveIntegerField(null=True)
     current_hp = models.PositiveIntegerField(null=True)
+
+    HITS_PER_DAY = 3
 
     def load_boss_info(self, source: str, force_load_names: bool = False):
         try:
@@ -158,9 +164,10 @@ class ClanBattle(models.Model):
                 lasthit_users.append(hit.user_id)
             else:
                 hit.hit_type = ClanBattleHitType.NORMAL
-            hit.save()
             self.current_hp -= hit.actual_damage
-            if self.current_hp == 0:
+            hit.killing_blow = self.current_hp == 0
+            hit.save()
+            if hit.killing_blow:
                 if self.current_boss == 5:
                     self.current_lap += 1
                     self.current_boss = 1
@@ -184,6 +191,89 @@ class ClanBattle(models.Model):
 
     def boss_list(self):
         boss_l = []
-        for num in range(1,6):
+        for num in range(1, 6):
             boss_l.append({"icon": getattr(self, 'boss%d_iconid' % num), "name": getattr(self, 'boss%d_name' % num)})
         return boss_l
+
+    @property
+    def current_day(self):
+        now = timezone.now()
+        first_day_reset = self.start_time.replace(hour=13, minute=0, second=0, microsecond=0)
+        started_before_reset = self.start_time.hour < 13
+        return math.floor((now - first_day_reset).total_seconds() / 86400) + (2 if started_before_reset else 1)
+
+    @property
+    def total_days(self):
+        first_day_reset = self.start_time.replace(hour=13, minute=0, second=0, microsecond=0)
+        started_before_reset = self.start_time.hour < 13
+        return math.floor((self.end_time - first_day_reset).total_seconds() / 86400) + (
+            2 if started_before_reset else 1)
+
+    @property
+    def next_reset(self):
+        now = timezone.now()
+        if now.hour >= 13:
+            now = now + datetime.timedelta(days=1)
+        return now.replace(hour=13, minute=0, second=0, microsecond=0)
+
+    @property
+    def current_boss_icon(self):
+        return getattr(self, 'boss%d_iconid' % self.current_boss)
+
+    @property
+    def current_boss_name(self):
+        return getattr(self, 'boss%d_name' % self.current_boss)
+
+    @property
+    def hits_today(self):
+        return self.hits_on_day(self.current_day)
+
+    def hits_on_day(self, day):
+        with connection.cursor() as cur:
+            cur.execute("""
+            SELECT COALESCE(SUM(CASE WHEN "hit_type" = 'Normal' THEN 1 ELSE 0.5 END), 0)
+            FROM "rong_clanbattlescore"
+            WHERE "clan_battle_id" = %s AND "day" = %s
+            """, [self.id, day])
+            return cur.fetchone()[0]
+
+    @property
+    def total_daily_hits(self):
+        return self.clan.members.count() * ClanBattle.HITS_PER_DAY
+
+    @property
+    def hits_left_today(self):
+        return self.total_daily_hits - self.hits_today
+
+    def user_hits_today(self, user_id):
+        return self.user_hits_on_day(user_id, self.current_day)
+
+    def user_hits_on_day(self, user_id, day):
+        with connection.cursor() as cur:
+            cur.execute("""
+            SELECT COALESCE(SUM(CASE WHEN "hit_type" = 'Normal' THEN 1 ELSE 0.5 END), 0)
+            FROM "rong_clanbattlescore"
+            WHERE "clan_battle_id" = %s AND "day" = %s AND "user_id" = %s
+            """, [self.id, day, user_id])
+            return cur.fetchone()[0]
+
+    @property
+    def damage_dealt_today(self):
+        return self.damage_dealt_on_day(self.current_day)
+
+    def damage_dealt_on_day(self, day):
+        return self.hits.filter(day=day).aggregate(Sum('actual_damage'))["actual_damage__sum"] or 0
+
+    @property
+    def bosses_killed_today(self):
+        return self.bosses_killed_on_day(self.current_day)
+
+    def bosses_killed_on_day(self, day):
+        return self.hits.filter(day=day, killing_blow=True).count()
+
+    def user_damage_dealt_today(self, user_id):
+        return self.user_damage_dealt_on_day(user_id, self.current_day)
+
+    def user_damage_dealt_on_day(self, user_id, day):
+        return self.hits.filter(day=day, user_id=user_id).aggregate(Sum('actual_damage'))["actual_damage__sum"] or 0
+

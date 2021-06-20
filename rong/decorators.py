@@ -1,9 +1,10 @@
-from functools import wraps
 import urllib.parse
+from functools import wraps
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import reverse, redirect
+from django.shortcuts import reverse, redirect, get_object_or_404
+
+from rong.models import Clan, ClanBattle
 
 
 def user_passes_test(test_func, login_url=None, redirect_field_name='next'):
@@ -19,8 +20,11 @@ def user_passes_test(test_func, login_url=None, redirect_field_name='next'):
             if test_func(request.user):
                 return view_func(request, *args, **kwargs)
             path = request.build_absolute_uri()
-            return redirect((login_url if login_url else reverse('rong:discordlogin')) + '?' + urllib.parse.urlencode({redirect_field_name: path}))
+            return redirect((login_url if login_url else reverse('rong:discordlogin')) + '?' + urllib.parse.urlencode(
+                {redirect_field_name: path}))
+
         return _wrapped_view
+
     return decorator
 
 
@@ -37,3 +41,36 @@ def login_required(function=None, redirect_field_name='next', login_url=None):
     if function:
         return actual_decorator(function)
     return actual_decorator
+
+
+def clan_lead_view(func):
+    @wraps(func)
+    def _wrapped_view(request, clan, *args, **kwargs):
+        clan = get_object_or_404(Clan, slug=clan)
+        if request.user.is_authenticated and request.user.can_manage(clan):
+            return func(request, clan, *args, **kwargs)
+        raise PermissionDenied()
+
+    return _wrapped_view
+
+
+def clan_view(func):
+    @wraps(func)
+    def _wrapped_view(request, clan, *args, **kwargs):
+        clan = get_object_or_404(Clan, slug=clan)
+        if request.user.is_authenticated and request.user.can_view(clan):
+            return func(request, clan, *args, **kwargs)
+        raise PermissionDenied()
+
+    return _wrapped_view
+
+
+def clanbattle_view(func):
+    @wraps(func)
+    def _wrapped_view(request, battle, *args, **kwargs):
+        battle = get_object_or_404(ClanBattle, slug=battle)
+        if request.user.is_authenticated and request.user.can_view(battle):
+            return func(request, battle, *args, **kwargs)
+        raise PermissionDenied()
+
+    return _wrapped_view

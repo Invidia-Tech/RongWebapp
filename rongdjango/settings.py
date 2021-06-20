@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'rong.apps.RongConfig',
     'bootstrap4',
     'webpack_loader',
+    'django.contrib.humanize',
 ]
 
 WEBPACK_LOADER = {

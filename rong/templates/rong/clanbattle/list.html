@@ -1,4 +1,6 @@
 {% extends 'rong/layout.html' %}
+{% load clan_battle %}
+{% load humanize %}
 
 {% load static %}
 {% load bootstrap4 %}
@@ -18,7 +20,94 @@
     {% endif %}
     {% if clan.current_cb %}
         <h3>{% if clan.current_cb.in_progress %}Current{% else %}Upcoming{% endif %} Clan Battle</h3>
-        <a href="{% url 'rong:cb_view' clan.current_cb.slug %}">{{ clan.current_cb.name }}</a>
+        {% if clan.current_cb.in_progress %}
+            {# current #}
+            <div class="jumbotron text-center">
+                <div class="row align-items-center mb-3">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-6 text-center">
+                        <h1 class="display-3">{{ clan.current_cb.name }}</h1>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row text-left">
+                            <div class="col">
+                                Day {{ clan.current_cb.current_day }}/{{ clan.current_cb.total_days }}</div>
+                        </div>
+                        <div class="row text-left">
+                            <div class="col">
+                                {% if clan.current_cb.next_reset < clan.current_cb.end_time %}
+                                    Reset in <b>{{ clan.current_cb.next_reset|timeuntil }}</b>
+                                {% else %}
+                                    Ends in <b>{{ clan.current_cb.end_time|timeuntil }}</b>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="{% if in_clan %}col-md-4{% else %}col-md-6{% endif %}"><h3>Current Boss</h3></div>
+                    <div class="{% if in_clan %}col-md-4{% else %}col-md-6{% endif %}"><h3>Clan Progress Today</h3>
+                    </div>
+                    {% if in_clan %}
+                        <div class="col-md-4"><h3>My Hits</h3></div>{% endif %}
+                </div>
+                <div class="row align-items-center mb-3">
+                    <div class="{% if in_clan %}col-md-4{% else %}col-md-6{% endif %}">
+                        <img src="{% static 'rong/images/enemies/' %}{{ clan.current_cb.current_boss_icon }}.png"/>
+                        <p>
+                            Lap {{ clan.current_cb.current_lap }} {{ clan.current_cb.current_boss_name }}<br>
+                            {{ clan.current_cb.current_hp|intcomma }} HP left
+                        </p>
+                    </div>
+                    <div class="{% if in_clan %}col-md-4{% else %}col-md-6{% endif %}">
+                        <p>
+                            {{ clan.current_cb.hits_today }} hits used, {{ clan.current_cb.hits_left_today }} left<br/>
+                            {{ clan.current_cb.damage_dealt_today }} damage
+                            dealt, {{ clan.current_cb.bosses_killed_today }} bosses killed
+                        </p>
+                    </div>
+                    {% if in_clan %}
+                        <div class="col-md-4">
+                            <p>
+                                {% user_hits_today clan.current_cb request.user %} hits
+                                used, {% user_hits_left_today clan.current_cb request.user %} left<br>
+                                {% user_damage_today clan.current_cb request.user %} damage dealt today
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+                <h3>Click to open dashboard</h3>
+            </div>
+        {% else %}
+            {# upcoming #}
+            <div class="jumbotron text-center">
+                <div class="row align-items-center mb-3">
+                    <div class="col-md-3"></div>
+                    <div class="col-md-6 text-center">
+                        <h1 class="display-3">{{ clan.current_cb.name }}</h1>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="row">
+                            <div class="col-md-5">Starts in</div>
+                            <div class="col-md-7">{{ clan.current_cb.start_time|timeuntil }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">Ends in</div>
+                            <div class="col-md-7">{{ clan.current_cb.end_time|timeuntil }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    {% for boss in clan.current_cb.boss_list %}
+                        <div class="col-boss">
+                            <img src="{% static 'rong/images/enemies/' %}{{ boss.icon }}.png"/><br/>
+                            {{ boss.name }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <h3>Click to open dashboard</h3>
+            </div>
+        {% endif %}
     {% endif %}
     {% if clan.future_cbs %}
         <h3>Future Clan Battles</h3>

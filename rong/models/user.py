@@ -101,6 +101,9 @@ WHERE (
         cl_id = entity.get_clan_id()
         return cl_id in self.managed_clan_ids or self.clan_memberships.filter(clan_id=cl_id).exists()
 
+    def in_clan(self, clan):
+        return self.clan_memberships.filter(clan_id=clan.id).exists()
+
     @property
     def is_authenticated(self):
         return True

@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 <table class="table w-100">
     <thead>
     <tr>
@@ -13,12 +14,12 @@
     {% for battle in battles %}
         <tr>
             <td>{{ battle.name }}</td>
-            <td>{{ battle.start_time }}</td>
-            <td>{{ battle.end_time }}</td>
+            <td>{{ battle.start_time }}<br>({{ battle.start_time|naturaltime }})</td>
+            <td>{{ battle.end_time }}<br>({{ battle.end_time|naturaltime }})</td>
             <td>
                 <div class="row">
                     {% for boss in battle.boss_list %}
-                        <div class="col-md-2">
+                        <div class="col-boss">
                             <img src="{% static 'rong/images/enemies/' %}{{ boss.icon }}.png"/><br />
                             {{ boss.name }}
                         </div>
