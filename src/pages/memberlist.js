@@ -25,7 +25,7 @@ page('clan_list_members', function () {
             $('#editMemberModal').modal('hide');
             $("#id_player_id").unmask();
             show_loading();
-            $.post($api.attr('data-api-url') + "/" + id, $('#editMemberForm').serialize(), function (data) {
+            $.post($api.attr('data-api-url') + id + "/", $('#editMemberForm').serialize(), function (data) {
                 if (data.success) {
                     let $rootRow = $("tr[data-id='" + data.member.id + "'");
                     $rootRow.find(".member-name").html(formatDiscordName(data.member.name, data.member.discriminator));
@@ -50,7 +50,7 @@ page('clan_list_members', function () {
 
     function editMemberDetails(id) {
         show_loading();
-        $.get($api.attr('data-api-url') + "/" + id, function (member) {
+        $.get($api.attr('data-api-url') + id + "/", function (member) {
             hide_loading();
             $("#editMemberName .name").text(member.name);
             $("#editMemberName .discriminator").text("#" + member.discriminator.toString().padStart(4, "0"));

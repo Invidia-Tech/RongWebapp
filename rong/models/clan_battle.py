@@ -165,9 +165,9 @@ class ClanBattle(models.Model):
             else:
                 hit.hit_type = ClanBattleHitType.NORMAL
             self.current_hp -= hit.actual_damage
-            hit.killing_blow = self.current_hp == 0
+            hit.boss_hp_left = self.current_hp
             hit.save()
-            if hit.killing_blow:
+            if self.current_hp == 0:
                 if self.current_boss == 5:
                     self.current_lap += 1
                     self.current_boss = 1
@@ -269,7 +269,7 @@ class ClanBattle(models.Model):
         return self.bosses_killed_on_day(self.current_day)
 
     def bosses_killed_on_day(self, day):
-        return self.hits.filter(day=day, killing_blow=True).count()
+        return self.hits.filter(day=day, boss_hp_left=0).count()
 
     def user_damage_dealt_today(self, user_id):
         return self.user_damage_dealt_on_day(user_id, self.current_day)

@@ -1,12 +1,15 @@
+from enum import Enum
+
 from django.db import models
 from django.db.models import Max
-from enum import Enum
 from django_enum_choices.fields import EnumChoiceField
+
 
 class ClanBattleHitType(Enum):
     NORMAL = "Normal"
     LAST_HIT = "Last Hit"
     CARRYOVER = "Carryover"
+
 
 class ClanBattleScore(models.Model):
     clan_battle = models.ForeignKey('ClanBattle', on_delete=models.CASCADE, related_name='hits')
@@ -24,7 +27,7 @@ class ClanBattleScore(models.Model):
     boss_lap = models.PositiveIntegerField()
     boss_number = models.PositiveIntegerField()
     actual_damage = models.PositiveIntegerField()
-    killing_blow = models.BooleanField(default=False)
+    boss_hp_left = models.PositiveIntegerField()
     hit_type = EnumChoiceField(ClanBattleHitType, default=ClanBattleHitType.NORMAL)
 
     def save(self, *args, **kwargs):
@@ -48,8 +51,8 @@ class ClanBattleScore(models.Model):
             else:
                 self.hit_type = ClanBattleHitType.NORMAL
             self.clan_battle.current_hp -= self.actual_damage
-            self.killing_blow = self.clan_battle.current_hp == 0
-            if self.killing_blow:
+            self.boss_hp_left = self.clan_battle.current_hp
+            if self.clan_battle.current_hp == 0:
                 self.clan_battle.spawn_next_boss()
             self.clan_battle.save()
         super().save(*args, **kwargs)

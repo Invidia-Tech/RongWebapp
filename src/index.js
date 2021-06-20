@@ -8,6 +8,7 @@ require('./modules/equipment');
 require('./modules/unit-selector');
 require('./pages/box');
 require('./pages/memberlist');
+require('./pages/hit-log');
 
 import './styles/main.scss';
 import $ from 'jquery';
@@ -19,6 +20,7 @@ require("select2/dist/css/select2.css");
 require("select2-theme-bootstrap4/dist/select2-bootstrap.css");
 require("datatables.net-bs4/css/dataTables.bootstrap4.css");
 require("datatables.net-bs4/js/dataTables.bootstrap4");
+require("datatables.net-rowreorder-bs4/css/rowReorder.bootstrap4.css");
 require("flatpickr/dist/flatpickr.css");
 
 const flatpickr = require("flatpickr").default;

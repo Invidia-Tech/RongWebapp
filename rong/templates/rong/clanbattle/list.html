@@ -67,7 +67,7 @@
                             dealt, {{ clan.current_cb.bosses_killed_today }} bosses killed
                         </p>
                     <div class="elevated-button-holder">
-                        <a href="#" class="btn btn-primary">Hit Log</a>
+                        <a href="{% url 'rong:cb_list_hits' clan.current_cb.slug %}" class="btn btn-primary">Hit Log</a>
                     </div>
                     </div>
                     {% if in_clan %}

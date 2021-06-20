@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'bootstrap4',
     'webpack_loader',
     'django.contrib.humanize',
+    'django_extensions',
 ]
 
 WEBPACK_LOADER = {

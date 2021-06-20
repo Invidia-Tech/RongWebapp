@@ -1,0 +1,73 @@
+{% extends 'rong/layout.html' %}
+{% load clan_battle %}
+{% load humanize %}
+
+{% load static %}
+{% load bootstrap4 %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block title %}{{ battle.name }} - {{ battle.clan.name }}{% endblock %}
+
+{% block content %}
+    <div class="row header mb-3">
+        <div class="col-md-6"><h2>{{ battle.name }} Hit Log</h2></div>
+        <div class="col-md-6 text-right">
+            {% can_manage request.user battle as manageable %}
+            {% if manageable %}
+                <a href="#" class="btn btn-primary">Add Hit</a>
+            {% endif %}
+            <a href="{% url 'rong:cb_view' battle.slug %}" class="btn btn-primary">Dashboard</a>
+        </div>
+    </div>
+    <table class="table w-100 cells-middle" id="hitLogTable">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Hit #</th>
+            <th>Day</th>
+            <th>User</th>
+            <th>Team</th>
+            <th>Damage</th>
+            <th>Lap</th>
+            <th>Boss</th>
+            <th>Remaining HP</th>
+            <th>Attempts</th>
+            <th>Hit Type</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for hit in hits %}
+            <tr data-id="{{ hit.id }}">
+                <td><span class="grippy"></span></td>
+                <td>{{ hit.order }}</td>
+                <td>{{ hit.day }}</td>
+                <td>{{ hit.user.discordname }}</td>
+                <td class="text-center">{% if hit.team %}{% else %}<i>N/A</i>{% endif %}</td>
+                <td data-sort="{{ hit.damage }}">
+                    {% if hit.damage == hit.actual_damage %}
+                        {{ hit.damage|intcomma }}
+                    {% else %}
+                        {{ hit.damage|intcomma }} ({{ hit.actual_damage|intcomma }})
+                    {% endif %}
+                </td>
+                <td>{{ hit.boss_lap }}</td>
+                <td data-sort="{{ hit.boss_number }}"><img
+                        src="{% static 'rong/images/enemies/' %}{% boss_icon battle hit %}.png"
+                        alt="{% boss_name battle hit %}" title="{% boss_name battle hit %}"/></td>
+                <td>{{ hit.boss_hp_left|intcomma }}</td>
+                <td data-sort="{{ hit.attempt_count }}">{{ hit.attempt_count }}/{{ hits_per_day }}</td>
+                <td>{{ hit.hit_type.value }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <form role="form" method="post" id="reorderForm">
+    {% csrf_token %}
+    <input type="hidden" name="reorderData" id="reorderData" value="" />
+    </form>
+{% endblock %}
