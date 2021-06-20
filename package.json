@@ -32,6 +32,7 @@
     "css-loader": "^5.2.6",
     "datatables.net": "^1.10.25",
     "datatables.net-bs4": "^1.10.25",
+    "flatpickr": "^4.6.9",
     "ignore-loader": "^0.1.2",
     "jquery": "^3.6.0",
     "jquery-mask-plugin": "^1.14.16",

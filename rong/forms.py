@@ -61,8 +61,8 @@ class EditBoxUnitForm(forms.ModelForm):
         fields = ['level', 'star', 'rank', 'equip1', 'equip2', 'equip3', 'equip4', 'equip5', 'equip6']
 
 
-def get_cb_data_source_choices():
-    output = []
+def get_cb_data_source_choices(blank_str='--Choose--'):
+    output = [('', blank_str)]
     for source in CB_DATA_SOURCES:
         out_choice = [source["name"], []]
         for cb_period in source["periodModel"].objects.all().order_by('id'):
@@ -76,22 +76,77 @@ def get_cb_data_source_choices():
 
 
 class AddClanBattleForm(forms.ModelForm):
+    data_source = forms.ChoiceField(choices=get_cb_data_source_choices, required=True)
+
+    field_order = ['name', 'start_time', 'end_time', 'data_source', 'boss1_name', 'boss2_name', 'boss3_name',
+                   'boss4_name', 'boss5_name']
+
     class Meta:
         model = ClanBattle
-        fields = ['name', 'start_time', 'end_time']
+        fields = ['name', 'start_time', 'end_time', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
+                  'boss5_name']
+        widgets = {
+            'start_time': forms.DateTimeInput(format='%Y-%m-%d %H:%M:%S', attrs={'class':'datetimefield'}),
+            'end_time': forms.DateTimeInput(format='%Y-%m-%d %H:%M:%S', attrs={'class':'datetimefield'})
+        }
+        labels = {
+            'start_time': 'Start Date/Time (UTC)',
+            'end_time': 'End Date/Time (UTC)',
+            'boss1_name': 'Boss 1 Name',
+            'boss2_name': 'Boss 2 Name',
+            'boss3_name': 'Boss 3 Name',
+            'boss4_name': 'Boss 4 Name',
+            'boss5_name': 'Boss 5 Name',
+        }
+        help_texts = {
+            'boss1_name': 'Leave blank to load from boss data',
+            'boss2_name': 'Leave blank to load from boss data',
+            'boss3_name': 'Leave blank to load from boss data',
+            'boss4_name': 'Leave blank to load from boss data',
+            'boss5_name': 'Leave blank to load from boss data',
+        }
+
+
+class EditClanBattleForm(forms.ModelForm):
+    data_source = forms.ChoiceField(choices=get_cb_data_source_choices('Keep Current'), required=False, help_text='Optional. Current data will be kept if not selected.')
+
+    field_order = ['name', 'start_time', 'end_time', 'data_source', 'boss1_name', 'boss2_name', 'boss3_name',
+                   'boss4_name', 'boss5_name']
+
+    class Meta:
+        model = ClanBattle
+        fields = ['name', 'start_time', 'end_time', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
+                  'boss5_name']
+        widgets = {
+            'start_time': forms.DateTimeInput(format='%Y-%m-%d %H:%M:%S', attrs={'class':'datetimefield'}),
+            'end_time': forms.DateTimeInput(format='%Y-%m-%d %H:%M:%S', attrs={'class':'datetimefield'})
+        }
+        labels = {
+            'start_time': 'Start Date/Time (UTC)',
+            'end_time': 'End Date/Time (UTC)',
+            'boss1_name': 'Boss 1 Name',
+            'boss2_name': 'Boss 2 Name',
+            'boss3_name': 'Boss 3 Name',
+            'boss4_name': 'Boss 4 Name',
+            'boss5_name': 'Boss 5 Name',
+        }
+        help_texts = {
+            'boss1_name': 'Empty to load from boss data',
+            'boss2_name': 'Empty to load from boss data',
+            'boss3_name': 'Empty to load from boss data',
+            'boss4_name': 'Empty to load from boss data',
+            'boss5_name': 'Empty to load from boss data',
+        }
 
 
 class EditClanMemberForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['ign'].widget.attrs.update({'placeholder': 'In Game Name'})
-        self.fields['ign'].label = 'IGN'
         self.fields['ign'].required = False
         self.fields['player_id'].widget.attrs.update({'placeholder': 'XXX XXX XXX'})
-        self.fields['player_id'].label = 'Player ID'
         self.fields['player_id'].required = False
         self.fields['group_num'].widget.attrs.update({'placeholder': ''})
-        self.fields['group_num'].label = 'Group #'
         self.fields['group_num'].required = False
 
     class Meta:
@@ -99,6 +154,11 @@ class EditClanMemberForm(forms.ModelForm):
         fields = ['ign', 'player_id', 'group_num']
         widgets = {
             'player_id': forms.TextInput()
+        }
+        labels = {
+            'ign': 'IGN',
+            'player_id': 'Player ID',
+            'group_num': 'Group #'
         }
 
 
@@ -108,4 +168,9 @@ class FullEditClanMemberForm(EditClanMemberForm):
         fields = ['ign', 'player_id', 'group_num', 'is_lead']
         widgets = {
             'player_id': forms.TextInput()
+        }
+        labels = {
+            'ign': 'IGN',
+            'player_id': 'Player ID',
+            'group_num': 'Group #'
         }

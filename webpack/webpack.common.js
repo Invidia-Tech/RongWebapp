@@ -1,5 +1,6 @@
 const Path = require('path');
 const BundleTracker = require('webpack-bundle-tracker');
+const webpack = require('webpack');
 
 
 module.exports = {
@@ -33,7 +34,7 @@ module.exports = {
         moduleIds: 'deterministic',
     },
     plugins: [
-        new BundleTracker({filename: './webpack-stats.json'}),
+        new BundleTracker({filename: './webpack-stats.json'})
     ],
     resolve: {
         alias: {

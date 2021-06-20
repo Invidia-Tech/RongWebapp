@@ -1,0 +1,32 @@
+{% load static %}
+<table class="table w-100">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Bosses</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for battle in battles %}
+        <tr>
+            <td>{{ battle.name }}</td>
+            <td>{{ battle.start_time }}</td>
+            <td>{{ battle.end_time }}</td>
+            <td>
+                <div class="row">
+                    {% for boss in battle.boss_list %}
+                        <div class="col-md-2">
+                            <img src="{% static 'rong/images/enemies/' %}{{ boss.icon }}.png"/><br />
+                            {{ boss.name }}
+                        </div>
+                    {% endfor %}
+                </div>
+            </td>
+            <td><a class="btn btn-primary" href="{% url 'rong:clan_edit_battle' clan.slug battle.id %}">Edit</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

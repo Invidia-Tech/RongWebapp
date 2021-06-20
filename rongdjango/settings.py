@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rong.apps.RongConfig',
     'bootstrap4',
-    'webpack_loader'
+    'webpack_loader',
 ]
 
 WEBPACK_LOADER = {
@@ -50,8 +50,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'rong.middleware.AuthenticationMiddleware',
-    'rong.middleware.WebPMiddleware'
+    'rong.middleware.AuthenticationMiddleware'
 ]
 
 ROOT_URLCONF = 'rongdjango.urls'
@@ -67,7 +66,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
                 'rong.context_processors.auth',
-                'rong.context_processors.webp',
             ],
         },
     },

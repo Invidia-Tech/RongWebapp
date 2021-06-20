@@ -181,3 +181,9 @@ class ClanBattle(models.Model):
     def in_progress(self):
         now = timezone.now()
         return self.start_time <= now and self.end_time > now
+
+    def boss_list(self):
+        boss_l = []
+        for num in range(1,6):
+            boss_l.append({"icon": getattr(self, 'boss%d_iconid' % num), "name": getattr(self, 'boss%d_name' % num)})
+        return boss_l

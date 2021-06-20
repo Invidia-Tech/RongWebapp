@@ -1,11 +1,12 @@
 from functools import wraps
 
+from django.contrib import messages
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 
-from rong.forms import EditClanMemberForm, FullEditClanMemberForm
-from rong.models import Clan
+from rong.forms import EditClanMemberForm, FullEditClanMemberForm, AddClanBattleForm, EditClanBattleForm
+from rong.models import Clan, ClanBattle
 
 
 def clan_lead_required(func):
@@ -17,6 +18,53 @@ def clan_lead_required(func):
         raise PermissionDenied()
 
     return _wrapped_view
+
+@clan_lead_required
+def edit_battle(request, clan, battle_id):
+    battle = get_object_or_404(clan.clanbattle_set, pk=battle_id)
+    if request.method == 'POST':
+        form = EditClanBattleForm(request.POST, instance=battle)
+        if form.is_valid():
+            form.save()
+            if "data_source" in form.data and form.data["data_source"]:
+                battle.load_boss_info(form.data["data_source"])
+                battle.recalculate()
+            messages.add_message(request, messages.SUCCESS, "Clan Battle successfully edited.")
+            return redirect('rong:clan_list_battles', clan.slug)
+    else:
+        form = EditClanBattleForm(instance=battle)
+    ctx = {
+        'form': form,
+        'clan': clan
+    }
+    return render(request, 'rong/manageclan/edit_battle.html', ctx)
+
+
+@clan_lead_required
+def add_battle(request, clan):
+    if request.method == 'POST':
+        cb = ClanBattle(clan=clan)
+        form = AddClanBattleForm(request.POST, instance=cb)
+        if form.is_valid():
+            form.save()
+            cb.load_boss_info(form.data["data_source"])
+            cb.save()
+            messages.add_message(request, messages.SUCCESS, "Clan Battle successfully added.")
+            return redirect('rong:clan_list_battles', clan.slug)
+    else:
+        form = AddClanBattleForm()
+    ctx = {
+        'form': form,
+        'clan': clan
+    }
+    return render(request, 'rong/manageclan/add_battle.html', ctx)
+
+@clan_lead_required
+def list_battles(request, clan):
+    ctx = {
+        "clan": clan,
+    }
+    return render(request, 'rong/manageclan/battles.html', ctx)
 
 
 def member_form(request, clan):

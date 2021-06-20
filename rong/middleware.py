@@ -1,8 +1,8 @@
 from django.utils.deprecation import MiddlewareMixin
-from .discord import make_session
 from django.utils.functional import SimpleLazyObject
+
 from .models import User, AnonymousUser
-from .helpers.webp import supports_webp
+
 
 def get_user(request):
     if not hasattr(request, '_cached_user'):
@@ -13,6 +13,7 @@ def get_user(request):
 
     return request._cached_user
 
+
 class AuthenticationMiddleware(MiddlewareMixin):
     def process_request(self, request):
         assert hasattr(request, 'session'), (
@@ -22,7 +23,3 @@ class AuthenticationMiddleware(MiddlewareMixin):
             "'rong.middleware.AuthenticationMiddleware'."
         )
         request.user = SimpleLazyObject(lambda: get_user(request))
-
-class WebPMiddleware(MiddlewareMixin):
-    def process_request(self, request):
-        request.supports_webp = SimpleLazyObject(lambda: supports_webp(request))

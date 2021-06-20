@@ -1,0 +1,36 @@
+{% extends 'rong/layout.html' %}
+{% load rong_common %}
+{% load unit_icons %}
+
+{% load static %}
+{% load bootstrap4 %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block title %}{{ clan.name }} - Manage Clan Battles{% endblock %}
+
+{% block content %}
+    <div class="row header mb-3">
+        <div class="col-md-6"><h2>{{ clan.name }} &gt; Clan Battles</h2></div>
+        <div class="col-md-6 text-right"><a class="btn btn-primary" href="{% url 'rong:clan_add_battle' clan.slug %}">Add CB</a></div>
+    </div>
+    {% if not clan.current_cb and not clan.past_cbs %}
+        <p><i>This clan has no Clan Battles defined!</i></p>
+    {% endif %}
+    {% if clan.current_cb %}
+        <h3>{% if clan.current_cb.in_progress %}Current{% else %}Upcoming{% endif %} Clan Battle</h3>
+        {% include "./battles_table.html" with battles=clan.current_cb|listize %}
+    {% endif %}
+    {% if clan.future_cbs %}
+        <h3>Future Clan Battles</h3>
+        {% include "./battles_table.html" with battles=clan.future_cbs %}
+    {% endif %}
+    {% if clan.past_cbs %}
+        <h3>Past Clan Battles</h3>
+        {% include "./battles_table.html" with battles=clan.past_cbs %}
+    {% endif %}
+{% endblock %}

@@ -7,7 +7,7 @@ const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
     mode: 'development',
-    devtool: 'eval-cheap-source-map',
+    devtool: false,
     output: {
         chunkFilename: 'js/[name].chunk.js',
     },

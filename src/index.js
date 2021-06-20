@@ -19,6 +19,9 @@ require("select2/dist/css/select2.css");
 require("select2-theme-bootstrap4/dist/select2-bootstrap.css");
 require("datatables.net-bs4/css/dataTables.bootstrap4.css");
 require("datatables.net-bs4/js/dataTables.bootstrap4");
+require("flatpickr/dist/flatpickr.css");
+
+const flatpickr = require("flatpickr").default;
 
 $(document).ready(function () {
     $(".dt").each(function () {
@@ -29,4 +32,11 @@ $(document).ready(function () {
         }
         $t.DataTable(opt);
     });
+    flatpickr(".datetimefield", {
+        enableTime: true,
+        enableSeconds: true,
+        dateFormat: "Y-m-d H:i:S",
+    });
 });
+
+

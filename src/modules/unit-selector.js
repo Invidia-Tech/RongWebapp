@@ -91,7 +91,7 @@ function matchCustom(params, data) {
 // ctl is the element, options is the set of defaults + user options
 $.UnitSelector = function (ctl, options) {
     $(ctl).select2({
-        theme: 'bootstrap4',
+        theme: 'bootstrap',
         templateSelection: formatState,
         templateResult: formatState,
         matcher: matchCustom,
