@@ -45,8 +45,15 @@ def edit_member(request, clan, member_id):
 @clan_lead_required
 def list_members(request, clan):
     clan.sync_members()
+    boxes = {}
+    for member in clan.members.prefetch_related('box'):
+        if member.box is not None and member.box.boxunit_set.count() > 0:
+            boxes[member.id] = member.box.meta_json()
+        else:
+            boxes[member.id] = None
     ctx = {
         "clan": clan,
-        "form": member_form(request, clan)()
+        "form": member_form(request, clan)(),
+        "boxes": boxes
     }
     return render(request, 'rong/manageclan/members.html', ctx)

@@ -1,11 +1,22 @@
 import $ from 'jquery';
-import {formatDiscordName, formatPlayerId, hide_loading, make_alert, show_loading} from '../modules/common';
+import {
+    formatDiscordName,
+    formatPlayerId,
+    hide_loading,
+    icon_id,
+    make_alert,
+    rank_color,
+    show_loading
+} from '../modules/common';
 import 'jquery-validation';
 import 'jquery-mask-plugin';
+import {boxUnitModal} from "../modules/box-unit-modal";
+require("datatables.net-bs4/js/dataTables.bootstrap4");
 
 $(document).ready(function () {
     if ($('.page__clan_list_members').length) {
         let $api = $('.api');
+        let boxes = JSON.parse(document.getElementById('boxData').textContent);
 
         function saveMemberDetails(id) {
             $('#editMemberForm').validate();
@@ -66,6 +77,48 @@ $(document).ready(function () {
 
         $('button.edit-member').click(function () {
             editMemberDetails($(this).closest('tr').attr('data-id'));
-        })
+        });
+
+        $('button.show-member-box').click(function() {
+            let t = $('#memberListTable').DataTable();
+            let btn = $(this);
+            let tr = btn.closest('tr');
+            let row = t.row(tr);
+            let id = tr.attr("data-id");
+            if(row.child.isShown()) {
+                $('div.slidable', row.child()).slideUp(function() {
+                    row.child.hide();
+                    btn.text("Show");
+                });
+            }
+            else {
+                if(boxes[id]) {
+                    let box_units_el = $("<div></div>");
+                    let box_data = boxes[id].units;
+                    for (const uid in box_data) {
+                        const unit = box_data[uid];
+                        let unit_el = $("<div class='unit-icon clickable'></div>").addClass('u-' + icon_id(unit.unit.id, unit.star));
+                        unit_el.attr("data-mid", id);
+                        unit_el.attr("data-uid", uid);
+                        unit_el.append($("<i class='unit-icon-border'></i>").addClass(rank_color(unit.rank)));
+                        if (unit.star) {
+                            unit_el.append($('<div class="unit-icon-stars"></div>').addClass('s-' + unit.star));
+                        }
+                        box_units_el.append(unit_el);
+                    }
+                    row.child("<div class='slidable'>"+box_units_el.html()+"</div>").show();
+                    $('div.slidable', row.child()).slideDown();
+                    btn.text("Hide");
+                    $("#memberListTable .unit-icon.clickable").off("click");
+                    $("#memberListTable .unit-icon.clickable").click(function() {
+                        const unit = boxes[$(this).attr("data-mid")].units[$(this).attr("data-uid")];
+                        boxUnitModal(unit, {
+                            editable: false,
+                            titleText: "View Unit - <span class='unit-name'></span>",
+                        });
+                    })
+                }
+            }
+        });
     }
 });

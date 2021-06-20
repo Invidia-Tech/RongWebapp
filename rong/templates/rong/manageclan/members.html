@@ -1,4 +1,5 @@
 {% extends 'rong/layout.html' %}
+{% load rong_common %}
 {% load unit_icons %}
 
 {% load static %}
@@ -14,7 +15,8 @@
 
 {% block content %}
     <h2>{{ clan.name }} &gt; Members</h2>
-    <table class="table dt w-100 dt-noPaging">
+    {{ boxes|json_script:"boxData" }}
+    <table class="table dt w-100 dt-noPaging" id="memberListTable">
         <thead>
         <tr>
             <th>Member</th>
@@ -44,7 +46,13 @@
                     {% endif %}
                 </td>
                 <td class="member-group">{{ member.group_num }}</td>
-                <td>{{ member.box.id }}</td>
+                <td>
+                    {% if boxes|get_key:member.id is not None %}
+                        <button type="button" class="btn btn-primary show-member-box">Show</button>
+                    {% else %}
+                        No Data
+                    {% endif %}
+                </td>
                 <td><button type="button" class="btn btn-primary edit-member">Edit Details</button></td>
             </tr>
         {% endfor %}
@@ -64,8 +72,8 @@
                 <div class="modal-body">
                     <form id="editMemberForm">
                         {% csrf_token %}
-                        <div class="form-group row">
-                            <div class="col-md-3 col-form-label">Member:</div>
+                        <div class="row mb-3">
+                            <div class="col-md-3">Member:</div>
                             <div class="col-md-9" id="editMemberName"><b class="name"></b><span class="discriminator"></span></div>
                         </div>
                         {% bootstrap_field form.ign layout='horizontal' %}
@@ -84,4 +92,5 @@
     </div>
 
     <div class="d-none api" data-api-url="{{ request.path }}"></div>
+    {% include "rong/includes/box_unit_modal.html" %}
 {% endblock %}
