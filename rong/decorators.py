@@ -49,7 +49,11 @@ def clan_lead_view(func):
         clan = get_object_or_404(Clan, slug=clan)
         if request.user.is_authenticated and request.user.can_manage(clan):
             return func(request, clan, *args, **kwargs)
-        raise PermissionDenied()
+        elif request.user.is_authenticated:
+            raise PermissionDenied()
+        else:
+            path = request.build_absolute_uri()
+            return redirect(reverse('rong:discordlogin') + '?' + urllib.parse.urlencode({'next': path}))
 
     return _wrapped_view
 
@@ -60,7 +64,11 @@ def clan_view(func):
         clan = get_object_or_404(Clan, slug=clan)
         if request.user.is_authenticated and request.user.can_view(clan):
             return func(request, clan, *args, **kwargs)
-        raise PermissionDenied()
+        elif request.user.is_authenticated:
+            raise PermissionDenied()
+        else:
+            path = request.build_absolute_uri()
+            return redirect(reverse('rong:discordlogin') + '?' + urllib.parse.urlencode({'next': path}))
 
     return _wrapped_view
 
@@ -68,9 +76,13 @@ def clan_view(func):
 def clanbattle_view(func):
     @wraps(func)
     def _wrapped_view(request, battle, *args, **kwargs):
-        battle = get_object_or_404(ClanBattle, slug=battle)
+        battle = get_object_or_404(ClanBattle.objects.select_related('clan'), slug=battle)
         if request.user.is_authenticated and request.user.can_view(battle):
             return func(request, battle, *args, **kwargs)
-        raise PermissionDenied()
+        elif request.user.is_authenticated:
+            raise PermissionDenied()
+        else:
+            path = request.build_absolute_uri()
+            return redirect(reverse('rong:discordlogin') + '?' + urllib.parse.urlencode({'next': path}))
 
     return _wrapped_view

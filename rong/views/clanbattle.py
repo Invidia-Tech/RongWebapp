@@ -30,7 +30,7 @@ def hit_log(request, battle: ClanBattle):
             messages.add_message(request, messages.SUCCESS, "Hits successfully reordered.")
         except Exception:
             raise SuspiciousOperation()
-    hits = list(battle.hits.prefetch_related('user', 'team').order_by('order'))
+    hits = list(battle.hits.select_related('user', 'team').order_by('order'))
     daily_attempt_counts = defaultdict(lambda: 0)
     day = None
     for hit in hits:
@@ -52,7 +52,7 @@ def view_battle(request, battle: ClanBattle):
     ctx = {
         'in_clan': request.user.in_clan(battle.clan),
         'battle': battle,
-        'hits': battle.hits.prefetch_related('user').order_by('-order')[:30],
+        'hits': battle.hits.select_related('user').order_by('-order')[:30],
         'myhits': battle.hits.filter(user=request.user).order_by('-order')[:30],
     }
     return render(request, 'rong/clanbattle/view.html', ctx)
