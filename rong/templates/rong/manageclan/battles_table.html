@@ -1,3 +1,4 @@
+{% load unit_icons %}
 {% load static %}
 {% load humanize %}
 <table class="table w-100">
@@ -20,7 +21,7 @@
                 <div class="row">
                     {% for boss in battle.boss_list %}
                         <div class="col-boss">
-                            <img src="{% static 'rong/images/enemies/' %}{{ boss.icon }}.png"/><br />
+                            {% enemy_icon boss.icon alt=boss.name %}<br />
                             {{ boss.name }}
                         </div>
                     {% endfor %}

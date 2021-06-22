@@ -83,7 +83,7 @@ def alter_box(request: HttpRequest, box_id):
         return JsonResponse({"success": True})
     elif request.method == 'GET':
         form = BoxForm(request.user, instance=box)
-        return JsonResponse({"name": box.name, "clan": box.clanmember.id if hasattr(box, 'clanmember') else None, "clan_options": [(cm.id, str(cm)) for cm in form.fields["clan"].queryset]})
+        return JsonResponse({"name": box.name, "clan": box.clanmember.id if hasattr(box, 'clanmember') else None, "clan_options": [(cm.id, cm.clan.name) for cm in form.fields["clan"].queryset]})
     else:
         raise SuspiciousOperation()
 
@@ -106,7 +106,7 @@ def create_box(request: HttpRequest):
             return JsonResponse({"success": False, "error": "Invalid box"})
     elif request.method == 'GET':
         form = BoxForm(request.user)
-        return JsonResponse({"clan_options": [(cm.id, str(cm)) for cm in form.fields["clan"].queryset]})
+        return JsonResponse({"clan_options": [(cm.id, cm.clan.name) for cm in form.fields["clan"].queryset]})
     else:
         raise SuspiciousOperation()
 

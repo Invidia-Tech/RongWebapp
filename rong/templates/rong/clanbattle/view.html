@@ -1,4 +1,5 @@
 {% extends 'rong/layout.html' %}
+{% load unit_icons %}
 {% load clan_battle %}
 {% load humanize %}
 
@@ -19,7 +20,7 @@
         <div class="jumbotron text-center position-relative">
             <div class="row align-items-center">
                 <div class="col-md-4 text-center">
-                    <img src="{% static 'rong/images/enemies/' %}{{ battle.current_boss_icon }}.png"/>
+                    {% enemy_icon battle.current_boss_icon alt=battle.current_boss_name %}
                     <p>
                         Lap {{ battle.current_lap }} {{ battle.current_boss_name }}<br>
                         {{ battle.current_hp|intcomma }} HP left<br>
@@ -56,14 +57,15 @@
                 <div class="col-md-6">
                     <div class="row header align-items-center">
                         <div class="col-md-8 text-left"><h4>Clan Hit Log</h4></div>
-                        <div class="col-md-4"><a href="{% url 'rong:cb_list_hits' battle.slug %}" class="btn btn-primary">Details</a></div>
+                        <div class="col-md-4"><a href="{% url 'rong:cb_list_hits' battle.slug %}"
+                                                 class="btn btn-primary">Details</a></div>
                     </div>
                     <div class="row">
                         <div class="col hitlog">
                             {% if hits %}
                                 {% for hit in hits %}
                                     <div class="hit">
-                                        <div class="info"><b>{{ hit.user.name }}</b> attacked
+                                        <div class="info"><b>{{ hit.displayed_username }}</b> attacked
                                             <b>{% boss_name battle hit %}</b> for
                                             <b>{{ hit.damage|intcomma }}</b> damage{% if hit.killing_blow %}
                                                 (Victory){% endif %}

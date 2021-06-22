@@ -4,12 +4,55 @@ from collections import defaultdict
 from django.contrib import messages
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
-from django.shortcuts import render
+from django.db.models import F
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 
-from rong.decorators import clan_view, clanbattle_view
-# Create your views here.
+from rong.decorators import clan_view, clanbattle_view, clanbattle_lead_view
+from rong.forms import HitForm
 from rong.models import ClanBattle
-from rong.models.clan_battle_score import ClanBattleHitType
+from rong.models.clan_battle_score import ClanBattleHitType, ClanBattleScore
+
+@clanbattle_lead_view
+def edit_hit(request, battle: ClanBattle, hit_id):
+    hit = get_object_or_404(battle.hits, pk=hit_id)
+    if request.method == 'DELETE':
+        order_val = hit.order
+        hit.delete()
+        battle.hits.filter(order__gt=order_val).update(order=F('order') - 1)
+        battle.recalculate()
+        messages.add_message(request, messages.SUCCESS, 'Hit successfully deleted.')
+        return JsonResponse({'success': True})
+    elif request.method == 'POST':
+        form = HitForm(hit, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, 'Hit successfully edited.')
+            return redirect('rong:cb_list_hits', battle.slug)
+    else:
+        form = HitForm(hit)
+    ctx = {
+        'battle': battle,
+        'form': form,
+    }
+    return render(request, 'rong/clanbattle/edit_hit.html', ctx)
+
+
+@clanbattle_lead_view
+def add_hit(request, battle: ClanBattle):
+    if request.method == 'POST':
+        form = HitForm(ClanBattleScore(clan_battle=battle), data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, 'Hit successfully added.')
+            return redirect('rong:cb_list_hits', battle.slug)
+    else:
+        form = HitForm(ClanBattleScore(clan_battle=battle))
+    ctx = {
+        'battle': battle,
+        'form': form,
+    }
+    return render(request, 'rong/clanbattle/add_hit.html', ctx)
 
 
 @clanbattle_view
@@ -22,15 +65,28 @@ def hit_log(request, battle: ClanBattle):
             reordered_hits = list(battle.hits.filter(pk__in=[int(n) for n in reorder_data.keys()]))
             assert len(reordered_hits) == len(reorder_data)
             assert set(hit.order for hit in reordered_hits) == set(int(n) for n in reorder_data.values())
-            with transaction.atomic():
-                for hit in reordered_hits:
-                    hit.order = int(reorder_data[str(hit.id)])
-                    hit.save()
-                battle.recalculate()
-            messages.add_message(request, messages.SUCCESS, "Hits successfully reordered.")
+            reordered_hits.sort(key=lambda hit: int(reorder_data[str(hit.id)]))
+            last_day = 0
+            day_ok = True
+            for hit in reordered_hits:
+                if hit.day < last_day:
+                    day_ok = False
+                    break
+                last_day = hit.day
+            if day_ok:
+                with transaction.atomic():
+                    for hit in reordered_hits:
+                        hit.order = int(reorder_data[str(hit.id)])
+                        hit.save()
+                    battle.recalculate()
+                messages.add_message(request, messages.SUCCESS, "Hits successfully reordered.")
+            else:
+                messages.add_message(request, messages.ERROR,
+                                     "You can't reorder hits that would mess up the day order. Please edit the hits to change the day instead.")
         except Exception:
-            raise SuspiciousOperation()
-    hits = list(battle.hits.select_related('user', 'team').order_by('order'))
+            messages.add_message(request, messages.ERROR, "Could not reorder hits.")
+    hits = list(battle.hits.select_related('user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
+                                           'team__unit5').order_by('order'))
     daily_attempt_counts = defaultdict(lambda: 0)
     day = None
     for hit in hits:

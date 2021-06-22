@@ -2,6 +2,8 @@ from enum import Enum
 
 from django.db import models
 from django.db.models import Max
+from django.utils.functional import cached_property
+from django.utils.html import format_html
 from django_enum_choices.fields import EnumChoiceField
 
 
@@ -29,6 +31,11 @@ class ClanBattleScore(models.Model):
     actual_damage = models.PositiveIntegerField()
     boss_hp_left = models.PositiveIntegerField()
     hit_type = EnumChoiceField(ClanBattleHitType, default=ClanBattleHitType.NORMAL)
+    ign = models.CharField(max_length=20, null=True)
+
+    def clear_unit_damage(self):
+        for unit in range(1, 6):
+            setattr(self, "unit%d_damage" % unit, None)
 
     def save(self, *args, **kwargs):
         # autopopulate fields for new entry
@@ -56,3 +63,10 @@ class ClanBattleScore(models.Model):
                 self.clan_battle.spawn_next_boss()
             self.clan_battle.save()
         super().save(*args, **kwargs)
+
+    @cached_property
+    def displayed_username(self):
+        if self.ign:
+            return format_html('<span title="{}">{}</span>', self.user.plaindiscordname, self.ign)
+        else:
+            return self.user.discordname

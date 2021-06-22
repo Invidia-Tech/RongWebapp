@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.db import models
 
 
@@ -9,9 +10,6 @@ class ClanMember(models.Model):
     is_lead = models.BooleanField(default=False)
     group_num = models.PositiveIntegerField(null=True)
     box = models.OneToOneField('Box', null=True, on_delete=models.SET_NULL)
-
-    def __str__(self) -> str:
-        return self.clan.name
 
     @property
     def formatted_id(self):
@@ -33,6 +31,19 @@ class ClanMember(models.Model):
             "is_owner": self.user_id == self.clan.collection.owner_id,
             "is_admin": self.user_id == self.clan.admin_id
         }
+
+    @property
+    def user_display_name(self):
+        if self.ign:
+            return "%s (%s#%04d)" % (self.ign, self.user.name, self.user.discriminator)
+        else:
+            return "%s#%04d" % (self.user.name, self.user.discriminator)
+
+    def save(self, *args, **kwargs):
+        super(ClanMember, self).save(*args, **kwargs)
+        # propogate ign change to battles
+        ClanBattleScore = apps.get_model("rong", "ClanBattleScore")
+        ClanBattleScore.objects.filter(clan_battle__clan_id=self.clan_id, user_id=self.user_id).update(ign=self.ign)
 
     class Meta:
         constraints = [

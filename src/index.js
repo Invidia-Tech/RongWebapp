@@ -22,6 +22,7 @@ require("datatables.net-bs4/css/dataTables.bootstrap4.css");
 require("datatables.net-bs4/js/dataTables.bootstrap4");
 require("datatables.net-rowreorder-bs4/css/rowReorder.bootstrap4.css");
 require("flatpickr/dist/flatpickr.css");
+require("font-awesome/css/font-awesome.css");
 
 const flatpickr = require("flatpickr").default;
 
@@ -38,6 +39,11 @@ $(document).ready(function () {
         enableTime: true,
         enableSeconds: true,
         dateFormat: "Y-m-d H:i:S",
+    });
+
+    // workaround for https://github.com/select2/select2/issues/5993
+    $(document).on("select2:open", () => {
+        document.querySelector(".select2-container--open .select2-search__field").focus();
     });
 });
 

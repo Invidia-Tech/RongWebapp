@@ -1,0 +1,30 @@
+{% extends 'rong/layout.html' %}
+{% load clan_battle %}
+{% load humanize %}
+
+{% load static %}
+{% load bootstrap4 %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block title %}{{ battle.name }} - Add Hit{% endblock %}
+
+{% block content %}
+    <div class="row header mb-3">
+        <div class="col-md-6"><h2><a href="{% url 'rong:cb_list' battle.clan.slug %}">{{ battle.clan.name }}</a> &gt; <a
+                href="{% url 'rong:cb_view' battle.slug %}">{{ battle.name }}</a> &gt; Add Hit</h2></div>
+        <div class="col-md-6 text-right">
+            <a href="{% url 'rong:cb_list_hits' battle.slug %}" class="btn btn-primary">Hit Log</a>
+            <a href="{% url 'rong:cb_view' battle.slug %}" class="btn btn-primary">Dashboard</a>
+        </div>
+    </div>
+    <form role="form" method="post">
+        {% csrf_token %}
+        {% bootstrap_form form layout='horizontal' bound_css_class='' %}
+        {% buttons submit='OK' reset="Cancel" %}{% endbuttons %}
+    </form>
+{% endblock %}

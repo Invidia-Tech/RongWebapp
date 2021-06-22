@@ -110,6 +110,10 @@ WHERE (
     def discordname(self):
         return format_html('{}<span class="discriminator">#{}</span>', self.name, '%04d' % self.discriminator)
 
+    @property
+    def plaindiscordname(self):
+        return "%s#%04d" % (self.name, self.discriminator)
+
 
 class AnonymousUser:
     is_authenticated = False
