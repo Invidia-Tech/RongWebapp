@@ -27,7 +27,6 @@ jobs:
             cd RongWebapp
             git checkout prod
             git pull
-            touch rongdjango/wsgi.py
             source venv/bin/activate
             npm ci
             npm run build
@@ -37,3 +36,4 @@ jobs:
             python manage.py update_database jp
             python manage.py migrate
             python manage.py collectstatic --no-input
+            touch rongdjango/wsgi.py
