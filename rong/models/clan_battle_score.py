@@ -18,7 +18,7 @@ class ClanBattleScore(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     day = models.PositiveIntegerField()
     damage = models.PositiveIntegerField()
-    team = models.OneToOneField('Team', null=True, on_delete=models.SET_NULL)
+    team = models.ForeignKey('Team', null=True, on_delete=models.SET_NULL)
     order = models.PositiveIntegerField()
     unit1_damage = models.PositiveIntegerField(null=True)
     unit2_damage = models.PositiveIntegerField(null=True)

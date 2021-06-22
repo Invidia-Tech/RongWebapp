@@ -65,7 +65,7 @@
                     {% if hit.damage == hit.actual_damage %}
                         {{ hit.damage|intcomma }}
                     {% else %}
-                        {{ hit.damage|intcomma }} ({{ hit.actual_damage|intcomma }})
+                        <span title="{{ hit.actual_damage|intcomma }} actual damage" class="underline-dotted">{{ hit.damage|intcomma }}</span>
                     {% endif %}
                 </td>
                 <td>{{ hit.boss_lap }}</td>

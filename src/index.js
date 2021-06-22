@@ -45,6 +45,12 @@ $(document).ready(function () {
     $(document).on("select2:open", () => {
         document.querySelector(".select2-container--open .select2-search__field").focus();
     });
+
+    $('.select2-dd').select2({
+        theme: 'bootstrap',
+        placeholder: "Select...",
+        allowClear: true
+    });
 });
 
 

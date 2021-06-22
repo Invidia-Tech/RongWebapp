@@ -219,7 +219,7 @@ class HitForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.hit = hit
         member_list = list(hit.clan_battle.clan.members.select_related('user'))
-        member_list.sort(key=lambda member: member.user_display_name)
+        member_list.sort(key=lambda member: member.user_display_name.lower())
         choices = [('', '--Select--')] + [(x.user_id, x.user_display_name) for x in member_list]
         if hit.id and hit.user_id not in [x.user_id for x in member_list]:
             if hit.ign:
@@ -227,6 +227,7 @@ class HitForm(forms.Form):
             else:
                 choices.append((hit.user_id, "%s#%04d" % (hit.user.name, hit.user.discriminator)))
         self.fields["user"].choices = choices
+        self.fields["user"].widget.attrs["class"] = "select2-dd"
         if hit.clan_battle.in_progress:
             self.fields["day"].initial = hit.clan_battle.current_day
         else:

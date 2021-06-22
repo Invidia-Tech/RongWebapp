@@ -9,6 +9,6 @@ class BattleArenaCounter(models.Model):
     upvotes = models.PositiveIntegerField()
     downvotes = models.PositiveIntegerField()
     notes = models.TextField()
-    attacker_team = models.OneToOneField('Team', on_delete=models.CASCADE, related_name='attacker_in')
-    defender_team = models.OneToOneField('Team', on_delete=models.CASCADE, related_name='defender_in')
+    attacker_team = models.ForeignKey('Team', on_delete=models.CASCADE, related_name='attacker_in')
+    defender_team = models.ForeignKey('Team', on_delete=models.CASCADE, related_name='defender_in')
     

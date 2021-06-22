@@ -6,5 +6,5 @@ class ClanBattleComp(models.Model):
     boss_phase = models.PositiveIntegerField()
     boss_number = models.PositiveIntegerField()
     damage = models.PositiveIntegerField()
-    team = models.OneToOneField('Team', default=0, on_delete=models.CASCADE)
+    team = models.ForeignKey('Team', default=0, on_delete=models.CASCADE)
     borrowed_unit = models.PositiveIntegerField(null=True)

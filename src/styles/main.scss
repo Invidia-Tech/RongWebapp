@@ -80,3 +80,8 @@ span.grippy {
 span.grippy::after {
   content: '.. .. .. ..';
 }
+
+.underline-dotted {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+}
