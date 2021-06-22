@@ -70,3 +70,7 @@ class ClanBattleScore(models.Model):
             return format_html('<span title="{}">{}</span>', self.user.plaindiscordname, self.ign)
         else:
             return self.user.discordname
+
+    @cached_property
+    def killing_blow(self):
+        return self.boss_hp_left == 0
