@@ -7,7 +7,7 @@ import 'datatables.net-rowreorder';
 page('cb_list_hits', function () {
     $("#hitLogTable .delete-button").click(function () {
         let $row = $(this).closest("tr");
-        let d = $("<span>Are you sure you want to delete <span class='name'></span>'s hit for <span class='damage'></span> damage? This cannot be undone.</span>");
+        let d = $("<div>Are you sure you want to delete <span class='name'></span>'s hit for <span class='damage'></span> damage? This cannot be undone.</div>");
         d.find(".name").html($row.attr("data-name"));
         d.find(".damage").text($row.attr("data-damage"));
         d.dialog(
