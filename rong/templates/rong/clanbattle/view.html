@@ -113,8 +113,14 @@
                 {% endif %}
             </div>
         </div>
-        <hr>
+
+    {% elif battle.ended %}
+        <p>This CB ended {{ battle.end_time|naturaltime }}.</p>
+        <a href="{% url 'rong:cb_list_hits' battle.slug %}" class="btn btn-primary">Hit Log</a>
+    {% else %}
+        <p>This CB starts in {{ battle.start_time|naturaltime }}.</p>
     {% endif %}
+    <hr>
     <h2>Boss Info</h2>
     <table class="table w-100">
         <thead>

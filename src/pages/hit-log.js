@@ -5,28 +5,6 @@ import 'datatables.net';
 import 'datatables.net-rowreorder';
 
 page('cb_list_hits', function () {
-    let table = $('#hitLogTable').DataTable({
-        columnDefs: [
-            {orderable: false, targets: [0, 4, 6, 8, 9, 11]}
-        ],
-        order: [[1, "desc"]],
-        rowReorder: {
-            selector: 'span.grippy',
-            dataSrc: 1,
-        }
-    });
-    table.on('row-reorder', function (e, diff, edit) {
-        if (diff.length > 0) {
-            let reorderData = {};
-            diff.forEach(function (change) {
-                reorderData[$(change.node).attr("data-id")] = change.newData;
-            });
-            show_loading();
-            $('#reorderData').val(JSON.stringify(reorderData));
-            $('#reorderForm').submit();
-        }
-    });
-
     $("#hitLogTable .delete-button").click(function () {
         let $row = $(this).closest("tr");
         let d = $("<span>Are you sure you want to delete <span class='name'></span>'s hit for <span class='damage'></span> damage? This cannot be undone.</span>");
@@ -63,5 +41,28 @@ page('cb_list_hits', function () {
         );
 
     });
+    let table = $('#hitLogTable').DataTable({
+        columnDefs: [
+            {orderable: false, targets: [0, 4, 6, 8, 9, 11]}
+        ],
+        order: [[1, "desc"]],
+        rowReorder: {
+            selector: 'span.grippy',
+            dataSrc: 1,
+        }
+    });
+    table.on('row-reorder', function (e, diff, edit) {
+        if (diff.length > 0) {
+            let reorderData = {};
+            diff.forEach(function (change) {
+                reorderData[$(change.node).attr("data-id")] = change.newData;
+            });
+            show_loading();
+            $('#reorderData').val(JSON.stringify(reorderData));
+            $('#reorderForm').submit();
+        }
+    });
+
+
 });
 

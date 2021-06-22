@@ -278,3 +278,8 @@ class ClanBattle(models.Model):
     def user_damage_dealt_on_day(self, user_id, day):
         return self.hits.filter(day=day, user_id=user_id).aggregate(Sum('actual_damage'))["actual_damage__sum"] or 0
 
+    @cached_property
+    def ended(self):
+        now = timezone.now()
+        return self.end_time <= now
+

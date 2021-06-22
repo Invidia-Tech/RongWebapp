@@ -86,7 +86,7 @@
             </div>
         {% else %}
             {# upcoming #}
-            <div class="jumbotron text-center">
+            <div class="jumbotron text-center position-relative">
                 <div class="row align-items-center mb-3">
                     <div class="col-md-3"></div>
                     <div class="col-md-6 text-center">
@@ -132,7 +132,7 @@
                         </div>
                     </td>
                     <td class="align-middle w-15">{{ cb.start_time|date:"Y/m/d" }}-{{ cb.end_time|date:"Y/m/d" }}</td>
-                    <td class="align-middle w-15"><a class="btn btn-primary" href="#">Dashboard</a></td>
+                    <td class="align-middle w-15"><a class="btn btn-primary" href="{% url 'rong:cb_view' cb.slug %}">Dashboard</a></td>
                 </tr>
             {% endfor %}
         </table>
@@ -153,7 +153,7 @@
                         </div>
                     </td>
                     <td class="align-middle w-15">{{ cb.start_time|date:"Y/m/d" }}-{{ cb.end_time|date:"Y/m/d" }}</td>
-                    <td class="align-middle w-15"><a class="btn btn-primary" href="#">Summary</a></td>
+                    <td class="align-middle w-15"><a class="btn btn-primary" href="{% url 'rong:cb_view' cb.slug %}">Summary</a></td>
                 </tr>
             {% endfor %}
         </table>

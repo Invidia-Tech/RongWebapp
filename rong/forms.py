@@ -318,10 +318,13 @@ class HitForm(forms.Form):
             self.hit.team = None
             self.hit.clear_unit_damage()
 
-        # get ign if available
+        # get ign if available (don't update if clanmember entry missing)
         cb = self.hit.clan_battle
         cm = cb.clan.members.filter(user_id=self.hit.user_id).first()
-        self.hit.ign = cm.ign if cm else None
+        if cm:
+            self.hit.ign = cm.ign
+        elif user_changed or not self.id:
+            self.hit.ign = None
 
         # what to do about ordering?
         if self.hit.id:
