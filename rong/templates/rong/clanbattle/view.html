@@ -125,7 +125,7 @@
     {% if battle.in_progress or battle.ended %}
         {% if manageable %}
             <h2>Hits Used</h2>
-            <table class="dt w-100 table">
+            <table class="dt w-100 table" id="hitsUsedTable">
             <tr>
                 <th>Player</th>
                 {% for day in battle.day_range %}
@@ -136,7 +136,7 @@
                 <tr>
                 <td>{{ player.member.user_display_name }}</td>
                 {% for hits_day in player.hits %}
-                    <td>{{ hits_day }}</td>
+                    <td data-hits="{ hits_day|format_hits }}">{{ hits_day|format_hits }}</td>
                 {% endfor %}
                 </tr>
             {% endfor %}

@@ -28,3 +28,28 @@
 #hitLogTable {
   font-size: 80%;
 }
+
+#hitsUsedTable {
+  font-size: 80%;
+  td[data-hits="0"] {
+    background-color: red;
+  }
+  td[data-hits="0.5"] {
+    background-color: orangered;
+  }
+  td[data-hits="1"] {
+    background-color: darkorange;
+  }
+  td[data-hits="1.5"] {
+    background-color: orange;
+  }
+  td[data-hits="2"] {
+    background-color: yellow;
+  }
+  td[data-hits="2.5"] {
+    background-color: greenyellow;
+  }
+  td[data-hits="3"] {
+    background-color: forestgreen;
+  }
+}

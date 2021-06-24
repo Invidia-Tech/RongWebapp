@@ -75,7 +75,7 @@
                     {% enemy_icon hit_bicon alt=hit_bname mini=True %}
                 </td>
                 <td>{{ hit.boss_hp_left|intcomma }}</td>
-                <td data-sort="{{ hit.attempt_count }}">{{ hit.attempt_count }}/{{ hits_per_day }}</td>
+                <td data-sort="{{ hit.attempt_count }}">{{ hit.attempt_count|format_hits }}/{{ hits_per_day }}</td>
                 <td>{{ hit.hit_type.value }}</td>
                 {% if manageable %}
                     <td>

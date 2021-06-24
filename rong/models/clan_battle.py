@@ -287,7 +287,7 @@ class ClanBattle(models.Model):
     @cached_property
     def hits_used(self):
         members = list(self.clan.members.all())
-        members.sort(key=lambda x: x.user_display_name)
+        members.sort(key=lambda x: x.user_display_name.lower())
         hit_matrix = OrderedDict()
         for member in members:
             hit_matrix[member.user_id] = {"member": member, "hits": [0] * self.total_days}
@@ -299,10 +299,10 @@ class ClanBattle(models.Model):
             GROUP BY user_id, day, ign
             """, [self.id])
             for row in cur.fetchall():
-                if row['user_id'] not in hit_matrix:
-                    hit_matrix[row['user_id']] = {"member": {"user_display_name": row['ign']},
+                if row[0] not in hit_matrix:
+                    hit_matrix[0] = {"member": {"user_display_name": row[2]},
                                                   "hits": [0] * self.total_days}
-                hit_matrix[row['user_id']]['hits'][row['day'] - 1] = row['num_hits']
+                hit_matrix[row[0]]['hits'][row[1] - 1] = row[3]
         hit_matrix = hit_matrix.values()
         return hit_matrix
 
