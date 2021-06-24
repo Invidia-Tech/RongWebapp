@@ -16,6 +16,7 @@
 
 {% block content %}
     <div class="w-100 text-center mb-3"><h2 class="display-2">{{ battle.name }}</h2></div>
+    {% can_manage request.user battle as manageable %}
     {% if battle.in_progress %}
         <div class="jumbotron text-center position-relative">
             <div class="row align-items-center">
@@ -121,6 +122,28 @@
         <p>This CB starts in {{ battle.start_time|naturaltime }}.</p>
     {% endif %}
     <hr>
+    {% if battle.in_progress or battle.ended %}
+        {% if manageable %}
+            <h2>Hits Used</h2>
+            <table class="dt w-100 table">
+            <tr>
+                <th>Player</th>
+                {% for day in battle.day_range %}
+                    <th>Day {{ day }}</th>
+                {% endfor %}
+            </tr>
+            {% for player in battle.hits_used %}
+                <tr>
+                <td>{{ player.member.user_display_name }}</td>
+                {% for hits_day in player.hits %}
+                    <td>{{ hits_day }}</td>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+            </table>
+            <hr>
+        {% endif %}
+    {% endif %}
     <h2>Boss Info</h2>
     <table class="table w-100">
         <thead>

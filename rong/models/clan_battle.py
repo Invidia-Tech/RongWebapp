@@ -1,5 +1,6 @@
 import datetime
 import math
+from collections import OrderedDict
 
 from django.db import models, connection
 from django.db.models import Sum
@@ -283,3 +284,28 @@ class ClanBattle(models.Model):
         now = timezone.now()
         return self.end_time <= now
 
+    @cached_property
+    def hits_used(self):
+        members = list(self.clan.members.all())
+        members.sort(key=lambda x: x.user_display_name)
+        hit_matrix = OrderedDict()
+        for member in members:
+            hit_matrix[member.user_id] = {"member": member, "hits": [0] * self.total_days}
+        with connection.cursor() as cur:
+            cur.execute("""
+            SELECT user_id, day, ign, SUM(CASE WHEN hit_type='Normal' THEN 1 ELSE 0.5 END) AS num_hits
+            FROM rong_clanbattlescore
+            WHERE clan_battle_id=%s
+            GROUP BY user_id, day, ign
+            """, [self.id])
+            for row in cur.fetchall():
+                if row['user_id'] not in hit_matrix:
+                    hit_matrix[row['user_id']] = {"member": {"user_display_name": row['ign']},
+                                                  "hits": [0] * self.total_days}
+                hit_matrix[row['user_id']]['hits'][row['day'] - 1] = row['num_hits']
+        hit_matrix = hit_matrix.values()
+        return hit_matrix
+
+    @cached_property
+    def day_range(self):
+        return range(1, self.total_days + 1)
