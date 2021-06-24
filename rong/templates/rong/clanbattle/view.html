@@ -125,7 +125,7 @@
     {% if battle.in_progress or battle.ended %}
         {% if manageable %}
             <h2>Hits Used</h2>
-            <table class="dt w-100 table" id="hitsUsedTable">
+            <table class="dt w-100 table dt-noPaging" id="hitsUsedTable">
             <thead>
             <tr>
                 <th>Player</th>
@@ -139,7 +139,12 @@
                 <tr>
                 <td>{{ player.member.user_display_name }}</td>
                 {% for hits_day in player.hits %}
+                    {% day_reached battle forloop.counter as active %}
+                    {% if active %}
                     <td data-hits="{{ hits_day|format_hits }}">{{ hits_day|format_hits }}</td>
+                    {% else %}
+                    <td>0</td>
+                    {% endif %}
                 {% endfor %}
                 </tr>
             {% endfor %}

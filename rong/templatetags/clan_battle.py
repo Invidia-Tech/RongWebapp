@@ -51,6 +51,11 @@ def can_manage(user, entity):
     return user.can_manage(entity)
 
 
+@register.simple_tag
+def day_reached(battle, day):
+    return day <= battle.current_day
+
+
 @register.filter
 def format_hits(hits):
     if float(int(hits)) == float(hits):
