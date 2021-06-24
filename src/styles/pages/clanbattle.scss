@@ -31,6 +31,9 @@
 
 #hitsUsedTable {
   font-size: 80%;
+  td {
+    padding: 0.1rem 0.75rem;
+  }
   td[data-hits="0"] {
     background-color: red;
   }
@@ -50,6 +53,6 @@
     background-color: greenyellow;
   }
   td[data-hits="3"] {
-    background-color: forestgreen;
+    background-color: limegreen;
   }
 }
