@@ -285,27 +285,60 @@ class ClanBattle(models.Model):
         return self.end_time <= now
 
     @cached_property
-    def hits_used(self):
-        members = list(self.clan.members.all())
-        members.sort(key=lambda x: x.user_display_name.lower())
-        hit_matrix = OrderedDict()
-        for member in members:
-            hit_matrix[member.user_id] = {"member": member, "hits": [0] * self.total_days}
-        with connection.cursor() as cur:
-            cur.execute("""
-            SELECT user_id, day, ign, SUM(CASE WHEN hit_type='Normal' THEN 1 ELSE 0.5 END) AS num_hits
-            FROM rong_clanbattlescore
-            WHERE clan_battle_id=%s
-            GROUP BY user_id, day, ign
-            """, [self.id])
-            for row in cur.fetchall():
-                if row[0] not in hit_matrix:
-                    hit_matrix[0] = {"member": {"user_display_name": row[2]},
-                                                  "hits": [0] * self.total_days}
-                hit_matrix[row[0]]['hits'][row[1] - 1] = row[3]
-        hit_matrix = hit_matrix.values()
-        return hit_matrix
-
-    @cached_property
     def day_range(self):
         return range(1, self.total_days + 1)
+
+    def initial_matrix_row(self, member):
+        return {
+            "member": member,
+            "total_damage": 0,
+            "total_score": 0,
+            "days": [{
+                "hits": 0,
+                "damage": 0,
+                "score": 0,
+                "hit_damage": [0 for n in range(ClanBattle.HITS_PER_DAY)],
+                "hit_score": [0 for n in range(ClanBattle.HITS_PER_DAY)],
+            } for n in range(self.total_days)],
+        }
+
+    @cached_property
+    def hit_stats(self):
+        members = list(self.clan.members.select_related('user'))
+        boss_data = list(self.bosses.order_by('difficulty').all())
+        difficulty_idx = 0
+        members.sort(key=lambda x: x.user_display_name.lower())
+        hit_matrix = OrderedDict()
+        curr_boss_info = boss_data[0].boss_list()
+        for member in members:
+            hit_matrix[member.user_id] = self.initial_matrix_row(member)
+        with connection.cursor() as cur:
+            cur.execute("""
+            SELECT user_id, day, ign, hit_type, actual_damage, boss_lap, boss_number
+            FROM rong_clanbattlescore
+            WHERE clan_battle_id=%s
+            ORDER BY "order" ASC
+            """, [self.id])
+            for row in cur.fetchall():
+                if boss_data[difficulty_idx].lap_to is not None and row[5] > boss_data[difficulty_idx].lap_to:
+                    difficulty_idx += 1
+                    curr_boss_info = boss_data[difficulty_idx].boss_list()
+                if row[0] not in hit_matrix:
+                    hit_matrix[row[0]] = self.initial_matrix_row({
+                        "user_display_name": row[2]
+                    })
+                entry = hit_matrix[row[0]]
+                day_idx = row[1] - 1
+                score = round(row[4] * curr_boss_info[row[6] - 1]["multiplier"])
+                entry['total_damage'] += row[4]
+                entry['total_score'] += score
+                entry['days'][day_idx]['damage'] += row[4]
+                entry['days'][day_idx]['score'] += score
+                entry['days'][day_idx]['hit_damage'][int(entry['days'][day_idx]['hits'])] += row[4]
+                entry['days'][day_idx]['hit_score'][int(entry['days'][day_idx]['hits'])] += score
+                if row[3] == 'Normal':
+                    entry['days'][day_idx]['hits'] += 1
+                else:
+                    entry['days'][day_idx]['hits'] += 0.5
+        hit_matrix = hit_matrix.values()
+        return hit_matrix

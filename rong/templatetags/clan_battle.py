@@ -61,3 +61,15 @@ def format_hits(hits):
     if float(int(hits)) == float(hits):
         return int(hits)
     return hits
+
+
+@register.filter
+def smallhit(damage):
+    if damage < 1000:
+        return int(damage)
+    elif damage < 1000000:
+        return '%dK' % int(damage / 1000)
+    elif damage < 10000000:
+        return '%.01fM' % (damage / 1000000)
+    else:
+        return '%dM' % int(damage / 1000000)

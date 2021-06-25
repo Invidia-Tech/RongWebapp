@@ -124,32 +124,117 @@
     <hr>
     {% if battle.in_progress or battle.ended %}
         {% if manageable %}
-            <h2>Hits Used</h2>
-            <table class="dt w-100 table dt-noPaging" id="hitsUsedTable">
-            <thead>
-            <tr>
-                <th>Player</th>
-                {% for day in battle.day_range %}
-                    <th>Day {{ day }}</th>
-                {% endfor %}
-            </tr>
-            </thead>
-            <tbody>
-            {% for player in battle.hits_used %}
-                <tr>
-                <td>{{ player.member.user_display_name }}</td>
-                {% for hits_day in player.hits %}
-                    {% day_reached battle forloop.counter as active %}
-                    {% if active %}
-                    <td data-hits="{{ hits_day|format_hits }}">{{ hits_day|format_hits }}</td>
-                    {% else %}
-                    <td>0</td>
-                    {% endif %}
-                {% endfor %}
-                </tr>
-            {% endfor %}
-            </tbody>
-            </table>
+            <h2>Stats</h2>
+            <ul id="tabs" class="nav nav-tabs">
+                <li class="nav-item"><a href="" data-target="#hits-used" data-toggle="tab"
+                                        class="nav-link small active">Hits Used</a></li>
+                <li class="nav-item"><a href="" data-target="#dps-daily" data-toggle="tab" class="nav-link small">DPS
+                    (Daily)</a></li>
+                <li class="nav-item"><a href="" data-target="#score-daily" data-toggle="tab" class="nav-link small">Score
+                    (Daily)</a></li>
+            </ul>
+            <br>
+            <div id="tabsContent" class="tab-content">
+                <div id="hits-used" class="tab-pane active show">
+                    <table class="dt w-100 table dt-noPaging stats-table" id="hitsUsedTable">
+                        <thead>
+                        <tr>
+                            <th>Player</th>
+                            {% for day in battle.day_range %}
+                                <th>Day {{ day }}</th>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for player in battle.hit_stats %}
+                            <tr>
+                                <td>{{ player.member.user_display_name }}</td>
+                                {% for day in player.days %}
+                                    {% day_reached battle forloop.counter as active %}
+                                    {% if active %}
+                                        <td data-hits="{{ day.hits|format_hits }}">{{ day.hits|format_hits }}</td>
+                                    {% else %}
+                                        <td>0</td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="dps-daily" class="tab-pane">
+                    <table class="dt w-100 table dt-noPaging stats-table daily-table" id="dpsDailyTable">
+                        <thead>
+                        <tr>
+                            <th>Player</th>
+                            {% for day in battle.day_range %}
+                                <th>Day {{ day }}</th>
+                            {% endfor %}
+                            <th>Total DMG</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for player in battle.hit_stats %}
+                            <tr>
+                                <td class="name">{{ player.member.user_display_name }}</td>
+                                {% for day in player.days %}
+                                    {% day_reached battle forloop.counter as active %}
+                                    {% if active %}
+                                        <td data-sort="{{ day.damage }}" class="day">
+                                            <div class="day-total">{{ day.damage|intcomma }}</div>
+                                            <div class="hits">
+                                                {% for hit in day.hit_damage %}
+                                                    <div>{{ hit|smallhit }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                {% endfor %}
+                                <td data-sort="{{ player.total_damage }}" class="total">{{ player.total_damage|intcomma }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="score-daily" class="tab-pane">
+                    <table class="dt w-100 table dt-noPaging stats-table daily-table" id="scoreDailyTable">
+                        <thead>
+                        <tr>
+                            <th>Player</th>
+                            {% for day in battle.day_range %}
+                                <th>Day {{ day }}</th>
+                            {% endfor %}
+                            <th>Total Score</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for player in battle.hit_stats %}
+                            <tr>
+                                <td class="name">{{ player.member.user_display_name }}</td>
+                                {% for day in player.days %}
+                                    {% day_reached battle forloop.counter as active %}
+                                    {% if active %}
+                                        <td data-sort="{{ day.score }}" class="day">
+                                            <div class="day-total">{{ day.score|intcomma }}</div>
+                                            <div class="hits">
+                                                {% for hit in day.hit_score %}
+                                                    <div>{{ hit|smallhit }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                {% endfor %}
+                                <td data-sort="{{ player.total_score }}" class="total">{{ player.total_score|intcomma }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <hr>
         {% endif %}
     {% endif %}

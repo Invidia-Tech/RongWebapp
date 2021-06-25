@@ -29,11 +29,57 @@
   font-size: 80%;
 }
 
-#hitsUsedTable {
+.stats-table {
   font-size: 80%;
   td {
     padding: 0.1rem 0.75rem;
   }
+}
+
+.daily-table {
+  td:not(:last-child), th:not(:last-child) {
+    border-right: 1px solid gray;
+  }
+  td.name {
+    width: 20%;
+    vertical-align: middle;
+  }
+  td.day {
+    width: 14%;
+  }
+  td.total {
+    width: 10%;
+    vertical-align: middle;
+    font-weight: bold;
+  }
+  .hits {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid gray;
+    width: calc(100% + 1.5rem);
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+    margin-bottom: -0.1rem;
+    div {
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+      padding-bottom: 0.1rem;
+      text-align: center;
+    }
+    div:not(:last-child) {
+      border-right: 1px solid gray;
+    }
+  }
+  .day-total {
+    font-weight: bold;
+    text-align: right;
+  }
+}
+
+#hitsUsedTable {
+
   td[data-hits="0"] {
     background-color: red;
   }
