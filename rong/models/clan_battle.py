@@ -302,6 +302,13 @@ class ClanBattle(models.Model):
             } for n in range(self.total_days)],
         }
 
+    def get_boss_info(self, boss_data, difficulty_idx):
+        cbi = boss_data[difficulty_idx].boss_list()
+        return {
+            "info": cbi,
+            "lap_hp": sum(boss["hp"] for boss in cbi),
+        }
+
     @cached_property
     def hit_stats(self):
         members = list(self.clan.members.select_related('user'))
@@ -309,9 +316,17 @@ class ClanBattle(models.Model):
         difficulty_idx = 0
         members.sort(key=lambda x: x.user_display_name.lower())
         hit_matrix = OrderedDict()
-        curr_boss_info = boss_data[0].boss_list()
+        curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
         for member in members:
             hit_matrix[member.user_id] = self.initial_matrix_row(member)
+        stats = {
+            "daily_damage": [0 for n in range(self.total_days)],
+            "cumu_damage": [0 for n in range(self.total_days)],
+            "daily_score": [0 for n in range(self.total_days)],
+            "cumu_score": [0 for n in range(self.total_days)],
+            "daily_laps": [0 for n in range(self.total_days)],
+            "cumu_laps": [0 for n in range(self.total_days)],
+        }
         with connection.cursor() as cur:
             cur.execute("""
             SELECT user_id, day, ign, hit_type, actual_damage, boss_lap, boss_number
@@ -322,16 +337,19 @@ class ClanBattle(models.Model):
             for row in cur.fetchall():
                 if boss_data[difficulty_idx].lap_to is not None and row[5] > boss_data[difficulty_idx].lap_to:
                     difficulty_idx += 1
-                    curr_boss_info = boss_data[difficulty_idx].boss_list()
+                    curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
                 if row[0] not in hit_matrix:
                     hit_matrix[row[0]] = self.initial_matrix_row({
                         "user_display_name": row[2]
                     })
                 entry = hit_matrix[row[0]]
                 day_idx = row[1] - 1
-                score = round(row[4] * curr_boss_info[row[6] - 1]["multiplier"])
+                score = math.ceil(row[4] * curr_boss_info["info"][row[6] - 1]["multiplier"])
                 entry['total_damage'] += row[4]
                 entry['total_score'] += score
+                stats["daily_damage"][day_idx] += row[4]
+                stats["daily_score"][day_idx] += score
+                stats["daily_laps"][day_idx] += row[4]/curr_boss_info["lap_hp"]
                 entry['days'][day_idx]['damage'] += row[4]
                 entry['days'][day_idx]['score'] += score
                 entry['days'][day_idx]['hit_damage'][int(entry['days'][day_idx]['hits'])] += row[4]
@@ -340,5 +358,10 @@ class ClanBattle(models.Model):
                     entry['days'][day_idx]['hits'] += 1
                 else:
                     entry['days'][day_idx]['hits'] += 0.5
-        hit_matrix = hit_matrix.values()
-        return hit_matrix
+        # cumu stuff
+        for n in range(self.total_days):
+            stats["cumu_damage"][n] = sum(stats["daily_damage"][0:n+1])
+            stats["cumu_score"][n] = sum(stats["daily_score"][0:n+1])
+            stats["cumu_laps"][n] = sum(stats["daily_laps"][0:n+1])
+        stats["players"] = list(hit_matrix.values())
+        return stats

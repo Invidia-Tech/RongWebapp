@@ -76,6 +76,9 @@
     font-weight: bold;
     text-align: right;
   }
+  tfoot td:not(:first-child) {
+    text-align: right;
+  }
 }
 
 #hitsUsedTable {

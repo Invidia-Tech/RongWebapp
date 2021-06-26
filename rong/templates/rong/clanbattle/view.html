@@ -146,7 +146,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for player in battle.hit_stats %}
+                        {% for player in battle.hit_stats.players %}
                             <tr>
                                 <td>{{ player.member.user_display_name }}</td>
                                 {% for day in player.days %}
@@ -174,7 +174,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for player in battle.hit_stats %}
+                        {% for player in battle.hit_stats.players %}
                             <tr>
                                 <td class="name">{{ player.member.user_display_name }}</td>
                                 {% for day in player.days %}
@@ -196,6 +196,43 @@
                             </tr>
                         {% endfor %}
                         </tbody>
+                        <tfoot>
+                        <tr>
+                            <td>&nbsp;</td>
+                            {% for day in battle.day_range %}
+                                <td>&nbsp;</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><b>Total Daily DMG</b></td>
+                            {% for day in battle.hit_stats.daily_damage %}
+                                <td>{{ day|intcomma }}</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><b>Cumulative DMG</b></td>
+                            {% for day in battle.hit_stats.cumu_damage %}
+                                <td>{{ day|intcomma }}</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><b>Daily Lap Count</b></td>
+                            {% for day in battle.hit_stats.daily_laps %}
+                                <td>{{ day|floatformat:2 }}</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><b>Total Lap Count</b></td>
+                            {% for day in battle.hit_stats.cumu_laps %}
+                                <td>{{ day|floatformat:2 }}</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        </tfoot>
                     </table>
                 </div>
                 <div id="score-daily" class="tab-pane">
@@ -210,7 +247,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for player in battle.hit_stats %}
+                        {% for player in battle.hit_stats.players %}
                             <tr>
                                 <td class="name">{{ player.member.user_display_name }}</td>
                                 {% for day in player.days %}
@@ -232,6 +269,43 @@
                             </tr>
                         {% endfor %}
                         </tbody>
+                        <tfoot>
+                        <tr>
+                            <td>&nbsp;</td>
+                            {% for day in battle.day_range %}
+                                <td>&nbsp;</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><b>Total Daily Score</b></td>
+                            {% for day in battle.hit_stats.daily_score %}
+                                <td>{{ day|intcomma }}</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><b>Cumulative Score</b></td>
+                            {% for day in battle.hit_stats.cumu_score %}
+                                <td>{{ day|intcomma }}</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><b>Daily Lap Count</b></td>
+                            {% for day in battle.hit_stats.daily_laps %}
+                                <td>{{ day|floatformat:2 }}</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><b>Total Lap Count</b></td>
+                            {% for day in battle.hit_stats.cumu_laps %}
+                                <td>{{ day|floatformat:2 }}</td>
+                            {% endfor %}
+                            <td>&nbsp;</td>
+                        </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
