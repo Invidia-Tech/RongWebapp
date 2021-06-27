@@ -365,7 +365,7 @@ class ClanBattle(models.Model):
                     entry['days'][day_idx]['hits'] += 0.5
                 for i in range(day_idx, self.total_days):
                     stats["daily_end"][i]["lap"] = row[5]
-                    stats["daily_end"][i]["boss"] = getattr(self, 'boss%d_hp' % row[6])
+                    stats["daily_end"][i]["boss"] = getattr(self, 'boss%d_name' % row[6])
                     stats["daily_end"][i]["hp"] = row[7]
         # cumu stuff
         for n in range(self.total_days):
