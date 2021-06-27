@@ -326,10 +326,15 @@ class ClanBattle(models.Model):
             "cumu_score": [0 for n in range(self.total_days)],
             "daily_laps": [0 for n in range(self.total_days)],
             "cumu_laps": [0 for n in range(self.total_days)],
+            "daily_end": [{
+                "lap": 1,
+                "boss": self.boss1_name,
+                "hp": curr_boss_info["info"][0]["hp"],
+            } for n in range(self.total_days)],
         }
         with connection.cursor() as cur:
             cur.execute("""
-            SELECT user_id, day, ign, hit_type, actual_damage, boss_lap, boss_number
+            SELECT user_id, day, ign, hit_type, actual_damage, boss_lap, boss_number, boss_hp_left
             FROM rong_clanbattlescore
             WHERE clan_battle_id=%s
             ORDER BY "order" ASC
@@ -358,6 +363,10 @@ class ClanBattle(models.Model):
                     entry['days'][day_idx]['hits'] += 1
                 else:
                     entry['days'][day_idx]['hits'] += 0.5
+                for i in range(day_idx, self.total_days):
+                    stats["daily_end"][i]["lap"] = row[5]
+                    stats["daily_end"][i]["boss"] = getattr(self, 'boss%d_hp' % row[6])
+                    stats["daily_end"][i]["hp"] = row[7]
         # cumu stuff
         for n in range(self.total_days):
             stats["cumu_damage"][n] = sum(stats["daily_damage"][0:n+1])
