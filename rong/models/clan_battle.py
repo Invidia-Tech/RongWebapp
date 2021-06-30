@@ -2,6 +2,7 @@ import datetime
 import math
 from collections import OrderedDict
 
+from django.apps import apps
 from django.db import models, connection
 from django.db.models import Sum
 from django.utils import timezone
@@ -293,17 +294,21 @@ class ClanBattle(models.Model):
             "member": member,
             "total_damage": 0,
             "total_score": 0,
+            "total_ascore": 0,
             "days": [{
                 "hits": 0,
                 "damage": 0,
                 "score": 0,
+                "ascore": 0,
                 "hit_damage": [0 for n in range(ClanBattle.HITS_PER_DAY)],
                 "hit_score": [0 for n in range(ClanBattle.HITS_PER_DAY)],
+                "hit_ascore": [0 for n in range(ClanBattle.HITS_PER_DAY)],
             } for n in range(self.total_days)],
+            "hits": [],
         }
 
     def get_boss_info(self, boss_data, difficulty_idx):
-        cbi = boss_data[difficulty_idx].boss_list()
+        cbi = boss_data[difficulty_idx].boss_list
         return {
             "info": cbi,
             "lap_hp": sum(boss["hp"] for boss in cbi),
@@ -326,6 +331,8 @@ class ClanBattle(models.Model):
             "cumu_damage": [0 for n in range(self.total_days)],
             "daily_score": [0 for n in range(self.total_days)],
             "cumu_score": [0 for n in range(self.total_days)],
+            "daily_ascore": [0 for n in range(self.total_days)],
+            "cumu_ascore": [0 for n in range(self.total_days)],
             "daily_laps": [0 for n in range(self.total_days)],
             "cumu_laps": [0 for n in range(self.total_days)],
             "daily_end": [{
@@ -334,45 +341,67 @@ class ClanBattle(models.Model):
                 "hp": curr_boss_info["info"][0]["hp"],
             } for n in range(self.total_days)],
         }
-        with connection.cursor() as cur:
-            cur.execute("""
-            SELECT user_id, day, ign, hit_type, actual_damage, boss_lap, boss_number, boss_hp_left
-            FROM rong_clanbattlescore
-            WHERE clan_battle_id=%s
-            ORDER BY "order" ASC
-            """, [self.id])
-            for row in cur.fetchall():
-                if boss_data[difficulty_idx].lap_to is not None and row[5] > boss_data[difficulty_idx].lap_to:
-                    difficulty_idx += 1
-                    curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
-                if row[0] not in hit_matrix:
-                    hit_matrix[row[0]] = self.initial_matrix_row({
-                        "user_display_name": row[2]
-                    })
-                entry = hit_matrix[row[0]]
-                day_idx = row[1] - 1
-                score = math.ceil(row[4] * curr_boss_info["info"][row[6] - 1]["multiplier"])
-                entry['total_damage'] += row[4]
-                entry['total_score'] += score
-                stats["daily_damage"][day_idx] += row[4]
-                stats["daily_score"][day_idx] += score
-                stats["daily_laps"][day_idx] += row[4]/curr_boss_info["lap_hp"]
-                entry['days'][day_idx]['damage'] += row[4]
-                entry['days'][day_idx]['score'] += score
-                entry['days'][day_idx]['hit_damage'][int(entry['days'][day_idx]['hits'])] += row[4]
-                entry['days'][day_idx]['hit_score'][int(entry['days'][day_idx]['hits'])] += score
-                if row[3] == 'Normal':
-                    entry['days'][day_idx]['hits'] += 1
-                else:
-                    entry['days'][day_idx]['hits'] += 0.5
-                for i in range(day_idx, self.total_days):
-                    stats["daily_end"][i]["lap"] = row[5]
-                    stats["daily_end"][i]["boss"] = getattr(self, 'boss%d_name' % row[6])
-                    stats["daily_end"][i]["hp"] = row[7]
+        weightable_hits = [[0 for n in range(5)] for i in range(len(boss_data))]
+        weightable_dmg = [[0 for n in range(5)] for i in range(len(boss_data))]
+        weight_ts = 0
+        weight_th = 0
+        ClanMember = apps.get_model("rong", "ClanMember")
+        for hit in self.hits.order_by('order').select_related('user'):
+            if boss_data[difficulty_idx].lap_to is not None and hit.boss_lap > boss_data[difficulty_idx].lap_to:
+                difficulty_idx += 1
+                curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
+            if hit.user_id not in hit_matrix:
+                fake_member = ClanMember(user=hit.user, clan=self.clan, ign=hit.ign)
+                hit_matrix[hit.user_id] = self.initial_matrix_row(fake_member)
+            entry = hit_matrix[hit.user_id]
+            entry["hits"].append(hit)
+            hit.difficulty = difficulty_idx
+            hit.score = math.ceil(hit.actual_damage * curr_boss_info["info"][hit.boss_number - 1]["multiplier"])
+            entry['total_damage'] += hit.actual_damage
+            entry['total_score'] += hit.score
+            stats["daily_damage"][hit.day - 1] += hit.actual_damage
+            stats["daily_score"][hit.day - 1] += hit.score
+            stats["daily_laps"][hit.day - 1] += hit.actual_damage/curr_boss_info["lap_hp"]
+            entry['days'][hit.day - 1]['damage'] += hit.actual_damage
+            entry['days'][hit.day - 1]['score'] += hit.score
+            hit.hit_index = int(entry['days'][hit.day - 1]['hits'])
+            entry['days'][hit.day - 1]['hit_damage'][hit.hit_index] += hit.actual_damage
+            entry['days'][hit.day - 1]['hit_score'][hit.hit_index] += hit.score
+            if hit.hit_type == ClanBattleHitType.NORMAL:
+                entry['days'][hit.day - 1]['hits'] += 1
+            else:
+                entry['days'][hit.day - 1]['hits'] += 0.5
+            if hit.hit_type == ClanBattleHitType.NORMAL or (hit.hit_type == ClanBattleHitType.LAST_HIT and hit.damage / hit.actual_damage >= 1.1):
+                weightable_hits[hit.difficulty][hit.boss_number - 1] += 1
+                weightable_dmg[hit.difficulty][hit.boss_number - 1] += hit.damage
+                weight_ts += math.ceil(hit.damage * curr_boss_info["info"][hit.boss_number - 1]["multiplier"])
+                weight_th += 1
+            for i in range(hit.day - 1, self.total_days):
+                stats["daily_end"][i]["lap"] = hit.boss_lap
+                stats["daily_end"][i]["boss"] = getattr(self, 'boss%d_name' % hit.boss_number)
+                stats["daily_end"][i]["hp"] = hit.boss_hp_left
+        print(str(weightable_hits))
+        print(str(weightable_dmg))
+        print(str(weight_ts))
+        print(str(weight_th))
+        for uid in hit_matrix:
+            entry = hit_matrix[uid]
+            for hit in hit_matrix[uid]["hits"]:
+                norm_boss_score = weightable_hits[hit.difficulty][hit.boss_number - 1] / weight_th * weight_ts
+                norm_mult = norm_boss_score / weightable_dmg[hit.difficulty][hit.boss_number - 1]
+                norm_score = math.ceil(hit.actual_damage * norm_mult)
+                entry['total_ascore'] += norm_score
+                entry['days'][hit.day - 1]['ascore'] += norm_score
+                entry['days'][hit.day - 1]['hit_ascore'][hit.hit_index] += norm_score
+                stats["daily_ascore"][hit.day - 1] += norm_score
+
         # cumu stuff
         for n in range(self.total_days):
             stats["cumu_damage"][n] = sum(stats["daily_damage"][0:n+1])
             stats["cumu_score"][n] = sum(stats["daily_score"][0:n+1])
+            stats["cumu_ascore"][n] = sum(stats["daily_ascore"][0:n+1])
             stats["cumu_laps"][n] = sum(stats["daily_laps"][0:n+1])
         stats["players"] = list(hit_matrix.values())
         return stats
+
+

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 
 
 class ClanBattleBossInfo(models.Model):
@@ -40,6 +41,7 @@ class ClanBattleBossInfo(models.Model):
         setattr(self, field_prefix + 'mdef', enemy_data.mdef)
         setattr(self, field_prefix + 'multiplier', multiplier)
 
+    @cached_property
     def boss_list(self):
         boss_l = []
         for num in range(1, 6):

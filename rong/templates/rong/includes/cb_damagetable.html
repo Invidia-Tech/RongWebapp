@@ -1,0 +1,119 @@
+{% load humanize %}
+{% load clan_battle %}
+{% load rong_common %}
+<table class="dt w-100 table dt-noPaging stats-table daily-table" id="{{ table_id }}">
+    <thead>
+    <tr>
+        <th>Player</th>
+        {% for day in battle.day_range %}
+            <th>Day {{ day }}</th>
+        {% endfor %}
+        <th>Total {{ name }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for player in battle.hit_stats.players %}
+        <tr>
+            <td class="name">{{ player.member.user_display_name }}</td>
+            {% for day in player.days %}
+                {% day_reached battle forloop.counter as active %}
+                {% if active %}
+                    <td data-sort="{{ day|get_item:day_total_key }}" class="day">
+                        <div class="day-total">{{ day|get_item:day_total_key|intcomma }}</div>
+                        <div class="hits">
+                            {% for hit in day|get_item:day_ind_key %}
+                                <div>{{ hit|smallhit }}</div>
+                            {% endfor %}
+                        </div>
+                    </td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+            {% endfor %}
+            <td data-sort="{{ player|get_item:total_key }}"
+                class="total">{{ player|get_item:total_key|intcomma }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+        <td>&nbsp;</td>
+        {% for day in battle.day_range %}
+            <td>&nbsp;</td>
+        {% endfor %}
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><b>Total Daily {{ name }}</b></td>
+        {% for day in battle.hit_stats|get_item:summary_daily %}
+            {% day_reached battle forloop.counter as active %}
+            {% if active %}
+                <td>{{ day|intcomma }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        {% endfor %}
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><b>Cumulative {{ name }}</b></td>
+        {% for day in battle.hit_stats|get_item:summary_cumu %}
+            {% day_reached battle forloop.counter as active %}
+            {% if active %}
+                <td>{{ day|intcomma }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        {% endfor %}
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><b>Daily Lap Count</b></td>
+        {% for day in battle.hit_stats.daily_laps %}
+            {% day_reached battle forloop.counter as active %}
+            {% if active %}
+                <td>{{ day|floatformat:2 }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        {% endfor %}
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><b>Total Lap Count</b></td>
+        {% for day in battle.hit_stats.cumu_laps %}
+            {% day_reached battle forloop.counter as active %}
+            {% if active %}
+                <td>{{ day|floatformat:2 }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        {% endfor %}
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><b>Final Boss</b></td>
+        {% for day in battle.hit_stats.daily_end %}
+            {% day_reached battle forloop.counter as active %}
+            {% if active %}
+                <td>Lap {{ day.lap }} {{ day.boss }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        {% endfor %}
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td><b>HP Left</b></td>
+        {% for day in battle.hit_stats.daily_end %}
+            {% day_reached battle forloop.counter as active %}
+            {% if active %}
+                <td>{{ day.hp|intcomma }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        {% endfor %}
+        <td>&nbsp;</td>
+    </tr>
+    </tfoot>
+</table>

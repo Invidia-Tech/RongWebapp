@@ -132,6 +132,8 @@
                     (Daily)</a></li>
                 <li class="nav-item"><a href="" data-target="#score-daily" data-toggle="tab" class="nav-link small">Score
                     (Daily)</a></li>
+                <li class="nav-item"><a href="" data-target="#ascore-daily" data-toggle="tab" class="nav-link small">Normalized Score
+                    (Daily)</a></li>
             </ul>
             <br>
             <div id="tabsContent" class="tab-content">
@@ -163,240 +165,13 @@
                     </table>
                 </div>
                 <div id="dps-daily" class="tab-pane">
-                    <table class="dt w-100 table dt-noPaging stats-table daily-table" id="dpsDailyTable">
-                        <thead>
-                        <tr>
-                            <th>Player</th>
-                            {% for day in battle.day_range %}
-                                <th>Day {{ day }}</th>
-                            {% endfor %}
-                            <th>Total DMG</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for player in battle.hit_stats.players %}
-                            <tr>
-                                <td class="name">{{ player.member.user_display_name }}</td>
-                                {% for day in player.days %}
-                                    {% day_reached battle forloop.counter as active %}
-                                    {% if active %}
-                                        <td data-sort="{{ day.damage }}" class="day">
-                                            <div class="day-total">{{ day.damage|intcomma }}</div>
-                                            <div class="hits">
-                                                {% for hit in day.hit_damage %}
-                                                    <div>{{ hit|smallhit }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        </td>
-                                    {% else %}
-                                        <td></td>
-                                    {% endif %}
-                                {% endfor %}
-                                <td data-sort="{{ player.total_damage }}"
-                                    class="total">{{ player.total_damage|intcomma }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <td>&nbsp;</td>
-                            {% for day in battle.day_range %}
-                                <td>&nbsp;</td>
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Total Daily DMG</b></td>
-                            {% for day in battle.hit_stats.daily_damage %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day|intcomma }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Cumulative DMG</b></td>
-                            {% for day in battle.hit_stats.cumu_damage %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day|intcomma }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Daily Lap Count</b></td>
-                            {% for day in battle.hit_stats.daily_laps %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day|floatformat:2 }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Total Lap Count</b></td>
-                            {% for day in battle.hit_stats.cumu_laps %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day|floatformat:2 }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Final Boss</b></td>
-                            {% for day in battle.hit_stats.daily_end %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>Lap {{ day.lap }} {{ day.boss }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>HP Left</b></td>
-                            {% for day in battle.hit_stats.daily_end %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day.hp|intcomma }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        </tfoot>
-                    </table>
+                    {% include "rong/includes/cb_damagetable.html" with name="DMG" table_id="damageDailyTable" day_total_key="damage" day_ind_key="hit_damage" total_key="total_damage" summary_daily="daily_damage" summary_cumu="cumu_damage" %}
                 </div>
                 <div id="score-daily" class="tab-pane">
-                    <table class="dt w-100 table dt-noPaging stats-table daily-table" id="scoreDailyTable">
-                        <thead>
-                        <tr>
-                            <th>Player</th>
-                            {% for day in battle.day_range %}
-                                <th>Day {{ day }}</th>
-                            {% endfor %}
-                            <th>Total Score</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for player in battle.hit_stats.players %}
-                            <tr>
-                                <td class="name">{{ player.member.user_display_name }}</td>
-                                {% for day in player.days %}
-                                    {% day_reached battle forloop.counter as active %}
-                                    {% if active %}
-                                        <td data-sort="{{ day.score }}" class="day">
-                                            <div class="day-total">{{ day.score|intcomma }}</div>
-                                            <div class="hits">
-                                                {% for hit in day.hit_score %}
-                                                    <div>{{ hit|smallhit }}</div>
-                                                {% endfor %}
-                                            </div>
-                                        </td>
-                                    {% else %}
-                                        <td></td>
-                                    {% endif %}
-                                {% endfor %}
-                                <td data-sort="{{ player.total_score }}"
-                                    class="total">{{ player.total_score|intcomma }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                        <tfoot>
-                        <tr>
-                            <td>&nbsp;</td>
-                            {% for day in battle.day_range %}
-                                <td>&nbsp;</td>
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Total Daily Score</b></td>
-                            {% for day in battle.hit_stats.daily_score %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day|intcomma }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Cumulative Score</b></td>
-                            {% for day in battle.hit_stats.cumu_score %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day|intcomma }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Daily Lap Count</b></td>
-                            {% for day in battle.hit_stats.daily_laps %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day|floatformat:2 }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Total Lap Count</b></td>
-                            {% for day in battle.hit_stats.cumu_laps %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day|floatformat:2 }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>Final Boss</b></td>
-                            {% for day in battle.hit_stats.daily_end %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>Lap {{ day.lap }} {{ day.boss }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td><b>HP Left</b></td>
-                            {% for day in battle.hit_stats.daily_end %}
-                                {% day_reached battle forloop.counter as active %}
-                                {% if active %}
-                                    <td>{{ day.hp|intcomma }}</td>
-                                {% else %}
-                                    <td></td>
-                                {% endif %}
-                            {% endfor %}
-                            <td>&nbsp;</td>
-                        </tr>
-                        </tfoot>
-                    </table>
+                    {% include "rong/includes/cb_damagetable.html" with name="Score" table_id="scoreDailyTable" day_total_key="score" day_ind_key="hit_score" total_key="total_score" summary_daily="daily_score" summary_cumu="cumu_score" %}
+                </div>
+                <div id="ascore-daily" class="tab-pane">
+                    {% include "rong/includes/cb_damagetable.html" with name="Norm. Score" table_id="ascoreDailyTable" day_total_key="ascore" day_ind_key="hit_ascore" total_key="total_ascore" summary_daily="daily_ascore" summary_cumu="cumu_ascore" %}
                 </div>
             </div>
             <hr>
@@ -409,7 +184,7 @@
             <th></th>
             {% for boss in battle.boss_list %}
                 <th class="text-center">
-                    <img src="{% static 'rong/images/enemies/' %}{{ boss.icon }}.png"/><br>
+                    {% enemy_icon boss.icon %}<br>
                     {{ boss.name }}
                 </th>
             {% endfor %}
