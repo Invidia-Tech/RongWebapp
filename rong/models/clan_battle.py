@@ -311,14 +311,16 @@ class ClanBattle(models.Model):
 
     @cached_property
     def hit_stats(self):
-        members = list(self.clan.members.select_related('user'))
         boss_data = list(self.bosses.order_by('difficulty').all())
         difficulty_idx = 0
-        members.sort(key=lambda x: x.user_display_name.lower())
-        hit_matrix = OrderedDict()
         curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
-        for member in members:
-            hit_matrix[member.user_id] = self.initial_matrix_row(member)
+        hit_matrix = OrderedDict()
+        if self.in_progress:
+            # if CB in progress, include all members so 0/3 hit people can be seen
+            members = list(self.clan.members.select_related('user'))
+            members.sort(key=lambda x: x.user_display_name.lower())
+            for member in members:
+                hit_matrix[member.user_id] = self.initial_matrix_row(member)
         stats = {
             "daily_damage": [0 for n in range(self.total_days)],
             "cumu_damage": [0 for n in range(self.total_days)],
