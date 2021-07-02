@@ -380,10 +380,6 @@ class ClanBattle(models.Model):
                 stats["daily_end"][i]["lap"] = hit.boss_lap
                 stats["daily_end"][i]["boss"] = getattr(self, 'boss%d_name' % hit.boss_number)
                 stats["daily_end"][i]["hp"] = hit.boss_hp_left
-        print(str(weightable_hits))
-        print(str(weightable_dmg))
-        print(str(weight_ts))
-        print(str(weight_th))
         for uid in hit_matrix:
             entry = hit_matrix[uid]
             for hit in hit_matrix[uid]["hits"]:
