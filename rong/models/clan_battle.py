@@ -219,11 +219,11 @@ class ClanBattle(models.Model):
             now = now + datetime.timedelta(days=1)
         return now.replace(hour=13, minute=0, second=0, microsecond=0)
 
-    @cached_property
+    @property
     def current_boss_icon(self):
         return getattr(self, 'boss%d_iconid' % self.current_boss)
 
-    @cached_property
+    @property
     def current_boss_name(self):
         return getattr(self, 'boss%d_name' % self.current_boss)
 
@@ -387,9 +387,12 @@ class ClanBattle(models.Model):
         for uid in hit_matrix:
             entry = hit_matrix[uid]
             for hit in hit_matrix[uid]["hits"]:
-                norm_boss_score = weightable_hits[hit.difficulty][hit.boss_number - 1] / weight_th * weight_ts
-                norm_mult = norm_boss_score / weightable_dmg[hit.difficulty][hit.boss_number - 1]
-                norm_score = math.ceil(hit.actual_damage * norm_mult)
+                if weightable_hits[hit.difficulty][hit.boss_number - 1]:
+                    norm_boss_score = weightable_hits[hit.difficulty][hit.boss_number - 1] / weight_th * weight_ts
+                    norm_mult = norm_boss_score / weightable_dmg[hit.difficulty][hit.boss_number - 1]
+                    norm_score = math.ceil(hit.actual_damage * norm_mult)
+                else:
+                    norm_score = hit.score
                 entry['total_ascore'] += norm_score
                 entry['days'][hit.day - 1]['ascore'] += norm_score
                 entry['days'][hit.day - 1]['hit_ascore'][hit.hit_index] += norm_score
