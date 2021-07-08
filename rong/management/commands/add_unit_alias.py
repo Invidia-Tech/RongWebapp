@@ -14,6 +14,9 @@ class Command(BaseCommand):
         unit = Unit.objects.filter(name__iexact=options['unit_name_or_id']).first()
         if not unit:
             unit = Unit.objects.get(id=options['unit_name_or_id'])
+        if UnitAlias.objects.filter(name__iexact=options['alias']).count():
+            print("Alias %s already exists." % options['alias'])
+            return
         with connection.cursor() as cur:
             cur.execute('INSERT INTO "rongbot"."unit_alias" ("unit_id", "unit_name") VALUES(%s, %s)', (unit.id, options['alias']))
         print("Successfully added alias %s for unit %s [%d]" % (options['alias'], unit.name, unit.id))
