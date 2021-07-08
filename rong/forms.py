@@ -1,9 +1,12 @@
+import functools
+
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Max, Min, F
 from django.forms import RadioSelect
+from django.forms.models import ModelChoiceIterator
 from django.utils import timezone
 
 from rong.models import User, Box, BoxUnit, ClanBattle, ClanMember, Unit, ClanBattleScore
@@ -28,12 +31,13 @@ class CBLabelModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return self.callback(obj)
 
-
 class UnitSelect(CBLabelModelChoiceField):
+    unit_choices = list(CBLabelModelChoiceField(lambda u: u.name, Unit.valid_units()).choices)
     def __init__(self, *args, **kwargs):
         kwargs['callback'] = lambda u: u.name
         kwargs['queryset'] = Unit.valid_units()
         super(UnitSelect, self).__init__(*args, **kwargs)
+        self.choices = self.unit_choices
         self.widget.attrs['class'] = 'unit-selector'
 
 
