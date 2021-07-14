@@ -1,7 +1,7 @@
 from rong.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpRequest
-from rong.forms import BoxForm, CreateBoxUnitForm, EditBoxUnitForm
+from rong.forms import BoxForm, CreateBoxUnitForm, EditBoxUnitForm, CreateBoxUnitBulkForm
 from django.core.exceptions import SuspiciousOperation, ValidationError
 from django.shortcuts import get_object_or_404
 from rong.models import BoxUnit
@@ -35,16 +35,12 @@ def alter_boxunit(request: HttpRequest, box_id, boxunit_id):
 def create_boxunit(request: HttpRequest, box_id):
     box = get_object_or_404(request.user.box_set, pk=box_id)
     if request.method == 'POST':
-        box_unit = BoxUnit(box=box)
-        form = CreateBoxUnitForm(request.POST, instance=box_unit)
+        form = CreateBoxUnitBulkForm(box, request.POST)
         if form.is_valid():
-            # because box isn't part of the form, we have to validate uniqueness ourselves
-            try:
-                box_unit.validate_unique()
-                form.save()
-                return JsonResponse({"success": True, "unit": box_unit.edit_json()})
-            except ValidationError as ex:
-                return JsonResponse({"success": False, "errors": [str(ex)]})
+            results = [BoxUnit(box=box, unit_id=uid) for uid in form.data.getlist("units")]
+            for result in results:
+                result.save()
+            return JsonResponse({"success": True, "units": [result.edit_json() for result in results]})
         else:
             return JsonResponse({"success": False, "errors": form.errors.get_json_data()})
     elif request.method == 'GET':

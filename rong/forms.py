@@ -1,12 +1,9 @@
-import functools
-
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Max, Min, F
 from django.forms import RadioSelect
-from django.forms.models import ModelChoiceIterator
 from django.utils import timezone
 
 from rong.models import User, Box, BoxUnit, ClanBattle, ClanMember, Unit, ClanBattleScore
@@ -31,8 +28,10 @@ class CBLabelModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return self.callback(obj)
 
+
 class UnitSelect(CBLabelModelChoiceField):
     unit_choices = list(CBLabelModelChoiceField(lambda u: u.name, Unit.valid_units()).choices)
+
     def __init__(self, *args, **kwargs):
         kwargs['callback'] = lambda u: u.name
         kwargs['queryset'] = Unit.valid_units()
@@ -68,6 +67,14 @@ class BoxForm(forms.ModelForm):
     class Meta:
         model = Box
         fields = ['name']
+
+
+class CreateBoxUnitBulkForm(forms.Form):
+    units = forms.ModelMultipleChoiceField(queryset=None, widget=forms.CheckboxSelectMultiple)
+
+    def __init__(self, box, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["units"].queryset = box.missing_units()
 
 
 class CreateBoxUnitForm(forms.ModelForm):
@@ -344,7 +351,7 @@ class HitForm(forms.Form):
                     cb.hits.filter(order__gt=self.hit.order, order__lte=new_order_val).update(order=F('order') - 1)
                 else:
                     new_order_val = cb.hits.filter(day__gt=self.hit.day).aggregate(Min('order'))['order__min']
-                    cb.hits.filter(order__gte=new_order_val,order__lt=self.hit.order).update(order=F('order') + 1)
+                    cb.hits.filter(order__gte=new_order_val, order__lt=self.hit.order).update(order=F('order') + 1)
                 self.hit.order = new_order_val
                 self.hit.save()
                 cb.recalculate()

@@ -2,7 +2,7 @@
   display: inline-block;
   margin-right: 5px;
 
-  input[type="radio"] {
+  input[type="radio"], input[type="checkbox"] {
     position: absolute;
     opacity: 0;
     width: 0;

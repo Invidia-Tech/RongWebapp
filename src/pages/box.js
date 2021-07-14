@@ -49,19 +49,21 @@ page('box_index', function () {
 
     function doAddUnit(id) {
         if (!$('#addUnitForm input:checked').length) {
-            alert("Please select a unit to add!");
+            alert("Please select at least one unit to add!");
             return false;
         }
-        let unit_id = $('#addUnitForm input:checked').val();
         $('#addUnitModal').modal('hide');
         show_loading();
         $.post("/box/" + id + "/unit/create/", $('#addUnitForm').serialize(), function (data) {
             if (data.success) {
-                boxes[id].units[data.unit.id] = data.unit;
+                for(let unit of data.units) {
+                    boxes[id].units[unit.id] = unit;
+                }
+                let utext = 'Unit' + (data.units.length > 1 ? 's' : '');
                 renderBoxUnits(id);
-                make_alert($('#mainContent'), 'success', 'Unit added to box.');
+                make_alert($('#mainContent'), 'success', utext+' added to box.');
             } else {
-                make_alert($('#mainContent'), 'danger', 'Unit could not be added to box.');
+                make_alert($('#mainContent'), 'danger', 'Unit(s) could not be added to box.');
             }
             hide_loading();
         });
@@ -99,7 +101,7 @@ page('box_index', function () {
                 addunit_form.html('');
                 for (let unit of data.units) {
                     let unit_selector = '<label class="image-radio position-' + unit_position(unit.range) + '" title="' + unit.name + '">';
-                    unit_selector += '<input type="radio" name="unit" value="' + unit.id + '" />';
+                    unit_selector += '<input type="checkbox" name="units" value="' + unit.id + '" />';
                     unit_selector += '<div class="unit-icon u-' + icon_id(unit.id, unit.rarity) + '">';
                     unit_selector += '<i class="unit-icon-border white"></i>';
                     unit_selector += '<div class="unit-icon-stars s-' + unit.rarity + '"></div>';
