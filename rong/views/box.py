@@ -41,7 +41,7 @@ def alter_boxunit(request: HttpRequest, box_id, boxunit_id):
 
 @login_required
 def import_box(request: HttpRequest, box_id):
-    box = get_object_or_404(request.user.box_set, pk=box_id)
+    box = get_object_or_404(request.user.box_set.prefetch_related('boxunit_set'), pk=box_id)
     if request.method == 'POST':
         form = ImportTWArmoryBoxForm(request.POST)
         if form.is_valid():
@@ -132,7 +132,7 @@ def import_box(request: HttpRequest, box_id):
                 if mode == 'Overwrite':
                     box.boxunit_set.exclude(id__in=[bu.id for bu in save_units]).delete()
             except ValueError as ex:
-                messages.add_message(request, messages.ERROR, "Could not import box data. "+ex.message)
+                messages.add_message(request, messages.ERROR, "Could not import box data. "+str(ex))
                 return redirect('rong:box_index')
             messages.add_message(request, messages.SUCCESS, "Successfully imported %d units (%d new) from TW Armory." % (len(save_units), new_units))
             return redirect('rong:box_index')
