@@ -29,6 +29,12 @@ class CBLabelModelChoiceField(forms.ModelChoiceField):
         return self.callback(obj)
 
 
+class SimpleChoiceField(forms.ChoiceField):
+    def __init__(self, choices, **kwargs):
+        choices = [(n, n) for n in choices]
+        super().__init__(choices=choices, **kwargs)
+
+
 class UnitSelect(CBLabelModelChoiceField):
     unit_choices = list(CBLabelModelChoiceField(lambda u: u.name, Unit.valid_units()).choices)
 
@@ -93,6 +99,39 @@ class EditBoxUnitForm(forms.ModelForm):
     class Meta:
         model = BoxUnit
         fields = ['level', 'star', 'rank', 'equip1', 'equip2', 'equip3', 'equip4', 'equip5', 'equip6']
+
+
+class ImportTWArmoryBoxForm(forms.Form):
+    data = forms.CharField(widget=forms.Textarea,
+                           required=True,
+                           label='TW Armory Export Text',
+                           max_length=3000,
+                           help_text='Go to the <a href="https://pcredivewiki.tw/Armory">TW Armory</a>, select '
+                                     'Export&amp;Import then Export Team. Choose "Generate export text" and then copy '
+                                     'the text into this box.')
+    mode = SimpleChoiceField(label='Import Mode',
+                             widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}),
+                             choices=['Overwrite', 'Update', 'Append'],
+                             help_text='Overwrite = replace all data and delete any non-matching units. Update = Add '
+                                       'missing units and update existing ones. Append = only add missing units, '
+                                       'keep current state of units already added.',
+                             initial='Update')
+    refines = SimpleChoiceField(label='Refinements',
+                                widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}),
+                                choices=['None', 'Full'],
+                                initial='Full',
+                                help_text='TW Armory does not track gear refinements. Choose what to do with them.')
+    levels = SimpleChoiceField(label='Levels',
+                               widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}),
+                               choices=['Keep Current', 'Update to Max'],
+                               initial='Keep Current',
+                               help_text='Choose what to do with unit and skill levels. If you update to max, '
+                                         'you will have to re-enter any deliberately underleveled skills/units '
+                                         'yourself. New units will be set to max level regardless.')
+    missing_units = SimpleChoiceField(label='Missing Units',
+                                      widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}),
+                                      choices=['Ignore', 'Error'],
+                                      initial='Ignore')
 
 
 def get_cb_data_source_choices(blank_str='--Choose--'):

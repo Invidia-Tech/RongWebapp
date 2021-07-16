@@ -86,3 +86,13 @@ span.grippy::after {
   text-decoration-line: underline;
   text-decoration-style: dotted;
 }
+
+.form-check-inline div {
+  padding-left: 0.8rem;
+  &:first-child {
+    padding-left: 0;
+  }
+  input {
+    margin-right: 0.25rem;
+  }
+}

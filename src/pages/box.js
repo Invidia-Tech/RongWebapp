@@ -266,8 +266,13 @@ page('box_index', function () {
             let boxEle = $("#boxTemplate").clone().removeClass("template").attr("id", "box-" + box.id);
             boxEle.find(".name").text(box.name);
             boxEle.find(".box-clan-name").text(box.clan);
-            boxEle.find(".box-load-screenshot").click(function () {
-                alert("Soon™");
+            boxEle.find(".box-import").click(function () {
+                show_loading();
+                $.get("/box/" + id + "/import/", function (data) {
+                    hide_loading();
+                    $('#importModal').find('.modal-body').html(data);
+                    $('#importModal').modal();
+                }, "html");
             });
             boxEle.find(".box-edit").click(function () {
                 editBox(id);

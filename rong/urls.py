@@ -18,10 +18,10 @@ urlpatterns = [
     path('box/<int:box_id>/', box.alter_box, name='box_alter'),
     path('box/<int:box_id>/unit/create/', box.create_boxunit, name='box_createunit'),
     path('box/<int:box_id>/unit/<int:boxunit_id>/', box.alter_boxunit, name='box_alterunit'),
+    path('box/<int:box_id>/import/', box.import_box, name='box_import'),
     path('preferences/', core.preferences, name='preferences'),
     path('auth/logout/', core.logout, name='logout'),
     path('auth/login/discord/', core.discordlogin, name='discordlogin'),
     path('auth/login/discord/callback/', core.discordcallback, name='discordcallback'),
-    path('unitselect/', core.unitselect, name='unitselect'),
     path('', core.index, name='index'),
 ]

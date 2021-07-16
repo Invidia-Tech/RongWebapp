@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 
 
 class Unit(models.Model):
@@ -39,9 +40,9 @@ class SkillCost(models.Model):
 
 
 class UnitPromotion(models.Model):
+    unit = models.ForeignKey('Unit', related_name='ranks', on_delete=models.DO_NOTHING)
     # fake to prevent id column
-    unit_id = models.IntegerField(primary_key=True)
-    promotion_level = models.IntegerField()
+    promotion_level = models.IntegerField(primary_key=True)
     equip1 = models.IntegerField(db_column='equip_slot_1')
     equip2 = models.IntegerField(db_column='equip_slot_2')
     equip3 = models.IntegerField(db_column='equip_slot_3')
@@ -52,12 +53,24 @@ class UnitPromotion(models.Model):
     class Meta():
         managed = False
         db_table = u'redive_en"."unit_promotion'
+        ordering = ['promotion_level']
 
 
 class Equipment(models.Model):
     id = models.IntegerField(primary_key=True, db_column='equipment_id')
     name = models.TextField(db_column='equipment_name')
     promotion_level = models.IntegerField()
+
+    @cached_property
+    def refine_stars(self):
+        if self.promotion_level >= 4:
+            return 5
+        elif self.promotion_level == 3:
+            return 3
+        elif self.promotion_level == 2:
+            return 1
+        else:
+            return 0
 
     class Meta():
         managed = False
