@@ -4,6 +4,9 @@ WORKDIR /RongWebApp
 RUN apt-get update && apt-get install -y \
     nodejs npm libpq-dev gcc \
     && rm -rf /var/lib/apt/lists/*
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 COPY . .
-RUN npm ci && npm run build && pip install -r requirements.txt
-CMD [ "./migrate_and_update.sh" ]
+RUN npm ci && npm run build
+EXPOSE 8000
+CMD [ "./migrate_and_update.sh", "&&", "python", "manage.py", "runserver" ]

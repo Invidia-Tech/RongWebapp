@@ -1,13 +1,18 @@
-version: '3'
+version: '3.9'
 services:
     bot:
-        image: scratch
+        image: rongbot-test
         restart: always
-        depends_on: db
+        depends_on:
+            - db
+            - webapp
     webapp:
-        image: scratch
+        image: rongwebapp-test
+        ports:
+            - 8000:8000
         restart: always
-        depends_on: db
+        depends_on:
+            - db
     db:
         image: postgres:latest
         restart: always
@@ -17,5 +22,5 @@ services:
             - POSTGRES_PASSWORD=${DB_PASSWORD}
         ports:
             - 5432:5432
-        volumes:
-            - ./.docker/conf/postgres/:/docker-entrypoint-initdb.d/
+        # volumes:
+        #     - ./.docker/conf/postgres/:/docker-entrypoint-initdb.d/
