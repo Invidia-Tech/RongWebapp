@@ -36,13 +36,18 @@ class SimpleChoiceField(forms.ChoiceField):
 
 
 class UnitSelect(CBLabelModelChoiceField):
-    unit_choices = list(CBLabelModelChoiceField(lambda u: u.name, Unit.valid_units()).choices)
+    unit_choices = None
 
     def __init__(self, *args, **kwargs):
         kwargs['callback'] = lambda u: u.name
         kwargs['queryset'] = Unit.valid_units()
         super(UnitSelect, self).__init__(*args, **kwargs)
-        self.choices = self.unit_choices
+        if not UnitSelect.unit_choices:
+            try:
+                UnitSelect.unit_choices = list(CBLabelModelChoiceField(lambda u: u.name, Unit.valid_units()).choices)
+            except:
+                UnitSelect.unit_choices = [('', 'N/A')]
+        self.choices = UnitSelect.unit_choices
         self.widget.attrs['class'] = 'unit-selector'
 
 
@@ -136,15 +141,18 @@ class ImportTWArmoryBoxForm(forms.Form):
 
 def get_cb_data_source_choices(blank_str='--Choose--'):
     output = [('', blank_str)]
-    for source in CB_DATA_SOURCES:
-        out_choice = [source["name"], []]
-        for cb_period in source["periodModel"].objects.all().order_by('id'):
-            cb_id = "%s-%d" % (source["prefix"], cb_period.id)
-            cb_desc = "%s CB %d (%s-%s)" % (
-                source["name"], cb_period.id - 1000, cb_period.start_time[:cb_period.start_time.index(" ")],
-                cb_period.end_time[:cb_period.end_time.index(" ")])
-            out_choice[1].append([cb_id, cb_desc])
-        output.append(out_choice)
+    try:
+        for source in CB_DATA_SOURCES:
+            out_choice = [source["name"], []]
+            for cb_period in source["periodModel"].objects.all().order_by('id'):
+                cb_id = "%s-%d" % (source["prefix"], cb_period.id)
+                cb_desc = "%s CB %d (%s-%s)" % (
+                    source["name"], cb_period.id - 1000, cb_period.start_time[:cb_period.start_time.index(" ")],
+                    cb_period.end_time[:cb_period.end_time.index(" ")])
+                out_choice[1].append([cb_id, cb_desc])
+            output.append(out_choice)
+    except:
+        pass
     return output
 
 
