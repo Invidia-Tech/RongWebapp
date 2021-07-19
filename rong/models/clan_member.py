@@ -28,8 +28,8 @@ class ClanMember(models.Model):
             "player_id": self.player_id,
             "is_lead": self.is_lead,
             "group_num": self.group_num,
-            "is_owner": self.user_id == self.clan.collection.owner_id,
-            "is_admin": self.user_id == self.clan.admin_id
+            "is_admin": self.user_id == self.clan.admin_id,
+            "is_superadmin": self.user.is_superadmin,
         }
 
     @property

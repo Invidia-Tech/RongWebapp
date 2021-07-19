@@ -1,4 +1,3 @@
-from .clan_collection import ClanCollection
 from .clan import Clan
 from .user import User, AnonymousUser
 from .clan_member import ClanMember

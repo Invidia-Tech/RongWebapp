@@ -2,9 +2,9 @@ from typing import Union
 
 from django.conf import settings
 from django.db import connection, models
+from django.utils.functional import cached_property
 from django.utils.html import format_html
 from requests_oauthlib import OAuth2Session
-from django.utils.functional import cached_property
 
 from .bot_models import DiscordRoleMember
 from .clan import Clan
@@ -19,6 +19,7 @@ class User(models.Model):
     display_pic = models.CharField(max_length=6, default='105811')
     single_mode = models.BooleanField(default=True)
     clans = models.ManyToManyField('Clan', through='ClanMember')
+    is_superadmin = models.BooleanField(default=False)
 
     def check_single_mode(self):
         if not self.single_mode:
@@ -71,18 +72,18 @@ class User(models.Model):
 
     @cached_property
     def managed_clan_ids(self):
+        if self.is_superadmin:
+            return Clan.objects.values_list('id', flat=True)
         with connection.cursor() as cur:
             cur.execute("""
 SELECT cl."id"
 FROM "rong_clan" cl
-JOIN "rong_clancollection" cc ON cl."collection_id" = cc."id"
 LEFT JOIN "rong_clanmember" cm ON (cl."id" = cm."clan_id" AND cm."user_id" = %s)
 WHERE (
 	(cm."id" IS NOT NULL AND cm."is_lead" IS TRUE)
 	OR cl."admin_id" = %s
-	OR cc."owner_id" = %s
 );
-            """, [self.id] * 3)
+            """, [self.id] * 2)
             return [row[0] for row in cur.fetchall()]
 
     @cached_property
@@ -90,14 +91,13 @@ WHERE (
         return Clan.objects.filter(id__in=self.managed_clan_ids)
 
     def can_administrate(self, clan: Clan):
-        return clan.admin_id == self.id or clan.collection.owner_id == self.id
+        return self.is_superadmin or clan.admin_id == self.id
 
     def can_manage(self, entity: Union[Clan, ClanBattle]):
         return entity.get_clan_id() in self.managed_clan_ids
 
     def can_view(self, entity: Union[Clan, ClanBattle]):
-        cl_id = entity.get_clan_id()
-        return cl_id in self.managed_clan_ids or self.clan_memberships.filter(clan_id=cl_id).exists()
+        return entity.can_be_viewed_by(self)
 
     def in_clan(self, clan):
         return self.clan_memberships.filter(clan_id=clan.id).exists()

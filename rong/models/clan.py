@@ -9,7 +9,6 @@ from .clan_member import ClanMember
 
 
 class Clan(models.Model):
-    collection = models.ForeignKey('ClanCollection', on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     platform_id = models.CharField(max_length=30, db_index=True)
     admin = models.ForeignKey(
@@ -21,15 +20,20 @@ class Clan(models.Model):
 
     @cached_property
     def current_cb(self):
-        return self.clanbattle_set.filter(end_time__gt=timezone.now()).order_by('start_time').first()
+        return self.clanbattle_set.exclude(start_time=None).filter(end_time__gt=timezone.now()).order_by('start_time').first()
 
     @cached_property
     def future_cbs(self):
-        return self.clanbattle_set.filter(end_time__gt=timezone.now()).order_by('start_time')[1:]
+        near_future_cbs = self.clanbattle_set.exclude(start_time=None).filter(end_time__gt=timezone.now()).order_by('start_time')[1:]
+        undated_cbs = self.clanbattle_set.filter(start_time=None).order_by('order')
+        return list(near_future_cbs) + list(undated_cbs)
 
     @cached_property
     def past_cbs(self):
-        return self.clanbattle_set.filter(end_time__lte=timezone.now()).order_by('-start_time')
+        return self.clanbattle_set.exclude(start_time=None).filter(end_time__lte=timezone.now()).order_by('-start_time')
+
+    def can_be_viewed_by(self, user):
+        return self.id in user.managed_clan_ids or self.members.filter(user=user).exists()
 
     def sync_members(self):
         if not self.platform_id:

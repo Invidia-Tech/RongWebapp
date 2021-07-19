@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.timezone import now
+
 
 class PrincessArenaComp(models.Model):
     name = models.CharField(max_length=20)

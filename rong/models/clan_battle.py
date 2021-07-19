@@ -51,8 +51,8 @@ class ClanBattle(models.Model):
     clan = models.ForeignKey('Clan', on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     slug = AutoSlugField(populate_from=['clan__name', 'name'], unique=True)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
     boss1_name = models.CharField(max_length=50, blank=True)
     boss2_name = models.CharField(max_length=50, blank=True)
     boss3_name = models.CharField(max_length=50, blank=True)
@@ -66,6 +66,8 @@ class ClanBattle(models.Model):
     current_lap = models.PositiveIntegerField(null=True)
     current_boss = models.PositiveIntegerField(null=True)
     current_hp = models.PositiveIntegerField(null=True)
+    viewable_by_members = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
 
     HITS_PER_DAY = 3
 
@@ -127,6 +129,24 @@ class ClanBattle(models.Model):
                 map_info.save()
                 difficulty += 1
                 last_id = current_id
+
+    def can_be_viewed_by(self, user):
+        # Leads can always view CBs.
+        if self.clan_id in user.managed_clan_ids:
+            return True
+        # Members can never view hidden CBs.
+        if not self.viewable_by_members:
+            return False
+        # Otherwise, members can only see CBs if either of the following is true:
+        # * The CB has not finished yet or is undated.
+        # * They did at least one hit in the CB.
+        # They must also be a current member of the clan,
+        # aka you can't see historical data from clans you've left for now.
+        if not user.clan_memberships.filter(clan_id=self.clan_id).exists():
+            return False
+        if self.start_time is None or self.end_time > timezone.now():
+            return True
+        return self.hits.filter(user=user).exists()
 
     def lap_info(self, lap):
         return self.bosses.get(
@@ -190,6 +210,8 @@ class ClanBattle(models.Model):
 
     @cached_property
     def in_progress(self):
+        if self.start_time is None or self.end_time is None:
+            return False
         now = timezone.now()
         return self.start_time <= now and self.end_time > now
 
@@ -201,6 +223,8 @@ class ClanBattle(models.Model):
 
     @cached_property
     def current_day(self):
+        if self.start_time is None or self.end_time is None:
+            return 0
         now = timezone.now()
         first_day_reset = self.start_time.replace(hour=13, minute=0, second=0, microsecond=0)
         started_before_reset = self.start_time.hour < 13
@@ -208,6 +232,8 @@ class ClanBattle(models.Model):
 
     @cached_property
     def total_days(self):
+        if self.start_time is None or self.end_time is None:
+            return 0
         first_day_reset = self.start_time.replace(hour=13, minute=0, second=0, microsecond=0)
         started_before_reset = self.start_time.hour < 13
         return math.floor((self.end_time - first_day_reset).total_seconds() / 86400) + (
@@ -283,6 +309,8 @@ class ClanBattle(models.Model):
 
     @cached_property
     def ended(self):
+        if self.start_time is None:
+            return False
         now = timezone.now()
         return self.end_time <= now
 
@@ -362,7 +390,7 @@ class ClanBattle(models.Model):
             entry['total_score'] += hit.score
             stats["daily_damage"][hit.day - 1] += hit.actual_damage
             stats["daily_score"][hit.day - 1] += hit.score
-            stats["daily_laps"][hit.day - 1] += hit.actual_damage/curr_boss_info["lap_hp"]
+            stats["daily_laps"][hit.day - 1] += hit.actual_damage / curr_boss_info["lap_hp"]
             entry['days'][hit.day - 1]['damage'] += hit.actual_damage
             entry['days'][hit.day - 1]['score'] += hit.score
             hit.hit_index = int(entry['days'][hit.day - 1]['hits'])
@@ -372,7 +400,8 @@ class ClanBattle(models.Model):
                 entry['days'][hit.day - 1]['hits'] += 1
             else:
                 entry['days'][hit.day - 1]['hits'] += 0.5
-            if hit.hit_type == ClanBattleHitType.NORMAL or (hit.hit_type == ClanBattleHitType.LAST_HIT and hit.damage / hit.actual_damage >= 1.1):
+            if hit.hit_type == ClanBattleHitType.NORMAL or (
+                    hit.hit_type == ClanBattleHitType.LAST_HIT and hit.damage / hit.actual_damage >= 1.1):
                 weightable_hits[hit.difficulty][hit.boss_number - 1] += 1
                 weightable_dmg[hit.difficulty][hit.boss_number - 1] += hit.damage
                 weight_ts += math.ceil(hit.damage * curr_boss_info["info"][hit.boss_number - 1]["multiplier"])
@@ -397,11 +426,9 @@ class ClanBattle(models.Model):
 
         # cumu stuff
         for n in range(self.total_days):
-            stats["cumu_damage"][n] = sum(stats["daily_damage"][0:n+1])
-            stats["cumu_score"][n] = sum(stats["daily_score"][0:n+1])
-            stats["cumu_ascore"][n] = sum(stats["daily_ascore"][0:n+1])
-            stats["cumu_laps"][n] = sum(stats["daily_laps"][0:n+1])
+            stats["cumu_damage"][n] = sum(stats["daily_damage"][0:n + 1])
+            stats["cumu_score"][n] = sum(stats["daily_score"][0:n + 1])
+            stats["cumu_ascore"][n] = sum(stats["daily_ascore"][0:n + 1])
+            stats["cumu_laps"][n] = sum(stats["daily_laps"][0:n + 1])
         stats["players"] = list(hit_matrix.values())
         return stats
-
-

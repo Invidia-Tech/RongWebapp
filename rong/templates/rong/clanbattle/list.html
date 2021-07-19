@@ -16,30 +16,30 @@
 
 {% block content %}
     <h2>{{ clan.name }}'s Clan Battles</h2>
-    {% if not clan.current_cb and not clan.past_cbs %}
+    {% if not current_cb and not past_cbs and not future_cbs %}
         <p><i>This clan has no Clan Battles defined!</i></p>
     {% endif %}
-    {% if clan.current_cb %}
-        <h3>{% if clan.current_cb.in_progress %}Current{% else %}Upcoming{% endif %} Clan Battle</h3>
-        {% if clan.current_cb.in_progress %}
+    {% if current_cb %}
+        <h3>{% if current_cb.in_progress %}Current{% else %}Upcoming{% endif %} Clan Battle</h3>
+        {% if current_cb.in_progress %}
             {# current #}
             <div class="jumbotron text-center position-relative">
                 <div class="row align-items-center mb-3">
                     <div class="col-md-3"></div>
                     <div class="col-md-6 text-center">
-                        <h1 class="display-3">{{ clan.current_cb.name }}</h1>
+                        <h1 class="display-3">{{ current_cb.name }}</h1>
                     </div>
                     <div class="col-md-3">
                         <div class="row text-left">
                             <div class="col">
-                                Day {{ clan.current_cb.current_day }}/{{ clan.current_cb.total_days }}</div>
+                                Day {{ current_cb.current_day }}/{{ current_cb.total_days }}</div>
                         </div>
                         <div class="row text-left">
                             <div class="col">
-                                {% if clan.current_cb.next_reset < clan.current_cb.end_time %}
-                                    Reset in <b>{{ clan.current_cb.next_reset|timeuntil }}</b>
+                                {% if current_cb.next_reset < current_cb.end_time %}
+                                    Reset in <b>{{ current_cb.next_reset|timeuntil }}</b>
                                 {% else %}
-                                    Ends in <b>{{ clan.current_cb.end_time|timeuntil }}</b>
+                                    Ends in <b>{{ current_cb.end_time|timeuntil }}</b>
                                 {% endif %}
                             </div>
                         </div>
@@ -55,33 +55,34 @@
                 </div>
                 <div class="row align-items-center mb-3">
                     <div class="{% if in_clan %}col-md-4{% else %}col-md-6{% endif %}">
-                        {% enemy_icon clan.current_cb.current_boss_icon alt=clan.current_cb.current_boss_name %}
+                        {% enemy_icon current_cb.current_boss_icon alt=current_cb.current_boss_name %}
                         <p>
-                            Lap {{ clan.current_cb.current_lap }} {{ clan.current_cb.current_boss_name }}<br>
-                            {{ clan.current_cb.current_hp|intcomma }} HP left
+                            Lap {{ current_cb.current_lap }} {{ current_cb.current_boss_name }}<br>
+                            {{ current_cb.current_hp|intcomma }} HP left
                         </p>
                     </div>
                     <div class="{% if in_clan %}col-md-4{% else %}col-md-6{% endif %}">
                         <p>
-                            {{ clan.current_cb.hits_today|format_hits }} hits used, {{ clan.current_cb.hits_left_today|format_hits }} left<br/>
-                            {{ clan.current_cb.damage_dealt_today|intcomma }} damage
-                            dealt, {{ clan.current_cb.bosses_killed_today }} bosses killed
+                            {{ current_cb.hits_today|format_hits }} hits
+                            used, {{ current_cb.hits_left_today|format_hits }} left<br/>
+                            {{ current_cb.damage_dealt_today|intcomma }} damage
+                            dealt, {{ current_cb.bosses_killed_today }} bosses killed
                         </p>
-                    <div class="elevated-button-holder">
-                        <a href="{% url 'rong:cb_list_hits' clan.current_cb.slug %}" class="btn btn-primary">Hit Log</a>
-                    </div>
+                        <div class="elevated-button-holder">
+                            <a href="{% url 'rong:cb_list_hits' current_cb.slug %}" class="btn btn-primary">Hit Log</a>
+                        </div>
                     </div>
                     {% if in_clan %}
                         <div class="col-md-4">
                             <p>
-                                {% user_hits_today clan.current_cb request.user %} hits
-                                used, {% user_hits_left_today clan.current_cb request.user %} left<br>
-                                {% user_damage_today clan.current_cb request.user %} damage dealt today
+                                {% user_hits_today current_cb request.user %} hits
+                                used, {% user_hits_left_today current_cb request.user %} left<br>
+                                {% user_damage_today current_cb request.user %} damage dealt today
                             </p>
                         </div>
                     {% endif %}
                 </div>
-                <h3><a href="{% url 'rong:cb_view' clan.current_cb.slug %}" class="stretched-link">Click to open
+                <h3><a href="{% url 'rong:cb_view' current_cb.slug %}" class="stretched-link">Click to open
                     dashboard</a></h3>
             </div>
         {% else %}
@@ -90,36 +91,36 @@
                 <div class="row align-items-center mb-3">
                     <div class="col-md-3"></div>
                     <div class="col-md-6 text-center">
-                        <h1 class="display-3">{{ clan.current_cb.name }}</h1>
+                        <h1 class="display-3">{{ current_cb.name }}</h1>
                     </div>
                     <div class="col-md-3">
                         <div class="row">
                             <div class="col-md-5">Starts in</div>
-                            <div class="col-md-7">{{ clan.current_cb.start_time|timeuntil }}</div>
+                            <div class="col-md-7">{{ current_cb.start_time|timeuntil }}</div>
                         </div>
                         <div class="row">
                             <div class="col-md-5">Ends in</div>
-                            <div class="col-md-7">{{ clan.current_cb.end_time|timeuntil }}</div>
+                            <div class="col-md-7">{{ current_cb.end_time|timeuntil }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    {% for boss in clan.current_cb.boss_list %}
+                    {% for boss in current_cb.boss_list %}
                         <div class="col-boss">
                             {% enemy_icon boss.icon alt=boss.name %}<br/>
                             {{ boss.name }}
                         </div>
                     {% endfor %}
                 </div>
-                <h3><a href="{% url 'rong:cb_view' clan.current_cb.slug %}" class="stretched-link">Click to open
+                <h3><a href="{% url 'rong:cb_view' current_cb.slug %}" class="stretched-link">Click to open
                     dashboard</a></h3>
             </div>
         {% endif %}
     {% endif %}
-    {% if clan.future_cbs %}
+    {% if future_cbs %}
         <h3>Future Clan Battles</h3>
         <table class="table w-100">
-            {% for cb in clan.future_cbs %}
+            {% for cb in future_cbs %}
                 <tr>
                     <td class="align-middle w-15">{{ cb.name }}</td>
                     <td class="align-middle w-55">
@@ -131,16 +132,23 @@
                             {% endfor %}
                         </div>
                     </td>
-                    <td class="align-middle w-15">{{ cb.start_time|date:"Y/m/d" }}-{{ cb.end_time|date:"Y/m/d" }}</td>
-                    <td class="align-middle w-15"><a class="btn btn-primary" href="{% url 'rong:cb_view' cb.slug %}">Dashboard</a></td>
+                    <td class="align-middle w-15">
+                        {% if cb.start_time %}
+                            {{ cb.start_time|date:"Y/m/d" }}-{{ cb.end_time|date:"Y/m/d" }}
+                        {% else %}
+                            <i>No dates yet</i>
+                        {% endif %}
+                    </td>
+                    <td class="align-middle w-15"><a class="btn btn-primary" href="{% url 'rong:cb_view' cb.slug %}">Dashboard</a>
+                    </td>
                 </tr>
             {% endfor %}
         </table>
     {% endif %}
-    {% if clan.past_cbs %}
+    {% if past_cbs %}
         <h3>Past Clan Battles</h3>
         <table class="table w-100">
-            {% for cb in clan.past_cbs %}
+            {% for cb in past_cbs %}
                 <tr>
                     <td class="align-middle w-15">{{ cb.name }}</td>
                     <td class="align-middle w-55">
@@ -153,7 +161,8 @@
                         </div>
                     </td>
                     <td class="align-middle w-15">{{ cb.start_time|date:"Y/m/d" }}-{{ cb.end_time|date:"Y/m/d" }}</td>
-                    <td class="align-middle w-15"><a class="btn btn-primary" href="{% url 'rong:cb_view' cb.slug %}">Summary</a></td>
+                    <td class="align-middle w-15"><a class="btn btn-primary" href="{% url 'rong:cb_view' cb.slug %}">Summary</a>
+                    </td>
                 </tr>
             {% endfor %}
         </table>

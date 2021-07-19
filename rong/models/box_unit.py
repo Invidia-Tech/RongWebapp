@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Max
 from django.forms.models import model_to_dict
 
-from .redive_models import Unit, SkillCost, UnitPromotion
+from .redive_models import Unit, SkillCost
 
 
 def valid_box_unit(value):
@@ -22,7 +22,9 @@ def valid_level(value):
     if value <= 0 or value > BoxUnit.max_level():
         raise ValidationError('Invalid unit level')
 
+
 promotion_cache = {}
+
 
 class BoxUnit(models.Model):
     box = models.ForeignKey('Box', on_delete=models.CASCADE)

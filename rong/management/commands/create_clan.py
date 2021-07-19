@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from rong.models import Clan, DiscordServerRole, ClanCollection, DiscordMember, User
+from rong.models import Clan, DiscordServerRole, DiscordMember, User
 
 
 class Command(BaseCommand):
@@ -16,9 +16,6 @@ class Command(BaseCommand):
         role_info = DiscordServerRole.objects.filter(role_id=options['role_id']).first()
         if not role_info:
             raise CommandError("I don't know that role, please get the bot into its server first")
-        cc = ClanCollection.objects.filter(platform_id=role_info.server_id).first()
-        if not cc:
-            raise CommandError("No clan collection found for that role's server, please create_clancollection first")
         dm_info = DiscordMember.objects.filter(member_id=options['admin_id']).first()
         if not dm_info:
             raise CommandError("I don't know that member, please make sure they're in the server")
@@ -29,7 +26,7 @@ class Command(BaseCommand):
                         discriminator=dm_info.discriminator)
             user.save()
         # create clan
-        clan = Clan(name=options['name'], collection=cc, admin=user, platform_id=options['role_id'])
+        clan = Clan(name=options['name'], admin=user, platform_id=options['role_id'])
         clan.save()
         clan.sync_members()
-        print("Successfully created clan %s in collection %s with admin %s#%04d" % (clan.name, cc.name, user.name, user.discriminator))
+        print("Successfully created clan %s with admin %s#%04d" % (clan.name, user.name, user.discriminator))

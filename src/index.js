@@ -35,6 +35,18 @@ $(document).ready(function () {
         }
         $t.DataTable(opt);
     });
+    $(".datetimefield").each(function () {
+        let dtfield = this;
+        let clearButton = $("<button type='button' class='btn btn-outline-danger'><i class=\"fa fa-close\"></i></button>");
+        clearButton.click(function () {
+            if (typeof dtfield._flatpickr !== "undefined") {
+                dtfield._flatpickr.clear();
+            } else {
+                $(dtfield).val('');
+            }
+        });
+        $(this).parent().addClass("input-group").append($("<span class='input-group-append'></span>").append(clearButton));
+    });
     flatpickr(".datetimefield", {
         enableTime: true,
         enableSeconds: true,

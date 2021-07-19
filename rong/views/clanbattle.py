@@ -119,6 +119,9 @@ def list_battles(request, clan):
     # do something
     ctx = {
         'in_clan': request.user.in_clan(clan),
-        'clan': clan
+        'clan': clan,
+        'current_cb': clan.current_cb if clan.current_cb and request.user.can_view(clan.current_cb) else None,
+        'future_cbs': [cb for cb in clan.future_cbs if request.user.can_view(cb)],
+        'past_cbs': [cb for cb in clan.past_cbs if request.user.can_view(cb)],
     }
     return render(request, 'rong/clanbattle/list.html', ctx)

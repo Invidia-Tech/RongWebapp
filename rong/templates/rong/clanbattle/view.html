@@ -119,7 +119,13 @@
         <p>This CB ended {{ battle.end_time|naturaltime }}.</p>
         <a href="{% url 'rong:cb_list_hits' battle.slug %}" class="btn btn-primary">Hit Log</a>
     {% else %}
-        <p>This CB starts in {{ battle.start_time|naturaltime }}.</p>
+        <p>
+        {% if battle.start_time %}
+            This CB starts in {{ battle.start_time|naturaltime }}.
+        {% else %}
+            This is a future CB without dates set yet.
+        {% endif %}
+        </p>
     {% endif %}
     <hr>
     {% if battle.in_progress or battle.ended %}

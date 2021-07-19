@@ -35,8 +35,8 @@
                 <td class="member-ign">{% if member.ign %}{{ member.ign }}{% else %}N/A{% endif %}</td>
                 <td class="member-pid">{{ member.formatted_id }}</td>
                 <td class="member-lead">
-                    {% if member.user_id == clan.collection.owner_id %}
-                        Owner
+                    {% if member.user.is_superadmin %}
+                        SuperAdmin
                     {% elif member.user_id == clan.admin_id %}
                         Leader
                     {% elif member.is_lead %}

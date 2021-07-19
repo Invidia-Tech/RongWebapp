@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.timezone import now
+
 
 class BattleArenaCounter(models.Model):
     submitter = models.ForeignKey('User', null=True, on_delete=models.SET_NULL)
@@ -11,4 +11,3 @@ class BattleArenaCounter(models.Model):
     notes = models.TextField()
     attacker_team = models.ForeignKey('Team', on_delete=models.CASCADE, related_name='attacker_in')
     defender_team = models.ForeignKey('Team', on_delete=models.CASCADE, related_name='defender_in')
-    

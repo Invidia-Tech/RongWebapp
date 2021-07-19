@@ -162,6 +162,18 @@ class AddClanBattleForm(forms.ModelForm):
     field_order = ['name', 'start_time', 'end_time', 'data_source', 'boss1_name', 'boss2_name', 'boss3_name',
                    'boss4_name', 'boss5_name']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["start_time"].required = False
+        self.fields["end_time"].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if (not not cleaned_data["start_time"]) + (not not cleaned_data["end_time"]) == 1:
+            raise ValidationError("Clan Battles must have either both dates filled in or neither date filled in.")
+        return cleaned_data
+
     class Meta:
         model = ClanBattle
         fields = ['name', 'start_time', 'end_time', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
@@ -194,6 +206,18 @@ class EditClanBattleForm(forms.ModelForm):
 
     field_order = ['name', 'start_time', 'end_time', 'data_source', 'boss1_name', 'boss2_name', 'boss3_name',
                    'boss4_name', 'boss5_name']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["start_time"].required = False
+        self.fields["end_time"].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if (not not cleaned_data["start_time"]) + (not not cleaned_data["end_time"]) == 1:
+            raise ValidationError("Clan Battles must have either both dates filled in or neither date filled in.")
+        return cleaned_data
 
     class Meta:
         model = ClanBattle
