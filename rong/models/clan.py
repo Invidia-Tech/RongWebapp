@@ -33,7 +33,7 @@ class Clan(models.Model):
         return self.clanbattle_set.exclude(start_time=None).filter(end_time__lte=timezone.now()).order_by('-start_time')
 
     def can_be_viewed_by(self, user):
-        return self.id in user.managed_clan_ids or self.members.filter(user=user).exists()
+        return self.id in user.managed_clan_ids or user.in_clan(self)
 
     def sync_members(self):
         if not self.platform_id:
@@ -53,7 +53,12 @@ class Clan(models.Model):
                              discriminator=imember.member.discriminator)
                     u.save()
                 # register them as part of the clan, either way
-                cm = ClanMember(user=u, clan=self)
+                cm = ClanMember.objects.get_or_create(user=u, clan=self)
+                cm.active = True
                 cm.save()
         # delete unwanted members
-        self.members.exclude(user__platform_id__in=member_id_list).delete()
+        self.all_members.exclude(user__platform_id__in=member_id_list).update(active=False, box=None)
+
+    @property
+    def members(self):
+        return self.all_members.filter(active=True)

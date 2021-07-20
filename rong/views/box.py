@@ -41,7 +41,7 @@ def alter_boxunit(request: HttpRequest, box_id, boxunit_id):
 
 @login_required
 def import_box(request: HttpRequest, box_id):
-    box = get_object_or_404(request.user.box_set.prefetch_related('boxunit_set'), pk=box_id)
+    box = get_object_or_404(request.user.detailed_boxes, pk=box_id)
     if request.method == 'POST':
         form = ImportTWArmoryBoxForm(request.POST)
         if form.is_valid():
@@ -224,5 +224,5 @@ def create_box(request: HttpRequest):
 @login_required
 def index(request: HttpRequest):
     request.user.check_single_mode()
-    boxes = [box.meta_json() for box in request.user.box_set.all()]
+    boxes = [box.meta_json() for box in request.user.detailed_boxes.all()]
     return render(request, 'rong/box/index.html', {"boxes": boxes})

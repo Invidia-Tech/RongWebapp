@@ -117,6 +117,7 @@ def view_battle(request, battle: ClanBattle):
 @clan_view
 def list_battles(request, clan):
     # do something
+    request.user.preload_perms()
     ctx = {
         'in_clan': request.user.in_clan(clan),
         'clan': clan,

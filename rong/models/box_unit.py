@@ -55,10 +55,7 @@ class BoxUnit(models.Model):
     def edit_json(self):
         base = model_to_dict(self)
         base["unit"] = model_to_dict(self.unit)
-        if self.unit_id not in promotion_cache:
-            promotion_cache[self.unit_id] = list(self.unit.ranks.all())
-        ranks = promotion_cache[self.unit_id]
-        base["ranks"] = [[rk.equip1, rk.equip2, rk.equip3, rk.equip4, rk.equip5, rk.equip6] for rk in ranks]
+        base["ranks"] = [[rk.equip1, rk.equip2, rk.equip3, rk.equip4, rk.equip5, rk.equip6] for rk in self.unit.ranks.all()]
         base["max_level"] = BoxUnit.max_level()
         return base
 

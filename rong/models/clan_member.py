@@ -3,13 +3,14 @@ from django.db import models
 
 
 class ClanMember(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='clan_memberships')
-    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='members')
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='all_clan_memberships')
+    clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='all_members')
     ign = models.CharField(max_length=20, null=True)
     player_id = models.PositiveIntegerField(null=True)
     is_lead = models.BooleanField(default=False)
     group_num = models.PositiveIntegerField(null=True)
     box = models.OneToOneField('Box', null=True, on_delete=models.SET_NULL)
+    active = models.BooleanField(default=True)
 
     @property
     def formatted_id(self):

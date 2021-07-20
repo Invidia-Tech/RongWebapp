@@ -6,6 +6,7 @@ from django.utils.functional import cached_property
 from django.utils.html import format_html
 from requests_oauthlib import OAuth2Session
 
+from .clan_battle_score import ClanBattleScore
 from .bot_models import DiscordRoleMember
 from .clan import Clan
 from .clan_battle import ClanBattle
@@ -47,16 +48,19 @@ class User(models.Model):
         all_clans = {clan.platform_id: clan for clan in Clan.objects.all()}
         roles_member_of = [rolemember.role_id for rolemember in DiscordRoleMember.objects.filter(
             member_id=self.platform_id, role_id__in=all_clans.keys())]
-        current_membership_roles = [
-            membership.clan.platform_id for membership in self.clan_memberships.select_related('clan')]
+        current_membership_roles = {
+            membership.clan.platform_id: membership for membership in self.all_clan_memberships.select_related('clan')}
         # add missing clanmembers
         for role in roles_member_of:
             if role not in current_membership_roles:
                 membership = ClanMember(user=self, clan=all_clans[role])
                 membership.save()
+            elif not current_membership_roles[role].active:
+                current_membership_roles[role].active = True
+                current_membership_roles[role].save()
         # remove incorrect clanmembers
         self.clan_memberships.exclude(
-            clan__platform_id__in=roles_member_of).delete()
+            clan__platform_id__in=roles_member_of).update(active=False, box=None)
 
     def for_discord_session(session: OAuth2Session):
         r = session.get('%s/users/@me' % settings.DISCORD_BASE_URL)
@@ -99,8 +103,19 @@ WHERE (
     def can_view(self, entity: Union[Clan, ClanBattle]):
         return entity.can_be_viewed_by(self)
 
+    def preload_perms(self):
+        self.clan_ids = self.clan_memberships.values_list('clan_id', flat=True)
+        self.cbs_with_scores = set(ClanBattleScore.objects.filter(user=self).values_list('clan_battle_id', flat=True))
+
     def in_clan(self, clan):
+        if hasattr(self, 'clan_ids'):
+            return clan.id in self.clan_ids
         return self.clan_memberships.filter(clan_id=clan.id).exists()
+
+    def participated_in(self, battle):
+        if hasattr(self, 'cbs_with_scores'):
+            return battle.id in self.cbs_with_scores
+        return battle.hits.filter(user=self).exists()
 
     @property
     def is_authenticated(self):
@@ -113,6 +128,14 @@ WHERE (
     @property
     def plaindiscordname(self):
         return "%s#%04d" % (self.name, self.discriminator)
+
+    @property
+    def clan_memberships(self):
+        return self.all_clan_memberships.filter(active=True)
+
+    @property
+    def detailed_boxes(self):
+        return self.box_set.select_related("clanmember", "clanmember__clan").prefetch_related('boxunit_set__unit__ranks')
 
 
 class AnonymousUser:

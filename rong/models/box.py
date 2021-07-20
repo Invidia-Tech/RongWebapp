@@ -21,7 +21,9 @@ class Box(models.Model):
         # use a consistent order for NOW
         # can be removed if wanted after sorts implemented on frontend
         units = OrderedDict()
-        for unit in self.boxunit_set.all().select_related('unit').order_by('pk'):
+        ordered_units = list(self.boxunit_set.all())
+        ordered_units.sort(key=lambda x: x.id)
+        for unit in self.boxunit_set.all():
             units[unit.id] = unit.edit_json()
         return units
 

@@ -142,11 +142,11 @@ class ClanBattle(models.Model):
         # * They did at least one hit in the CB.
         # They must also be a current member of the clan,
         # aka you can't see historical data from clans you've left for now.
-        if not user.clan_memberships.filter(clan_id=self.clan_id).exists():
+        if not user.in_clan(self.clan):
             return False
         if self.start_time is None or self.end_time > timezone.now():
             return True
-        return self.hits.filter(user=user).exists()
+        return user.participated_in(self)
 
     def lap_info(self, lap):
         return self.bosses.get(
