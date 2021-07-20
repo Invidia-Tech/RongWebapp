@@ -20,11 +20,13 @@ class Clan(models.Model):
 
     @cached_property
     def current_cb(self):
-        return self.clanbattle_set.exclude(start_time=None).filter(end_time__gt=timezone.now()).order_by('start_time').first()
+        return self.clanbattle_set.exclude(start_time=None).filter(end_time__gt=timezone.now()).order_by(
+            'start_time').first()
 
     @cached_property
     def future_cbs(self):
-        near_future_cbs = self.clanbattle_set.exclude(start_time=None).filter(end_time__gt=timezone.now()).order_by('start_time')[1:]
+        near_future_cbs = self.clanbattle_set.exclude(start_time=None).filter(end_time__gt=timezone.now()).order_by(
+            'start_time')[1:]
         undated_cbs = self.clanbattle_set.filter(start_time=None).order_by('order')
         return list(near_future_cbs) + list(undated_cbs)
 
@@ -57,7 +59,8 @@ class Clan(models.Model):
                 cm.active = True
                 cm.save()
         # delete unwanted members
-        self.all_members.exclude(user__platform_id__in=member_id_list).update(active=False, box=None)
+        self.all_members.exclude(user__platform_id__in=member_id_list).update(active=False, box=None, is_lead=False,
+                                                                              group_num=None)
 
     @property
     def members(self):

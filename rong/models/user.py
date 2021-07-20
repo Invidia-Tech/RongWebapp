@@ -6,10 +6,10 @@ from django.utils.functional import cached_property
 from django.utils.html import format_html
 from requests_oauthlib import OAuth2Session
 
-from .clan_battle_score import ClanBattleScore
 from .bot_models import DiscordRoleMember
 from .clan import Clan
 from .clan_battle import ClanBattle
+from .clan_battle_score import ClanBattleScore
 from .clan_member import ClanMember
 
 
@@ -60,7 +60,7 @@ class User(models.Model):
                 current_membership_roles[role].save()
         # remove incorrect clanmembers
         self.clan_memberships.exclude(
-            clan__platform_id__in=roles_member_of).update(active=False, box=None)
+            clan__platform_id__in=roles_member_of).update(active=False, box=None, is_lead=False, group_num=None)
 
     def for_discord_session(session: OAuth2Session):
         r = session.get('%s/users/@me' % settings.DISCORD_BASE_URL)
@@ -135,7 +135,8 @@ WHERE (
 
     @property
     def detailed_boxes(self):
-        return self.box_set.select_related("clanmember", "clanmember__clan").prefetch_related('boxunit_set__unit__ranks')
+        return self.box_set.select_related("clanmember", "clanmember__clan").prefetch_related(
+            'boxunit_set__unit__ranks')
 
 
 class AnonymousUser:
