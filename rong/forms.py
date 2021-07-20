@@ -159,7 +159,7 @@ def get_cb_data_source_choices(blank_str='--Choose--'):
 class AddClanBattleForm(forms.ModelForm):
     data_source = forms.ChoiceField(choices=get_cb_data_source_choices, required=True)
 
-    field_order = ['name', 'start_time', 'end_time', 'data_source', 'boss1_name', 'boss2_name', 'boss3_name',
+    field_order = ['name', 'start_time', 'end_time', 'viewable_by_members', 'data_source', 'boss1_name', 'boss2_name', 'boss3_name',
                    'boss4_name', 'boss5_name']
 
     def __init__(self, *args, **kwargs):
@@ -176,7 +176,7 @@ class AddClanBattleForm(forms.ModelForm):
 
     class Meta:
         model = ClanBattle
-        fields = ['name', 'start_time', 'end_time', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
+        fields = ['name', 'start_time', 'end_time', 'viewable_by_members', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
                   'boss5_name']
         widgets = {
             'start_time': forms.DateTimeInput(format='%Y-%m-%d %H:%M:%S', attrs={'class': 'datetimefield'}),
@@ -197,6 +197,7 @@ class AddClanBattleForm(forms.ModelForm):
             'boss3_name': 'Leave blank to load from boss data',
             'boss4_name': 'Leave blank to load from boss data',
             'boss5_name': 'Leave blank to load from boss data',
+            'viewable_by_members': 'Turn this off to completely hide the CB from non-leads. Should usually only be used for future CBs.',
         }
 
 
@@ -204,7 +205,7 @@ class EditClanBattleForm(forms.ModelForm):
     data_source = forms.ChoiceField(choices=get_cb_data_source_choices('Keep Current'), required=False,
                                     help_text='Optional. Current data will be kept if not selected.')
 
-    field_order = ['name', 'start_time', 'end_time', 'data_source', 'boss1_name', 'boss2_name', 'boss3_name',
+    field_order = ['name', 'start_time', 'end_time', 'data_source', 'viewable_by_members', 'boss1_name', 'boss2_name', 'boss3_name',
                    'boss4_name', 'boss5_name']
 
     def __init__(self, *args, **kwargs):
@@ -221,7 +222,7 @@ class EditClanBattleForm(forms.ModelForm):
 
     class Meta:
         model = ClanBattle
-        fields = ['name', 'start_time', 'end_time', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
+        fields = ['name', 'start_time', 'end_time', 'viewable_by_members', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
                   'boss5_name']
         widgets = {
             'start_time': forms.DateTimeInput(format='%Y-%m-%d %H:%M:%S', attrs={'class': 'datetimefield'}),
@@ -242,6 +243,7 @@ class EditClanBattleForm(forms.ModelForm):
             'boss3_name': 'Empty to load from boss data',
             'boss4_name': 'Empty to load from boss data',
             'boss5_name': 'Empty to load from boss data',
+            'viewable_by_members': 'Turn this off to completely hide the CB from non-leads. Should usually only be used for future CBs.',
         }
 
 
