@@ -9,4 +9,4 @@ RUN pip install -r requirements.txt
 COPY . .
 RUN npm ci && npm run build
 EXPOSE 8000
-CMD [ "./migrate_and_update.sh", "&&", "python", "manage.py", "runserver" ]
+CMD [ "./launch.sh" ]
