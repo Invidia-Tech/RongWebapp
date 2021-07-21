@@ -65,6 +65,10 @@ $(document).ready(function () {
         allowClear: true
     });
 
+    $('.select2-multi').select2({
+        theme: 'bootstrap'
+    });
+
     // Javascript to enable link to tab
     var url = document.location.toString();
     if (url.match('#')) {

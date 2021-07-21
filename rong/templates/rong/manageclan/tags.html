@@ -1,0 +1,49 @@
+{% extends 'rong/layout.html' %}
+{% load rong_common %}
+{% load unit_icons %}
+
+{% load static %}
+{% load bootstrap4 %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block title %}{{ clan.name }} - Manage Hit Tags{% endblock %}
+
+{% block content %}
+    <div class="row header mb-3">
+        <div class="col-md-6"><h2>{{ clan.name }} &gt; Hit Tags</h2></div>
+        <div class="col-md-6 text-right"><a class="btn btn-primary" href="{% url 'rong:clan_add_hit_tag' clan.slug %}">Add
+            Tag</a></div>
+    </div>
+    {% if not clan.hit_tags.all %}
+        <p><i>This clan has no tags defined yet!</i></p>
+    {% else %}
+        <h3>Current Hit Tags</h3>
+        <table class="table">
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th># of Hits</th>
+                <th>Actions</th>
+            </tr>
+            {% for tag in clan.hit_tags.all %}
+                <tr data-name="{{ tag.name }}">
+                    <td>{{ tag.name }}</td>
+                    <td>{{ tag.description }}</td>
+                    <td>{{ tag.hits.count }}</td>
+                    <td>
+                        <a href="{% url 'rong:clan_edit_hit_tag' clan.slug tag.id %}"
+                           class="btn btn-primary" title="Edit"><i class="fa fa-edit"></i></a>
+                        <button class="btn btn-danger delete-group-button"
+                                data-url="{% url 'rong:clan_edit_hit_tag' clan.slug tag.id %}"
+                                title="Delete"><i class="fa fa-remove"></i></button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endblock %}

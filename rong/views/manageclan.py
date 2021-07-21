@@ -6,8 +6,8 @@ from django.urls import reverse
 
 from rong.decorators import clan_lead_view
 from rong.forms.manageclan import HitGroupForm, EditClanBattleForm, AddClanBattleForm, FullEditClanMemberForm, \
-    EditClanMemberForm
-from rong.models import ClanBattle, HitGroup
+    EditClanMemberForm, HitTagForm
+from rong.models import ClanBattle, HitGroup, HitTag
 
 
 @clan_lead_view
@@ -53,6 +53,51 @@ def add_hit_group(request, clan, battle_id):
             reverse('rong:clan_edit_battle', kwargs={'clan': clan.slug, 'battle_id': battle.id}) + '#hit-groups')
     else:
         raise SuspiciousOperation()
+
+
+@clan_lead_view
+def edit_hit_tag(request, clan, tag_id):
+    tag = get_object_or_404(clan.hit_tags, pk=tag_id)
+    if request.method == 'POST':
+        form = HitTagForm(request.POST, instance=tag)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Tag successfully edited.")
+            return redirect('rong:clan_list_hit_tags')
+    else:
+        form = HitTagForm(instance=tag)
+    ctx = {
+        'form': form,
+        'clan': clan,
+        'tag': tag,
+    }
+    return render(request, 'rong/manageclan/edit_tag.html', ctx)
+
+
+@clan_lead_view
+def add_hit_tag(request, clan):
+    if request.method == 'POST':
+        tag = HitTag(clan=clan)
+        form = HitTagForm(request.POST, instance=tag)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Tag successfully added.")
+            return redirect('rong:clan_list_hit_tags', clan.slug)
+    else:
+        form = HitTagForm()
+    ctx = {
+        'form': form,
+        'clan': clan
+    }
+    return render(request, 'rong/manageclan/add_tag.html', ctx)
+
+
+@clan_lead_view
+def list_hit_tags(request, clan):
+    ctx = {
+        "clan": clan,
+    }
+    return render(request, 'rong/manageclan/tags.html', ctx)
 
 
 @clan_lead_view

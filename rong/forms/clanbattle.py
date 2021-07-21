@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Max, Min, F
 from django.utils import timezone
 
-from rong.forms.fields import CBLabelModelChoiceField, UnitSelect
+from rong.forms.fields import CBLabelModelChoiceField, UnitSelect, CBLabelModelMultipleChoiceField
 from rong.models import ClanBattleScore, ClanBattle
 from rong.models.clan_battle_score import ClanBattleHitType
 from rong.models.team import create_team
@@ -16,6 +16,8 @@ class HitForm(forms.Form):
     group = CBLabelModelChoiceField(callback=lambda x: x.name, queryset=None,
                                     widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}), blank=True,
                                     empty_label="None", required=False)
+    tags = CBLabelModelMultipleChoiceField(callback=lambda x: x.name, queryset=None, required=False,
+                                           widget=forms.SelectMultiple(attrs={'class': 'select2-multi'}))
     unit1 = UnitSelect(label='Unit 1', required=False)
     unit2 = UnitSelect(label='Unit 2', required=False)
     unit3 = UnitSelect(label='Unit 3', required=False)
@@ -37,6 +39,13 @@ class HitForm(forms.Form):
             self.fields["group"].queryset = hg
             if hit.id:
                 self.fields["group"].initial = hit.group
+        tags = hit.clan_battle.clan.hit_tags.all()
+        if not tags:
+            del self.fields["tags"]
+        else:
+            self.fields["tags"].queryset = tags
+            if hit.id:
+                self.fields["tags"].initial = hit.tags.all()
         member_list = list(hit.clan_battle.clan.members.select_related('user'))
         member_list.sort(key=lambda member: member.user_display_name.lower())
         choices = [('', '--Select--')] + [(x.user_id, x.user_display_name) for x in member_list]
@@ -120,6 +129,10 @@ class HitForm(forms.Form):
         self.hit.damage = self.cleaned_data["damage"]
         if "group" in self.cleaned_data:
             self.hit.group = self.cleaned_data["group"]
+        if "tags" in self.cleaned_data:
+            self.hit.tags.clear()
+            if self.cleaned_data["tags"]:
+                self.hit.tags.add(*self.cleaned_data["tags"])
 
         # individual unit data?
         units = [x for x in (self.cleaned_data.get("unit%d" % unit) for unit in range(1, 6)) if x is not None]

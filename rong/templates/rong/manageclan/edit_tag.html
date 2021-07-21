@@ -1,0 +1,23 @@
+{% extends 'rong/layout.html' %}
+{% load rong_common %}
+{% load unit_icons %}
+
+{% load static %}
+{% load bootstrap4 %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block title %}Edit Hit Tag - {{ tag.name }}{% endblock %}
+
+{% block content %}
+    <h2>{{ clan.name }} &gt; <a href="{% url 'rong:clan_list_hit_tags' clan.slug %}">Hit Tags</a> &gt; Edit Hit Tag - {{ tag.name }}</h2>
+    <form role="form" method="post" action="">
+        {% csrf_token %}
+        {% bootstrap_form form layout='horizontal' bound_css_class='' %}
+        {% buttons submit='OK' %}{% endbuttons %}
+    </form>
+{% endblock %}

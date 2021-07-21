@@ -1,7 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from rong.models import HitGroup, ClanMember
+from rong.models import HitGroup, ClanMember, HitTag
 from rong.models.clan_battle import CB_DATA_SOURCES, ClanBattle
 
 
@@ -120,6 +120,12 @@ class EditClanBattleForm(forms.ModelForm):
 class HitGroupForm(forms.ModelForm):
     class Meta:
         model = HitGroup
+        fields = ['name', 'description']
+
+
+class HitTagForm(forms.ModelForm):
+    class Meta:
+        model = HitTag
         fields = ['name', 'description']
 
 
