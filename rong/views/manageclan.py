@@ -2,10 +2,56 @@ from django.contrib import messages
 from django.core.exceptions import SuspiciousOperation
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
 
 from rong.decorators import clan_lead_view
-from rong.forms import EditClanMemberForm, FullEditClanMemberForm, AddClanBattleForm, EditClanBattleForm
-from rong.models import ClanBattle
+from rong.forms import EditClanMemberForm, FullEditClanMemberForm, AddClanBattleForm, EditClanBattleForm, HitGroupForm
+from rong.models import ClanBattle, HitGroup
+
+
+@clan_lead_view
+def edit_hit_group(request, clan, battle_id, group_id):
+    battle = get_object_or_404(clan.clanbattle_set, pk=battle_id)
+    group = get_object_or_404(battle.hit_groups, pk=group_id)
+    if request.method == 'POST':
+        form = HitGroupForm(request.POST, instance=group)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Hit Group successfully edited.")
+        return redirect(
+            reverse('rong:clan_edit_battle', kwargs={'clan': clan.slug, 'battle_id': battle.id}) + '#hit-groups')
+    elif request.method == 'DELETE':
+        if group.hits.count():
+            return JsonResponse({'success': False, 'error': 'Cannot delete hit group with tagged hits.'})
+        else:
+            group.delete()
+            messages.add_message(request, messages.SUCCESS, "Hit Group successfully deleted.")
+            return JsonResponse({'success': True})
+    else:
+        form = HitGroupForm(instance=group)
+    ctx = {
+        'form': form,
+        'clan': clan,
+        'battle': battle,
+        'group': group,
+    }
+    return render(request, 'rong/manageclan/edit_hit_group.html', ctx)
+
+
+@clan_lead_view
+def add_hit_group(request, clan, battle_id):
+    battle = get_object_or_404(clan.clanbattle_set, pk=battle_id)
+    if request.method == 'POST':
+        form = HitGroupForm(request.POST, prefix="add-group", instance=HitGroup(clan_battle=battle))
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Successfully added new hit group.")
+        else:
+            messages.add_message(request, messages.ERROR, "Could not add new hit group.")
+        return redirect(
+            reverse('rong:clan_edit_battle', kwargs={'clan': clan.slug, 'battle_id': battle.id}) + '#hit-groups')
+    else:
+        raise SuspiciousOperation()
 
 
 @clan_lead_view
@@ -19,12 +65,13 @@ def edit_battle(request, clan, battle_id):
                 battle.load_boss_info(form.data["data_source"])
                 battle.recalculate()
             messages.add_message(request, messages.SUCCESS, "Clan Battle successfully edited.")
-            return redirect('rong:clan_list_battles', clan.slug)
     else:
         form = EditClanBattleForm(instance=battle)
     ctx = {
-        'form': form,
-        'clan': clan
+        'detailsform': form,
+        'clan': clan,
+        'battle': battle,
+        'hgform': HitGroupForm(prefix="add-group"),
     }
     return render(request, 'rong/manageclan/edit_battle.html', ctx)
 

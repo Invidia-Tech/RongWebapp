@@ -9,3 +9,4 @@ class ClanBattleComp(models.Model):
     damage = models.PositiveIntegerField()
     team = models.ForeignKey('Team', default=0, on_delete=models.CASCADE)
     borrowed_unit = models.PositiveIntegerField(null=True)
+    group = models.ForeignKey('HitGroup', null=True, on_delete=models.SET_NULL, related_name='comps')

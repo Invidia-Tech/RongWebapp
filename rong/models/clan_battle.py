@@ -324,6 +324,7 @@ class ClanBattle(models.Model):
             "total_damage": 0,
             "total_score": 0,
             "total_ascore": 0,
+            "has_groups": False,
             "days": [{
                 "hits": 0,
                 "damage": 0,
@@ -332,6 +333,7 @@ class ClanBattle(models.Model):
                 "hit_damage": [0 for n in range(ClanBattle.HITS_PER_DAY)],
                 "hit_score": [0 for n in range(ClanBattle.HITS_PER_DAY)],
                 "hit_ascore": [0 for n in range(ClanBattle.HITS_PER_DAY)],
+                "hit_group": ["N/A" for n in range(ClanBattle.HITS_PER_DAY)],
             } for n in range(self.total_days)],
             "hits": [],
         }
@@ -375,7 +377,7 @@ class ClanBattle(models.Model):
         weight_ts = 0
         weight_th = 0
         ClanMember = apps.get_model("rong", "ClanMember")
-        for hit in self.hits.order_by('order').select_related('user'):
+        for hit in self.hits.order_by('order').select_related('user', 'group').prefetch_related('tags'):
             if boss_data[difficulty_idx].lap_to is not None and hit.boss_lap > boss_data[difficulty_idx].lap_to:
                 difficulty_idx += 1
                 curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
@@ -400,6 +402,9 @@ class ClanBattle(models.Model):
                 entry['days'][hit.day - 1]['hits'] += 1
             else:
                 entry['days'][hit.day - 1]['hits'] += 0.5
+            if hit.hit_type != ClanBattleHitType.CARRYOVER and hit.group:
+                entry['has_groups'] = True
+                entry['days'][hit.day - 1]['hit_group'][hit.hit_index] = hit.group.name
             if hit.hit_type == ClanBattleHitType.NORMAL or (
                     hit.hit_type == ClanBattleHitType.LAST_HIT and hit.damage / hit.actual_damage >= 1.1):
                 weightable_hits[hit.difficulty][hit.boss_number - 1] += 1

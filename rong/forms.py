@@ -6,7 +6,7 @@ from django.db.models import Max, Min, F
 from django.forms import RadioSelect
 from django.utils import timezone
 
-from rong.models import User, Box, BoxUnit, ClanBattle, ClanMember, Unit, ClanBattleScore
+from rong.models import User, Box, BoxUnit, ClanBattle, ClanMember, Unit, ClanBattleScore, HitGroup
 from rong.models.clan_battle import CB_DATA_SOURCES
 from rong.models.clan_battle_score import ClanBattleHitType
 from rong.models.team import create_team
@@ -159,7 +159,8 @@ def get_cb_data_source_choices(blank_str='--Choose--'):
 class AddClanBattleForm(forms.ModelForm):
     data_source = forms.ChoiceField(choices=get_cb_data_source_choices, required=True)
 
-    field_order = ['name', 'start_time', 'end_time', 'viewable_by_members', 'data_source', 'boss1_name', 'boss2_name', 'boss3_name',
+    field_order = ['name', 'start_time', 'end_time', 'viewable_by_members', 'data_source', 'boss1_name', 'boss2_name',
+                   'boss3_name',
                    'boss4_name', 'boss5_name']
 
     def __init__(self, *args, **kwargs):
@@ -176,7 +177,8 @@ class AddClanBattleForm(forms.ModelForm):
 
     class Meta:
         model = ClanBattle
-        fields = ['name', 'start_time', 'end_time', 'viewable_by_members', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
+        fields = ['name', 'start_time', 'end_time', 'viewable_by_members', 'boss1_name', 'boss2_name', 'boss3_name',
+                  'boss4_name',
                   'boss5_name']
         widgets = {
             'start_time': forms.DateTimeInput(format='%Y-%m-%d %H:%M:%S', attrs={'class': 'datetimefield'}),
@@ -205,7 +207,8 @@ class EditClanBattleForm(forms.ModelForm):
     data_source = forms.ChoiceField(choices=get_cb_data_source_choices('Keep Current'), required=False,
                                     help_text='Optional. Current data will be kept if not selected.')
 
-    field_order = ['name', 'start_time', 'end_time', 'data_source', 'viewable_by_members', 'boss1_name', 'boss2_name', 'boss3_name',
+    field_order = ['name', 'start_time', 'end_time', 'data_source', 'viewable_by_members', 'boss1_name', 'boss2_name',
+                   'boss3_name',
                    'boss4_name', 'boss5_name']
 
     def __init__(self, *args, **kwargs):
@@ -222,7 +225,8 @@ class EditClanBattleForm(forms.ModelForm):
 
     class Meta:
         model = ClanBattle
-        fields = ['name', 'start_time', 'end_time', 'viewable_by_members', 'boss1_name', 'boss2_name', 'boss3_name', 'boss4_name',
+        fields = ['name', 'start_time', 'end_time', 'viewable_by_members', 'boss1_name', 'boss2_name', 'boss3_name',
+                  'boss4_name',
                   'boss5_name']
         widgets = {
             'start_time': forms.DateTimeInput(format='%Y-%m-%d %H:%M:%S', attrs={'class': 'datetimefield'}),
@@ -245,6 +249,12 @@ class EditClanBattleForm(forms.ModelForm):
             'boss5_name': 'Empty to load from boss data',
             'viewable_by_members': 'Turn this off to completely hide the CB from non-leads. Should usually only be used for future CBs.',
         }
+
+
+class HitGroupForm(forms.ModelForm):
+    class Meta:
+        model = HitGroup
+        fields = ['name', 'description']
 
 
 class EditClanMemberForm(forms.ModelForm):
@@ -288,6 +298,9 @@ class HitForm(forms.Form):
     day = forms.IntegerField(min_value=1, max_value=31)
     user = forms.ChoiceField()
     damage = forms.IntegerField(min_value=0)
+    group = CBLabelModelChoiceField(callback=lambda x: x.name, queryset=None,
+                                    widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}), blank=True,
+                                    empty_label="None", required=False)
     unit1 = UnitSelect(label='Unit 1', required=False)
     unit2 = UnitSelect(label='Unit 2', required=False)
     unit3 = UnitSelect(label='Unit 3', required=False)
@@ -302,6 +315,13 @@ class HitForm(forms.Form):
     def __init__(self, hit: ClanBattleScore, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.hit = hit
+        hg = hit.clan_battle.hit_groups.all()
+        if not hg:
+            del self.fields["group"]
+        else:
+            self.fields["group"].queryset = hg
+            if hit.id:
+                self.fields["group"].initial = hit.group
         member_list = list(hit.clan_battle.clan.members.select_related('user'))
         member_list.sort(key=lambda member: member.user_display_name.lower())
         choices = [('', '--Select--')] + [(x.user_id, x.user_display_name) for x in member_list]
@@ -378,18 +398,19 @@ class HitForm(forms.Form):
 
     def save(self):
         old_day = self.hit.day
-        user_changed = self.hit.user_id != self.cleaned_data["user"]
-        damage_changed = self.hit.damage != self.cleaned_data["damage"]
+        user_changed = self.hit.user_id != int(self.cleaned_data["user"])
+        damage_changed = self.hit.damage != int(self.cleaned_data["damage"])
         self.hit.day = self.cleaned_data["day"]
         self.hit.user_id = self.cleaned_data["user"]
         self.hit.damage = self.cleaned_data["damage"]
+        if "group" in self.cleaned_data:
+            self.hit.group = self.cleaned_data["group"]
 
         # individual unit data?
         units = [x for x in (self.cleaned_data.get("unit%d" % unit) for unit in range(1, 6)) if x is not None]
         damages = [x for x in (self.cleaned_data.get("unit%d_damage" % unit) for unit in range(1, 6)) if x is not None]
         if units:
             team, ordering = create_team(units)
-            team.save()
             self.hit.team = team
             if damages:
                 for idx, dmg in enumerate(damages):

@@ -25,6 +25,8 @@ class ClanBattleScore(models.Model):
     unit3_damage = models.PositiveIntegerField(null=True)
     unit4_damage = models.PositiveIntegerField(null=True)
     unit5_damage = models.PositiveIntegerField(null=True)
+    group = models.ForeignKey('HitGroup', null=True, on_delete=models.SET_NULL, related_name='hits')
+    tags = models.ManyToManyField('HitTag')
     # these fields are autocalculated by the code and shouldn't be filled manually
     boss_lap = models.PositiveIntegerField()
     boss_number = models.PositiveIntegerField()

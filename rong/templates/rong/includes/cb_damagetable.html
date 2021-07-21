@@ -20,6 +20,13 @@
                 {% if active %}
                     <td data-sort="{{ day|get_item:day_total_key }}" class="day">
                         <div class="day-total">{{ day|get_item:day_total_key|intcomma }}</div>
+                        {% if player.has_groups %}
+                            <div class="groups">
+                                {% for group in day.hit_group %}
+                                    <div>{{ group }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                         <div class="hits">
                             {% for hit in day|get_item:day_ind_key %}
                                 <div>{{ hit|smallhit }}</div>

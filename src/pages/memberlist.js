@@ -32,8 +32,8 @@ page('clan_list_members', function () {
                     $rootRow.find(".member-ign").text(data.member.ign || "N/A");
                     $rootRow.find(".member-pid").text(formatPlayerId(data.member.player_id));
                     $rootRow.find(".member-group").text(data.member.group_num || "None");
-                    if (data.member.is_owner) {
-                        $rootRow.find(".member-lead").text("Owner");
+                    if (data.member.is_superadmin) {
+                        $rootRow.find(".member-lead").text("SuperAdmin");
                     } else if (data.member.is_admin) {
                         $rootRow.find(".member-lead").text("Admin");
                     } else {
@@ -59,7 +59,7 @@ page('clan_list_members', function () {
             $("#id_player_id").mask('000 000 000');
             $("#id_group_num").val(member.group_num ?? "");
             if ($("#id_is_lead").length) {
-                if (member.is_owner || member.is_admin) {
+                if (member.is_superadmin || member.is_admin) {
                     $("#id_is_lead").prop("checked", true);
                     $("#id_is_lead").prop("disabled", true);
                 } else {
