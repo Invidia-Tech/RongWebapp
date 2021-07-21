@@ -5,7 +5,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 
 from rong.decorators import clan_lead_view
-from rong.forms import EditClanMemberForm, FullEditClanMemberForm, AddClanBattleForm, EditClanBattleForm, HitGroupForm
+from rong.forms.manageclan import HitGroupForm, EditClanBattleForm, AddClanBattleForm, FullEditClanMemberForm, \
+    EditClanMemberForm
 from rong.models import ClanBattle, HitGroup
 
 

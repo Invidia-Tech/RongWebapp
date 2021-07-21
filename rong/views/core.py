@@ -1,16 +1,16 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpRequest
 from django.conf import settings
-from django.urls import reverse
-from django.core.exceptions import PermissionDenied
-from rong.discord import make_session
-from rong.models import User, Unit
-from django.db import connection
-from django.utils.http import url_has_allowed_host_and_scheme
-from rong.decorators import login_required
-from requests.exceptions import HTTPError
 from django.contrib import messages
-from rong.forms import PreferencesForm
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse, HttpRequest
+from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from requests.exceptions import HTTPError
+
+from rong.decorators import login_required
+from rong.discord import make_session
+from rong.forms.preferences import PreferencesForm
+from rong.models import User, Unit
 
 
 # Create your views here.

@@ -2,16 +2,16 @@ import json
 from collections import defaultdict
 
 from django.contrib import messages
-from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from rong.decorators import clan_view, clanbattle_view, clanbattle_lead_view
-from rong.forms import HitForm
+from rong.forms.clanbattle import HitForm
 from rong.models import ClanBattle
 from rong.models.clan_battle_score import ClanBattleHitType, ClanBattleScore
+
 
 @clanbattle_lead_view
 def edit_hit(request, battle: ClanBattle, hit_id):

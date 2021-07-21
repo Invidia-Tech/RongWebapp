@@ -44,8 +44,10 @@
     width: 20%;
     vertical-align: middle;
   }
-  td.day {
-    width: 14%;
+  @for $day from 1 through 10 {
+    td.name:nth-last-child(#{$day + 2}) ~ td.day {
+      width: calc(70% / #{$day});
+    }
   }
   td.total {
     width: 10%;

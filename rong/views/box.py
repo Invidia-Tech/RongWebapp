@@ -5,13 +5,13 @@ import zlib
 
 from django.contrib import messages
 from django.core.exceptions import SuspiciousOperation
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 
 from rong.decorators import login_required
-from rong.forms import BoxForm, EditBoxUnitForm, CreateBoxUnitBulkForm, ImportTWArmoryBoxForm
+from rong.forms.box import EditBoxUnitForm, ImportTWArmoryBoxForm, CreateBoxUnitBulkForm, BoxForm
 from rong.models import BoxUnit, Unit, Equipment
 
 
@@ -81,7 +81,7 @@ def import_box(request: HttpRequest, box_id):
             new_units = 0
             try:
                 for unit in units:
-                    uid = unit["u"]*100 + 1
+                    uid = unit["u"] * 100 + 1
                     if uid in all_units:
                         unit_data = all_units[uid]
                         box_unit = box.boxunit_set.filter(unit_id=uid).first()
@@ -90,7 +90,9 @@ def import_box(request: HttpRequest, box_id):
                                 box_unit = BoxUnit(box=box, unit_id=uid, level=BoxUnit.max_level())
                                 new_units += 1
                             if unit["p"] > unit_data.ranks.count():
-                                raise ValueError("You have %s's rank set to %d on Armory, which is beyond current EN ranks." % (unit_data.name, unit["p"]))
+                                raise ValueError(
+                                    "You have %s's rank set to %d on Armory, which is beyond current EN ranks." % (
+                                    unit_data.name, unit["p"]))
                             box_unit.rank = unit["p"]
                             if unit["r"] > 5:
                                 raise ValueError("6-star units do not exist on EN yet.")
@@ -100,7 +102,7 @@ def import_box(request: HttpRequest, box_id):
                                 box_unit.level = BoxUnit.max_level()
                             if '.' in unit["t"] and int(unit["t"][:unit["t"].index(".")]) == unit["p"]:
                                 # goal is rank x.3-5, update the equipment binary to turn off missing gear
-                                goal_pieces = int(unit["t"][unit["t"].index(".")+1:])
+                                goal_pieces = int(unit["t"][unit["t"].index(".") + 1:])
                                 unit["e"] = list(unit["e"])
                                 # topleft piece is always missing
                                 unit["e"][0] = '0'
@@ -111,17 +113,18 @@ def import_box(request: HttpRequest, box_id):
                                     # bottomleft missing
                                     unit["e"][4] = '0'
                                 unit["e"] = "".join(unit["e"])
-                            current_rank = unit_data.ranks.all()[unit["p"]-1]
+                            current_rank = unit_data.ranks.all()[unit["p"] - 1]
                             for eq in range(6):
                                 equip_on = unit["e"][eq] == '1'
                                 if equip_on:
-                                    eq_id = getattr(current_rank, "equip%d" % (eq+1))
+                                    eq_id = getattr(current_rank, "equip%d" % (eq + 1))
                                     if eq_id == 999999:
-                                        raise ValueError("You have a piece of gear equipped on %s that does not exist on EN yet." % unit_data.name)
+                                        raise ValueError(
+                                            "You have a piece of gear equipped on %s that does not exist on EN yet." % unit_data.name)
                                     eq_val = equipment_data[eq_id].refine_stars if refines == 'Full' else 0
                                 else:
                                     eq_val = None
-                                setattr(box_unit, 'equip%d' % (eq+1), eq_val)
+                                setattr(box_unit, 'equip%d' % (eq + 1), eq_val)
                             save_units.append(box_unit)
                     elif missing_units == 'Error':
                         raise ValueError("Missing unit found in your import.")
@@ -132,9 +135,11 @@ def import_box(request: HttpRequest, box_id):
                 if mode == 'Overwrite':
                     box.boxunit_set.exclude(id__in=[bu.id for bu in save_units]).delete()
             except ValueError as ex:
-                messages.add_message(request, messages.ERROR, "Could not import box data. "+str(ex))
+                messages.add_message(request, messages.ERROR, "Could not import box data. " + str(ex))
                 return redirect('rong:box_index')
-            messages.add_message(request, messages.SUCCESS, "Successfully imported %d units (%d new) from TW Armory." % (len(save_units), new_units))
+            messages.add_message(request, messages.SUCCESS,
+                                 "Successfully imported %d units (%d new) from TW Armory." % (
+                                 len(save_units), new_units))
             return redirect('rong:box_index')
         else:
             messages.add_message(request, messages.ERROR, "Could not import box data. Form issue detected.")
