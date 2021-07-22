@@ -120,11 +120,11 @@
         <a href="{% url 'rong:cb_list_hits' battle.slug %}" class="btn btn-primary">Hit Log</a>
     {% else %}
         <p>
-        {% if battle.start_time %}
-            This CB starts in {{ battle.start_time|naturaltime }}.
-        {% else %}
-            This is a future CB without dates set yet.
-        {% endif %}
+            {% if battle.start_time %}
+                This CB starts in {{ battle.start_time|naturaltime }}.
+            {% else %}
+                This is a future CB without dates set yet.
+            {% endif %}
         </p>
     {% endif %}
     <hr>
@@ -140,6 +140,10 @@
                     (Daily)</a></li>
                 <li class="nav-item"><a href="#ascore-daily" data-toggle="tab" class="nav-link small">Normalized Score
                     (Daily)</a></li>
+                {% if battle.hit_stats.tags %}
+                    <li class="nav-item"><a href="#tagged-hits" data-toggle="tab" class="nav-link small">Tagged Hits</a>
+                    </li>
+                {% endif %}
             </ul>
             <br>
             <div id="tabsContent" class="tab-content">
@@ -179,6 +183,38 @@
                 <div id="ascore-daily" class="tab-pane">
                     {% include "rong/includes/cb_damagetable.html" with name="Norm. Score" table_id="ascoreDailyTable" day_total_key="ascore" day_ind_key="hit_ascore" total_key="total_ascore" summary_daily="daily_ascore" summary_cumu="cumu_ascore" %}
                 </div>
+                {% if battle.hit_stats.tags %}
+                    <div id="tagged-hits" class="tab-pane">
+                        <table class="dt w-100 table dt-noPaging stats-table" id="taggedHitsTable">
+                            <thead>
+                            <tr>
+                                <th>Player</th>
+                                {% for tag in battle.hit_stats.tags %}
+                                    <th>{{ tag.name }}</th>
+                                {% endfor %}
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for player in battle.hit_stats.players %}
+                                <tr>
+                                    <td>{{ player.member.user_display_name }}</td>
+                                    {% for amount in player.tags %}
+                                        <td>{{ amount }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <th>Totals</th>
+                                {% for tag in battle.hit_stats.tags %}
+                                    <th>{{ tag.total }}</th>
+                                {% endfor %}
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% endif %}
             </div>
             <hr>
         {% endif %}

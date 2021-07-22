@@ -1,6 +1,6 @@
 import datetime
 import math
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 from django.apps import apps
 from django.db import models, connection
@@ -336,6 +336,7 @@ class ClanBattle(models.Model):
                 "hit_group": ["N/A" for n in range(ClanBattle.HITS_PER_DAY)],
             } for n in range(self.total_days)],
             "hits": [],
+            "tags": defaultdict(lambda: 0),
         }
 
     def get_boss_info(self, boss_data, difficulty_idx):
@@ -371,6 +372,7 @@ class ClanBattle(models.Model):
                 "boss": self.boss1_name,
                 "hp": curr_boss_info["info"][0]["hp"],
             } for n in range(self.total_days)],
+            "tags": set(),
         }
         weightable_hits = [[0 for n in range(5)] for i in range(len(boss_data))]
         weightable_dmg = [[0 for n in range(5)] for i in range(len(boss_data))]
@@ -386,6 +388,9 @@ class ClanBattle(models.Model):
                 hit_matrix[hit.user_id] = self.initial_matrix_row(fake_member)
             entry = hit_matrix[hit.user_id]
             entry["hits"].append(hit)
+            stats["tags"].update(hit.tags.all())
+            for tag in hit.tags.all():
+                entry["tags"][tag.id] += 1
             hit.difficulty = difficulty_idx
             hit.score = math.ceil(hit.actual_damage * curr_boss_info["info"][hit.boss_number - 1]["multiplier"])
             entry['total_damage'] += hit.actual_damage
@@ -415,8 +420,17 @@ class ClanBattle(models.Model):
                 stats["daily_end"][i]["lap"] = hit.boss_lap
                 stats["daily_end"][i]["boss"] = getattr(self, 'boss%d_name' % hit.boss_number)
                 stats["daily_end"][i]["hp"] = hit.boss_hp_left
+
+        stats["tags"] = list(stats["tags"])
+        for tag in stats["tags"]:
+            tag.total = 0
         for uid in hit_matrix:
             entry = hit_matrix[uid]
+            old_tags = entry["tags"]
+            entry["tags"] = []
+            for tag in stats["tags"]:
+                entry["tags"].append(old_tags[tag.id])
+                tag.total += old_tags[tag.id]
             for hit in hit_matrix[uid]["hits"]:
                 if weightable_hits[hit.difficulty][hit.boss_number - 1]:
                     norm_boss_score = weightable_hits[hit.difficulty][hit.boss_number - 1] / weight_th * weight_ts
