@@ -102,3 +102,9 @@ export function page(name, cb) {
         }
     });
 }
+
+export function getDescendantProp(obj, desc) {
+    var arr = desc.split(".");
+    while(arr.length && (obj = obj[arr.shift()]));
+    return obj;
+}

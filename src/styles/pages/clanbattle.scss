@@ -107,3 +107,16 @@
     background-color: limegreen;
   }
 }
+
+.page__cb_list_hits #filters {
+  width: 250px;
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  height: calc(100vh-80px);
+  display: none;
+}
+
+#hitLogTable_wrapper .dataTables_filter {
+  display: none;
+}

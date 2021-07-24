@@ -50,6 +50,14 @@
         </thead>
     </table>
     <div id="hitLogData" data-url="{% url 'rong:cb_list_hits_data' battle.slug %}" class="d-none"></div>
+    <div id="filters">
+        <div class="row header mb-3">
+            <div class="col-md-6"><h4>Filters</h4></div>
+            <div class="col-md-6 text-right">
+                <button class="btn btn-primary" id="addFilter">Add Filter</button>
+            </div>
+        </div>
+    </div>
     <form role="form" method="post" id="reorderForm">
         {% csrf_token %}
         <input type="hidden" name="reorderData" id="reorderData" value=""/>

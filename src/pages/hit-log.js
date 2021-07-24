@@ -1,46 +1,10 @@
 import $ from 'jquery';
-import {hide_loading, make_alert, page, show_loading} from '../modules/common';
+import {getDescendantProp, hide_loading, make_alert, page, show_loading} from '../modules/common';
 import 'jquery-validation';
 import 'datatables.net';
 import 'datatables.net-rowreorder';
 
 page('cb_list_hits', function () {
-    $("#hitLogTable .delete-button").click(function () {
-        let $row = $(this).closest("tr");
-        let d = $("<div>Are you sure you want to delete <span class='name'></span>'s hit for <span class='damage'></span> damage? This cannot be undone.</div>");
-        d.find(".name").html($row.attr("data-name"));
-        d.find(".damage").text($row.attr("data-damage"));
-        d.dialog(
-            {
-                buttons: {
-                    "Yes": function () {
-                        d.dialog('destroy');
-                        show_loading();
-                        $.ajax({
-                            url: "/clanbattle/" + $("#hitLogTable").attr("data-battle") + "/hits/" + $row.attr("data-id") + "/",
-                            beforeSend: function (xhr) {
-                                xhr.setRequestHeader("X-CSRFToken", $('input[name="csrfmiddlewaretoken"]').val());
-                            },
-                            type: 'DELETE',
-                            success: function (data) {
-                                if (data.success) {
-                                    location.reload();
-                                } else {
-                                    make_alert($('#mainContent'), 'danger', 'Hit could not be removed.');
-                                }
-                                hide_loading();
-                            }
-                        });
-                    },
-                    "No": function () {
-                        d.dialog('destroy');
-                    },
-                },
-                modal: true,
-            }
-        );
-
-    });
     let $hitLog = $('#hitLogTable');
     let manageable = $hitLog.hasClass('manageable');
     let columns = [
@@ -68,7 +32,7 @@ page('cb_list_hits', function () {
         {
             data: "damage",
             render: function (data, type) {
-                if(type == 'sort') {
+                if (type == 'sort') {
                     return data.damage;
                 }
                 if (data.damage === data.actual) {
@@ -85,7 +49,7 @@ page('cb_list_hits', function () {
         {
             data: "boss",
             render: function (data, type) {
-                if(type == 'sort') {
+                if (type == 'sort') {
                     return data.number;
                 }
                 let img = $("<img style='width: 32px; height: 32px;' />");
@@ -185,6 +149,218 @@ page('cb_list_hits', function () {
             show_loading();
             $('#reorderData').val(JSON.stringify(reorderData));
             $('#reorderForm').submit();
+        }
+    });
+    table.on('xhr.dt', function (e, settings, json, xhr) {
+        // populate filters for tags and groups from json
+        if (manageable) {
+            let filters = [
+                {
+                    name: "Player",
+                    control: "dropdown_isnot",
+                    choices: json.users,
+                    column: 'user_id'
+                },
+                {
+                    name: "Damage",
+                    control: "number",
+                    column: "damage.damage"
+                },
+                {
+                    name: "Hit #",
+                    control: "number",
+                    column: "order"
+                },
+                {
+                    name: "Day",
+                    control: "number",
+                    column: "day"
+                },
+                {
+                    name: "Lap",
+                    control: "number",
+                    column: "lap"
+                },
+                {
+                    name: "Boss",
+                    control: "dropdown_isnot",
+                    choices: json.boss_choices,
+                    column: 'boss.number'
+                },
+                {
+                    name: "Unit",
+                    control: "custom",
+                    comparisons: ["in team", "not in team"],
+                    inputType: "dropdown",
+                    choices: json.unit_choices,
+                    callback: function (data, comparison, value) {
+                        value = parseInt(value);
+                        if (data.team === false) {
+                            return false;
+                        }
+                        for (let unit of data.team) {
+                            if (value == unit.unit) {
+                                return comparison == 'in team';
+                            }
+                        }
+                        return comparison != 'in team';
+                    }
+                },
+                {
+                    name: "Hit Type",
+                    control: "dropdown_isnot",
+                    choices: [["Normal", "Normal"], ["Last Hit", "Last Hit"], ["Carryover", "Carryover"]],
+                    column: 'hit_type'
+                },
+                {
+                    name: "Hit Group",
+                    control: "dropdown_isnot",
+                    choices: json.groups,
+                    column: 'group'
+                },
+                {
+                    name: "Tag",
+                    control: "custom",
+                    comparisons: ["is tagged", "not tagged"],
+                    inputType: "dropdown",
+                    choices: json.tags,
+                    callback: function (data, comparison, value) {
+                        value = parseInt(value);
+                        let tag_present = data.tags.indexOf(value) > -1;
+                        return tag_present == (comparison == 'is tagged');
+                    }
+                }
+
+            ];
+            let filtersByName = {};
+            for (let filter of filters) {
+                filtersByName[filter.name] = filter;
+                if (filter.control == 'dropdown_isnot') {
+                    filter.comparisons = ["is", "is not"];
+                    filter.inputType = "dropdown";
+                    filter.callback = function (data, comparison, value) {
+                        let dataValue = getDescendantProp(data, filter.column);
+                        let valueEqual = value == dataValue;
+                        return valueEqual == (comparison == 'is');
+                    }
+                } else if (filter.control == 'number') {
+                    filter.comparisons = ["==", "!=", ">=", ">", "<=", "<"];
+                    filter.inputType = "number";
+                    filter.callback = function (data, comp, value) {
+                        let compVal = getDescendantProp(data, filter.column);
+                        let numVal = parseInt(value);
+                        return (comp == '==' && compVal == numVal) || (comp == '!=' && compVal != numVal) || (comp == '>=' && compVal >= numVal) || (comp == '>' && compVal > numVal) || (comp == '<=' && compVal <= numVal) || (comp == '<' && compVal < numVal);
+                    }
+                }
+            }
+            let currentFilters = [];
+            let $filterBox = $("#filters");
+            $filterBox.show();
+            $("#addFilter").click(function () {
+                let $filter = $("<div class='filter'></div>");
+                let currentFilter = {type: '', comparison: '', value: ''};
+                currentFilters.push(currentFilter);
+
+                let $selector = null;
+                let $comparisonSelector = null;
+                let $valueInput = null;
+                let $deleteBtn = $("<button class='btn btn-danger'><i class='fa fa-remove'></i></button>");
+
+                function selectorChange() {
+                    currentFilter.type = $selector.val();
+                    currentFilter.comparison = '';
+                    currentFilter.value = '';
+                    if ($comparisonSelector) {
+                        $comparisonSelector.remove();
+                    }
+                    if ($valueInput) {
+                        $valueInput.remove();
+                    }
+                    let filter = filtersByName[currentFilter.type];
+                    $comparisonSelector = $("<select><option value=''>Select...</option></select>");
+                    for (let comparison of filter.comparisons) {
+                        let $option = $("<option></option>");
+                        $option.attr("value", comparison);
+                        $option.text(comparison);
+                        $comparisonSelector.append($option);
+                    }
+                    $comparisonSelector.insertBefore($deleteBtn);
+                    if (filter.inputType == 'number') {
+                        $valueInput = $('<input type="number" />');
+                    } else {
+                        $valueInput = $("<select><option value=''>Select...</option></select>");
+                        for (let choice of filter.choices) {
+                            let $option = $("<option></option>");
+                            $option.attr("value", choice[0]);
+                            $option.text(choice[1]);
+                            $valueInput.append($option);
+                        }
+                    }
+                    $valueInput.insertBefore($deleteBtn);
+                    attachEvents();
+                    table.draw();
+                }
+
+                function compSelectorChange() {
+                    currentFilter.comparison = $comparisonSelector.val();
+                    table.draw();
+                }
+
+                function valueInputChange() {
+                    currentFilter.value = $valueInput.val();
+                    table.draw();
+                }
+
+                function attachEvents() {
+                    if ($selector) {
+                        $selector.off("change").change(selectorChange);
+                    }
+                    if ($comparisonSelector) {
+                        $comparisonSelector.off("change").change(compSelectorChange);
+                    }
+                    if ($valueInput) {
+                        $valueInput.off("change").change(valueInputChange);
+                    }
+                }
+
+                $selector = $("<select><option value=''>Select...</option></select>");
+                for (let filter of filters) {
+                    let $option = $("<option></option>");
+                    $option.attr("value", filter.name);
+                    $option.text(filter.name);
+                    $selector.append($option);
+                }
+                $filter.append($selector);
+                $filter.append($deleteBtn);
+                $deleteBtn.click(function () {
+                    $filter.remove();
+                    const index = currentFilters.indexOf(currentFilter);
+                    if (index > -1) {
+                        currentFilters.splice(index, 1);
+                    }
+                    table.draw();
+                })
+                attachEvents();
+
+                // do last
+                $filter.appendTo($filterBox);
+            });
+
+            $.fn.dataTable.ext.search.push(
+                function (settings, data, dataIndex) {
+                    data = json.hits[dataIndex];
+                    for (let currentFilter of currentFilters) {
+                        if (currentFilter.type == '' || currentFilter.comparison == '' || currentFilter.value == '') {
+                            continue;
+                        }
+                        let filter = filtersByName[currentFilter.type];
+                        if (!filter.callback(data, currentFilter.comparison, currentFilter.value)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            );
         }
     });
 

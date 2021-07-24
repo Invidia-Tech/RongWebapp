@@ -10,7 +10,7 @@ from django.urls import reverse
 
 from rong.decorators import clan_view, clanbattle_view, clanbattle_lead_view
 from rong.forms.clanbattle import HitForm
-from rong.models import ClanBattle
+from rong.models import ClanBattle, Unit
 from rong.models.clan_battle_score import ClanBattleHitType, ClanBattleScore
 from rong.templatetags.clan_battle import format_hits
 
@@ -60,11 +60,14 @@ def add_hit(request, battle: ClanBattle):
 @clanbattle_view
 def hit_log_data(request, battle: ClanBattle):
     hits = list(battle.hits.select_related('user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
-                                           'team__unit5').order_by('order'))
+                                           'team__unit5', 'group').prefetch_related('tags').order_by('order'))
     daily_attempt_counts = defaultdict(lambda: 0)
     day = None
     hits_json = []
     manageable = request.user.can_manage(battle)
+    tags = set()
+    groups = set()
+    users = set()
     for hit in hits:
         if hit.day != day:
             daily_attempt_counts.clear()
@@ -95,11 +98,27 @@ def hit_log_data(request, battle: ClanBattle):
         }
         if manageable:
             hit_json["id"] = hit.id
+            hit_json["user_id"] = hit.user_id
             hit_json["links"] = {
                 "edit_url": reverse('rong:cb_edit_hit', args=[battle.slug, hit.id])
             }
+            hit_json["group"] = hit.group.id if hit.group else None
+            hit_json["tags"] = [tag.id for tag in hit.tags.all()]
+            users.add(hit.user)
+            if hit.group:
+                groups.add(hit.group)
+            tags.update(hit.tags.all())
         hits_json.append(hit_json)
-    return JsonResponse({"hits": hits_json})
+    resp = {
+        "hits": hits_json
+    }
+    if manageable:
+        resp["tags"] = [(tag.id,tag.name) for tag in tags]
+        resp["groups"] = [(group.id,group.name) for group in groups]
+        resp["unit_choices"] = [(unit.id,unit.name) for unit in Unit.valid_units().order_by('search_area_width')]
+        resp["users"] = [(user.id,user.plaindiscordname) for user in users]
+        resp["boss_choices"] = [(num, getattr(battle, "boss%d_name" % num)) for num in range(1, 6)]
+    return JsonResponse(resp)
 
 
 @clanbattle_view
