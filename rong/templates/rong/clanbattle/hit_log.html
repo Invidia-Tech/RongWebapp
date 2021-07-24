@@ -26,10 +26,13 @@
             <a href="{% url 'rong:cb_view' battle.slug %}" class="btn btn-primary">Dashboard</a>
         </div>
     </div>
-    <table class="table w-100 cells-middle" id="hitLogTable" data-battle="{{ battle.slug }}">
+    <table class="table w-100 cells-middle {% if manageable %}manageable{% endif %}" id="hitLogTable"
+           data-battle="{{ battle.slug }}">
         <thead>
         <tr>
-            <th></th>
+            {% if manageable %}
+                <th></th>
+            {% endif %}
             <th>Hit #</th>
             <th>Day</th>
             <th>User</th>
@@ -45,49 +48,8 @@
             {% endif %}
         </tr>
         </thead>
-        <tbody>
-        {% for hit in hits %}
-            <tr data-id="{{ hit.id }}" data-name="{{ hit.displayed_username|force_escape }}" data-damage="{{ hit.damage|intcomma }}">
-                <td><span class="grippy"></span></td>
-                <td>{{ hit.order }}</td>
-                <td>{{ hit.day }}</td>
-                <td>{{ hit.displayed_username }}</td>
-                <td class="text-center">
-                    {% if hit.team %}
-                        {% for unit in hit.team.units %}
-                            {% unit_icon unit.icon stars=unit.star mini=True %}
-                        {% endfor %}
-                    {% else %}
-                        <i>N/A</i>
-                    {% endif %}
-                </td>
-                <td data-sort="{{ hit.damage }}">
-                    {% if hit.damage == hit.actual_damage %}
-                        {{ hit.damage|intcomma }}
-                    {% else %}
-                        <span title="{{ hit.actual_damage|intcomma }} actual damage" class="underline-dotted">{{ hit.damage|intcomma }}</span>
-                    {% endif %}
-                </td>
-                <td>{{ hit.boss_lap }}</td>
-                <td data-sort="{{ hit.boss_number }}">
-                    {% boss_icon battle hit as hit_bicon %}
-                    {% boss_name battle hit as hit_bname %}
-                    {% enemy_icon hit_bicon alt=hit_bname mini=True %}
-                </td>
-                <td>{{ hit.boss_hp_left|intcomma }}</td>
-                <td data-sort="{{ hit.attempt_count }}">{{ hit.attempt_count|format_hits }}/{{ hits_per_day }}</td>
-                <td>{{ hit.hit_type.value }}</td>
-                {% if manageable %}
-                    <td>
-                        <a href="{% url 'rong:cb_edit_hit' battle.slug hit.id %}" class="btn btn-primary" title="Edit"><i
-                            class="fa fa-edit"></i></a>
-                        <button class="btn btn-danger delete-button" title="Delete"><i class="fa fa-remove"></i></button>
-                    </td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-        </tbody>
     </table>
+    <div id="hitLogData" data-url="{% url 'rong:cb_list_hits_data' battle.slug %}" class="d-none"></div>
     <form role="form" method="post" id="reorderForm">
         {% csrf_token %}
         <input type="hidden" name="reorderData" id="reorderData" value=""/>

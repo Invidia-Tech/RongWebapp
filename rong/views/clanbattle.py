@@ -6,11 +6,13 @@ from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 
 from rong.decorators import clan_view, clanbattle_view, clanbattle_lead_view
 from rong.forms.clanbattle import HitForm
 from rong.models import ClanBattle
 from rong.models.clan_battle_score import ClanBattleHitType, ClanBattleScore
+from rong.templatetags.clan_battle import format_hits
 
 
 @clanbattle_lead_view
@@ -56,6 +58,51 @@ def add_hit(request, battle: ClanBattle):
 
 
 @clanbattle_view
+def hit_log_data(request, battle: ClanBattle):
+    hits = list(battle.hits.select_related('user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
+                                           'team__unit5').order_by('order'))
+    daily_attempt_counts = defaultdict(lambda: 0)
+    day = None
+    hits_json = []
+    manageable = request.user.can_manage(battle)
+    for hit in hits:
+        if hit.day != day:
+            daily_attempt_counts.clear()
+            day = hit.day
+        hit.attempt_count = daily_attempt_counts[hit.user_id] + (1 if hit.hit_type == ClanBattleHitType.NORMAL else 0.5)
+        daily_attempt_counts[hit.user_id] = hit.attempt_count
+        hit_json = {
+            "order": hit.order,
+            "day": hit.day,
+            "username": hit.displayed_username,
+            "team": hit.team.units if hit.team else False,
+            "damage": {
+                "damage": hit.damage,
+                "actual": hit.actual_damage,
+            },
+            "lap": hit.boss_lap,
+            "boss": {
+                "number": hit.boss_number,
+                "icon": getattr(battle, 'boss%d_iconid' % hit.boss_number),
+                "name": getattr(battle, 'boss%d_name' % hit.boss_number),
+            },
+            "hp_left": hit.boss_hp_left,
+            "attempts": {
+                "value": format_hits(hit.attempt_count),
+                "per_day": ClanBattle.HITS_PER_DAY,
+            },
+            "hit_type": hit.hit_type.value,
+        }
+        if manageable:
+            hit_json["id"] = hit.id
+            hit_json["links"] = {
+                "edit_url": reverse('rong:cb_edit_hit', args=[battle.slug, hit.id])
+            }
+        hits_json.append(hit_json)
+    return JsonResponse({"hits": hits_json})
+
+
+@clanbattle_view
 def hit_log(request, battle: ClanBattle):
     if request.method == 'POST':
         try:
@@ -85,20 +132,8 @@ def hit_log(request, battle: ClanBattle):
                                      "You can't reorder hits that would mess up the day order. Please edit the hits to change the day instead.")
         except Exception:
             messages.add_message(request, messages.ERROR, "Could not reorder hits.")
-    hits = list(battle.hits.select_related('user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
-                                           'team__unit5').order_by('order'))
-    daily_attempt_counts = defaultdict(lambda: 0)
-    day = None
-    for hit in hits:
-        if hit.day != day:
-            daily_attempt_counts.clear()
-            day = hit.day
-        hit.attempt_count = daily_attempt_counts[hit.user_id] + (1 if hit.hit_type == ClanBattleHitType.NORMAL else 0.5)
-        daily_attempt_counts[hit.user_id] = hit.attempt_count
     ctx = {
-        'battle': battle,
-        'hits': hits,
-        'hits_per_day': ClanBattle.HITS_PER_DAY
+        'battle': battle
     }
     return render(request, 'rong/clanbattle/hit_log.html', ctx)
 

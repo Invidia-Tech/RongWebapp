@@ -27,6 +27,10 @@ require("font-awesome/css/font-awesome.css");
 
 const flatpickr = require("flatpickr").default;
 
+$.fn.outerHTML = function() {
+    return $(this).clone().wrap('<div></div>').parent().html();
+};
+
 $(document).ready(function () {
     $(".dt").each(function () {
         let $t = $(this);
