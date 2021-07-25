@@ -129,10 +129,6 @@ class HitForm(forms.Form):
         self.hit.damage = self.cleaned_data["damage"]
         if "group" in self.cleaned_data:
             self.hit.group = self.cleaned_data["group"]
-        if "tags" in self.cleaned_data:
-            self.hit.tags.clear()
-            if self.cleaned_data["tags"]:
-                self.hit.tags.add(*self.cleaned_data["tags"])
 
         # individual unit data?
         units = [x for x in (self.cleaned_data.get("unit%d" % unit) for unit in range(1, 6)) if x is not None]
@@ -202,3 +198,8 @@ class HitForm(forms.Form):
                 self.hit.actual_damage = 0
                 self.hit.save()
                 cb.recalculate()
+
+        if "tags" in self.cleaned_data:
+            self.hit.tags.clear()
+            if self.cleaned_data["tags"]:
+                self.hit.tags.add(*self.cleaned_data["tags"])
