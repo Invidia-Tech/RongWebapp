@@ -55,7 +55,7 @@ class Clan(models.Model):
                              discriminator=imember.member.discriminator)
                     u.save()
                 # register them as part of the clan, either way
-                cm = ClanMember.objects.get_or_create(user=u, clan=self)
+                cm, created = ClanMember.objects.get_or_create(user=u, clan=self)
                 cm.active = True
                 cm.save()
         # delete unwanted members

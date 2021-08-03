@@ -130,7 +130,7 @@ WHERE (
 
     @cached_property
     def clans(self):
-        return Clan.objects.filter(id__in=self.clan_memberships.values_list('id', flat=True))
+        return Clan.objects.filter(id__in=self.clan_memberships.values_list('clan_id', flat=True))
 
     @property
     def clan_memberships(self):
