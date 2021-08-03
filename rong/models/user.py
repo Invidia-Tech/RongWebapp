@@ -19,7 +19,6 @@ class User(models.Model):
     name = models.CharField(max_length=50)
     display_pic = models.CharField(max_length=6, default='105811')
     single_mode = models.BooleanField(default=True)
-    clans = models.ManyToManyField('Clan', through='ClanMember')
     is_superadmin = models.BooleanField(default=False)
 
     def check_single_mode(self):
@@ -128,6 +127,10 @@ WHERE (
     @property
     def plaindiscordname(self):
         return "%s#%04d" % (self.name, self.discriminator)
+
+    @cached_property
+    def clans(self):
+        return Clan.objects.filter(id__in=self.clan_memberships.values_list('id', flat=True))
 
     @property
     def clan_memberships(self):
