@@ -9,3 +9,4 @@ python manage.py runmodwsgi --setup-only \
     --user www-data --group www-data \
     --server-root=/etc/mod_wsgi-rongwebapp
 /etc/mod_wsgi-rongwebapp/apachectl start
+tail -f /etc/mod_wsgi-rongwebapp/error_log

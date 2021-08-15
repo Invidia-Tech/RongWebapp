@@ -3,6 +3,8 @@ on:
   push:
     branches:
       # - prod
+    branches-ignore:
+      - '**'
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest
