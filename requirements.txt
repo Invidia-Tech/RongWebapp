@@ -9,3 +9,4 @@ requests==2.25.1
 requests-oauthlib==1.3.0
 UnityPy==1.7.6
 django-webpack-loader==1.0.0
+mod-wsgi==4.9.0
