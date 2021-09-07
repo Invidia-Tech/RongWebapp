@@ -132,3 +132,7 @@ webpack-stats.json
 
 # docker
 .docker
+
+# Different env configurations
+deploy/envs/*
+!deploy/envs/example-env
