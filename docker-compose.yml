@@ -16,7 +16,7 @@ services:
     webapp:
         image: rongwebapp
         ports:
-            - 8000:8000
+            - ${WEBAPP_OUTPORT}:8000
         dns:
             - 8.8.8.8
             - 4.4.4.4
@@ -38,7 +38,7 @@ services:
             timeout: 5s
             retries: 5
         ports:
-            - 5432:5432
+            - ${DB_OUTPORT}:5432
         volumes:
             - pg_data:/var/lib/postgresql/data
 volumes:
