@@ -34,6 +34,10 @@ class ClanBattleScore(models.Model):
     boss_hp_left = models.PositiveIntegerField()
     hit_type = EnumChoiceField(ClanBattleHitType, default=ClanBattleHitType.NORMAL)
     ign = models.CharField(max_length=20, null=True)
+    kyaru_date = models.CharField(max_length=50, null=True)
+    kyaru_author = models.CharField(max_length=50, null=True)
+    kyaru_image_url = models.TextField(null=True)
+    kyaru_boss_number = models.PositiveIntegerField(null=True)
 
     def clear_unit_damage(self):
         for unit in range(1, 6):
