@@ -22,10 +22,10 @@ services:
             - 4.4.4.4
         restart: always
         environment:
-            - POSTGRES_DB=${DB_NAME}
-            - POSTGRES_USER=${DB_USER}
-            - POSTGRES_PASSWORD=${DB_PASSWORD}
-            - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+            - DB_NAME
+            - DB_USER
+            - DB_PASSWORD
+            - ALLOWED_HOSTS
         depends_on:
             db:
                 condition: service_healthy
