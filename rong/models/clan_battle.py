@@ -387,6 +387,8 @@ class ClanBattle(models.Model):
                 fake_member = ClanMember(user=hit.user, clan=self.clan, ign=hit.ign)
                 hit_matrix[hit.user_id] = self.initial_matrix_row(fake_member)
             entry = hit_matrix[hit.user_id]
+            if int(entry['days'][hit.day - 1]['hits']) >= ClanBattle.HITS_PER_DAY:
+                continue  # silently ignore extra hits to avoid kabooming the dashboard
             entry["hits"].append(hit)
             stats["tags"].update(hit.tags.all())
             for tag in hit.tags.all():
