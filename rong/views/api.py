@@ -22,16 +22,18 @@ def add_hit(request):
         if request.method != "POST" or "X-Kyaru-Bot" not in request.headers:
             return JsonResponse({"boo": "PUDDING DAYO"})
         data = json.loads(request.body)
-        clan = Clan.objects.filter(name=data['clan']).first()
+        clan = Clan.objects.filter(name__iexact=data['clan']).first()
         if not clan:
             return JsonResponse({"success": False, "error": "Invalid clan"})
         if not clan.current_cb or not clan.current_cb.in_progress:
             return JsonResponse({"success": False, "error": "No active CB"})
-        hitter = clan.members.filter(ign=data['account']).first()
+        hitter = clan.members.filter(ign__iexact=data['account']).first()
         if not hitter:
             return JsonResponse({"success": False, "error": "Could not find account"})
         if len(data["units"]) != len(data["damages"]):
             return JsonResponse({"success": False, "error": "Missing or extra damages"})
+        if len(data["units"]) != len(set(data["units"])):
+            return JsonResponse({"success": False, "error": "Duplicate unit detected"})
         units = Unit.valid_units().filter(name__in=data["units"])
         unit_mapping = {unit.name:unit for unit in units}
         if len(units) != len(data["units"]):
