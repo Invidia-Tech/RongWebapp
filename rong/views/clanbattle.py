@@ -4,7 +4,7 @@ from collections import defaultdict
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import F
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
@@ -59,7 +59,7 @@ def add_hit(request, battle: ClanBattle):
 
 @clanbattle_view
 def hit_log_data(request, battle: ClanBattle):
-    hits = list(battle.hits.select_related('user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
+    hits = list(battle.hits.select_related('member', 'member__user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
                                            'team__unit5', 'group').prefetch_related('tags').order_by('order'))
     daily_attempt_counts = defaultdict(lambda: 0)
     day = None
@@ -67,13 +67,13 @@ def hit_log_data(request, battle: ClanBattle):
     manageable = request.user.can_manage(battle)
     tags = set()
     groups = set()
-    users = set()
+    members = set()
     for hit in hits:
         if hit.day != day:
             daily_attempt_counts.clear()
             day = hit.day
-        hit.attempt_count = daily_attempt_counts[hit.user_id] + (1 if hit.hit_type == ClanBattleHitType.NORMAL else 0.5)
-        daily_attempt_counts[hit.user_id] = hit.attempt_count
+        hit.attempt_count = daily_attempt_counts[hit.member_id] + (1 if hit.hit_type == ClanBattleHitType.NORMAL else 0.5)
+        daily_attempt_counts[hit.member_id] = hit.attempt_count
         hit_json = {
             "order": hit.order,
             "day": hit.day,
@@ -98,13 +98,13 @@ def hit_log_data(request, battle: ClanBattle):
         }
         if manageable:
             hit_json["id"] = hit.id
-            hit_json["user_id"] = hit.user_id
+            hit_json["member_id"] = hit.member_id
             hit_json["links"] = {
                 "edit_url": reverse('rong:cb_edit_hit', args=[battle.slug, hit.id])
             }
             hit_json["group"] = hit.group.id if hit.group else None
             hit_json["tags"] = [tag.id for tag in hit.tags.all()]
-            users.add(hit.user)
+            members.add(hit.member)
             if hit.group:
                 groups.add(hit.group)
             tags.update(hit.tags.all())
@@ -116,7 +116,7 @@ def hit_log_data(request, battle: ClanBattle):
         resp["tags"] = [(tag.id,tag.name) for tag in tags]
         resp["groups"] = [(group.id,group.name) for group in groups]
         resp["unit_choices"] = [(unit.id,unit.name) for unit in Unit.valid_units().order_by('search_area_width')]
-        resp["users"] = [(user.id,user.plaindiscordname) for user in users]
+        resp["members"] = [(member.id,member.ign) for member in members]
         resp["boss_choices"] = [(num, getattr(battle, "boss%d_name" % num)) for num in range(1, 6)]
     return JsonResponse(resp)
 
@@ -162,8 +162,8 @@ def view_battle(request, battle: ClanBattle):
     ctx = {
         'in_clan': request.user.in_clan(battle.clan),
         'battle': battle,
-        'hits': battle.hits.select_related('user').order_by('-order')[:30],
-        'myhits': battle.hits.filter(user=request.user).order_by('-order')[:30],
+        'hits': battle.hits.select_related('member', 'member__user').order_by('-order')[:30],
+        'myhits': battle.hits.filter(member__user=request.user).order_by('-order')[:30],
     }
     return render(request, 'rong/clanbattle/view.html', ctx)
 

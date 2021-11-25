@@ -11,7 +11,7 @@ from rong.models.team import create_team
 
 class HitForm(forms.Form):
     day = forms.IntegerField(min_value=1, max_value=31)
-    user = forms.ChoiceField()
+    member = forms.ChoiceField()
     damage = forms.IntegerField(min_value=0)
     group = CBLabelModelChoiceField(callback=lambda x: x.name, queryset=None,
                                     widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}), blank=True,
@@ -47,15 +47,12 @@ class HitForm(forms.Form):
             if hit.id:
                 self.fields["tags"].initial = hit.tags.all()
         member_list = list(hit.clan_battle.clan.members.select_related('user'))
-        member_list.sort(key=lambda member: member.user_display_name.lower())
-        choices = [('', '--Select--')] + [(x.user_id, x.user_display_name) for x in member_list]
-        if hit.id and hit.user_id not in [x.user_id for x in member_list]:
-            if hit.ign:
-                choices.append((hit.user_id, "%s (%s#%04d)" % (hit.ign, hit.user.name, hit.user.discriminator)))
-            else:
-                choices.append((hit.user_id, "%s#%04d" % (hit.user.name, hit.user.discriminator)))
-        self.fields["user"].choices = choices
-        self.fields["user"].widget.attrs["class"] = "select2-dd"
+        member_list.sort(key=lambda member: member.ign.lower())
+        choices = [('', '--Select--')] + [(x.id, x.ign) for x in member_list]
+        if hit.id and hit.member_id not in [x.id for x in member_list]:
+            choices.append((hit.member_id, hit.member.ign))
+        self.fields["member"].choices = choices
+        self.fields["member"].widget.attrs["class"] = "select2-dd"
         if hit.clan_battle.in_progress:
             self.fields["day"].initial = hit.clan_battle.current_day
         else:
@@ -66,7 +63,7 @@ class HitForm(forms.Form):
 
         if hit.id:
             self.fields["day"].initial = hit.day
-            self.fields["user"].initial = hit.user_id
+            self.fields["member"].initial = hit.member_id
             self.fields["damage"].initial = hit.damage
 
             if hit.team:
@@ -107,10 +104,10 @@ class HitForm(forms.Form):
                                         params={'name': fu.name}))
 
         # hit limit check
-        if not self.hit.id and self.hit.clan_battle.user_hits_on_day(cleaned_data.get("user"), cleaned_data.get(
+        if not self.hit.id and self.hit.clan_battle.member_hits_on_day(cleaned_data.get("member"), cleaned_data.get(
                 "day")) >= ClanBattle.HITS_PER_DAY:
             form_errors.append(
-                ValidationError("That user already has %(hits)d or more hits for this day!", code='invalid',
+                ValidationError("That member already has %(hits)d or more hits for this day!", code='invalid',
                                 params={'hits': ClanBattle.HITS_PER_DAY}))
 
         if len(form_errors):
@@ -122,10 +119,10 @@ class HitForm(forms.Form):
 
     def save(self):
         old_day = self.hit.day
-        user_changed = self.hit.user_id != int(self.cleaned_data["user"])
+        member_changed = self.hit.member_id != int(self.cleaned_data["member"])
         damage_changed = self.hit.damage != int(self.cleaned_data["damage"])
         self.hit.day = self.cleaned_data["day"]
-        self.hit.user_id = self.cleaned_data["user"]
+        self.hit.member_id = self.cleaned_data["member"]
         self.hit.damage = self.cleaned_data["damage"]
         if "group" in self.cleaned_data:
             self.hit.group = self.cleaned_data["group"]
@@ -148,13 +145,7 @@ class HitForm(forms.Form):
             self.hit.team = None
             self.hit.clear_unit_damage()
 
-        # get ign if available (don't update if clanmember entry missing)
         cb = self.hit.clan_battle
-        cm = cb.clan.members.filter(user_id=self.hit.user_id).first()
-        if cm:
-            self.hit.ign = cm.ign
-        elif user_changed or not self.id:
-            self.hit.ign = None
 
         # what to do about ordering?
         if self.hit.id:
@@ -173,7 +164,7 @@ class HitForm(forms.Form):
                 self.hit.order = new_order_val
                 self.hit.save()
                 cb.recalculate()
-            elif damage_changed or user_changed:
+            elif damage_changed or member_changed:
                 # something else crucial changed, just save and recalculate
                 self.hit.save()
                 cb.recalculate()

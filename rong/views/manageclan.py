@@ -176,7 +176,6 @@ def edit_member(request, clan, member_id):
 
 @clan_lead_view
 def list_members(request, clan):
-    clan.sync_members()
     boxes = {}
     members = clan.members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks')
     for member in members:

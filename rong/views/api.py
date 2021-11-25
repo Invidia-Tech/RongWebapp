@@ -52,7 +52,7 @@ def add_hit(request):
         # create hit
         hit = ClanBattleScore()
         hit.clan_battle = clan.current_cb
-        hit.user = hitter.user
+        hit.member = hitter
         hit.day = clan.current_cb.current_day
         hit.damage = int(data["total_damage"])
         hit.kyaru_date = data["date"]

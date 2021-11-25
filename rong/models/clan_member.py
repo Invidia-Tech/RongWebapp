@@ -3,9 +3,9 @@ from django.db import models
 
 
 class ClanMember(models.Model):
-    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='all_clan_memberships')
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='all_clan_memberships', null=True)
     clan = models.ForeignKey('Clan', on_delete=models.CASCADE, related_name='all_members')
-    ign = models.CharField(max_length=20, null=True)
+    ign = models.CharField(max_length=20)
     player_id = models.PositiveIntegerField(null=True)
     is_lead = models.BooleanField(default=False)
     group_num = models.PositiveIntegerField(null=True)
@@ -42,11 +42,3 @@ class ClanMember(models.Model):
 
     def save(self, *args, **kwargs):
         super(ClanMember, self).save(*args, **kwargs)
-        # propogate ign change to battles
-        ClanBattleScore = apps.get_model("rong", "ClanBattleScore")
-        ClanBattleScore.objects.filter(clan_battle__clan_id=self.clan_id, user_id=self.user_id).update(ign=self.ign)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['user', 'clan'], name='unique user clan')
-        ]

@@ -6,11 +6,9 @@ from django.utils.functional import cached_property
 from django.utils.html import format_html
 from requests_oauthlib import OAuth2Session
 
-from .bot_models import DiscordRoleMember
 from .clan import Clan
 from .clan_battle import ClanBattle
 from .clan_battle_score import ClanBattleScore
-from .clan_member import ClanMember
 
 
 class User(models.Model):
@@ -43,24 +41,6 @@ class User(models.Model):
             clanmemb.box = box
             clanmemb.save()
 
-    def sync_clans(self):
-        all_clans = {clan.platform_id: clan for clan in Clan.objects.all()}
-        roles_member_of = [rolemember.role_id for rolemember in DiscordRoleMember.objects.filter(
-            member_id=self.platform_id, role_id__in=all_clans.keys())]
-        current_membership_roles = {
-            membership.clan.platform_id: membership for membership in self.all_clan_memberships.select_related('clan')}
-        # add missing clanmembers
-        for role in roles_member_of:
-            if role not in current_membership_roles:
-                membership = ClanMember(user=self, clan=all_clans[role])
-                membership.save()
-            elif not current_membership_roles[role].active:
-                current_membership_roles[role].active = True
-                current_membership_roles[role].save()
-        # remove incorrect clanmembers
-        self.clan_memberships.exclude(
-            clan__platform_id__in=roles_member_of).update(active=False, box=None, is_lead=False, group_num=None)
-
     def for_discord_session(session: OAuth2Session):
         r = session.get('%s/users/@me' % settings.DISCORD_BASE_URL)
         user_data = r.json()
@@ -70,7 +50,6 @@ class User(models.Model):
         user.name = user_data['username']
         user.discriminator = user_data['discriminator']
         user.save()
-        user.sync_clans()
         return user
 
     @cached_property
@@ -104,7 +83,8 @@ WHERE (
 
     def preload_perms(self):
         self.clan_ids = self.clan_memberships.values_list('clan_id', flat=True)
-        self.cbs_with_scores = set(ClanBattleScore.objects.filter(user=self).values_list('clan_battle_id', flat=True))
+        self.cbs_with_scores = set(
+            ClanBattleScore.objects.filter(member__user=self).values_list('clan_battle_id', flat=True))
 
     def in_clan(self, clan):
         if hasattr(self, 'clan_ids'):

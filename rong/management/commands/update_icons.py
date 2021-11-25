@@ -144,12 +144,12 @@ class Command(BaseCommand):
                 truth_version = json.load(f)
             
             # download unit manifest
-            with requests.get('http://prd-priconne-redive.akamaized.net/dl/Resources/%s/Jpn/AssetBundles/iOS/manifest/unit_assetmanifest' % truth_version) as rm:
+            with requests.get('http://prd-priconne-redive.akamaized.net/dl/Resources/%s/Jpn/AssetBundles/iOS/manifest/unit2_assetmanifest' % truth_version) as rm:
                 unit_manifest = rm.text.splitlines()
             download_icons(unit_manifest, lambda fn: (fn.startswith("unit_icon_unit_") and fn.endswith(".unity3d")))
 
             # download equipment icons
-            with requests.get('http://prd-priconne-redive.akamaized.net/dl/Resources/%s/Jpn/AssetBundles/iOS/manifest/icon_assetmanifest' % truth_version) as rm:
+            with requests.get('http://prd-priconne-redive.akamaized.net/dl/Resources/%s/Jpn/AssetBundles/iOS/manifest/icon2_assetmanifest' % truth_version) as rm:
                 icon_manifest = rm.text.splitlines()
             download_icons(icon_manifest, lambda fn: (fn.startswith("icon_icon_equipment_") and fn.endswith(".unity3d")))
 

@@ -158,8 +158,8 @@ page('cb_list_hits', function () {
                 {
                     name: "Player",
                     control: "dropdown_isnot",
-                    choices: json.users,
-                    column: 'user_id'
+                    choices: json.members,
+                    column: 'member_id'
                 },
                 {
                     name: "Damage",

@@ -15,7 +15,7 @@ class ClanBattleHitType(Enum):
 
 class ClanBattleScore(models.Model):
     clan_battle = models.ForeignKey('ClanBattle', on_delete=models.CASCADE, related_name='hits')
-    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    member = models.ForeignKey('ClanMember', on_delete=models.CASCADE, null=True)
     day = models.PositiveIntegerField()
     damage = models.PositiveIntegerField()
     team = models.ForeignKey('Team', null=True, on_delete=models.SET_NULL)
@@ -33,7 +33,6 @@ class ClanBattleScore(models.Model):
     actual_damage = models.PositiveIntegerField()
     boss_hp_left = models.PositiveIntegerField()
     hit_type = EnumChoiceField(ClanBattleHitType, default=ClanBattleHitType.NORMAL)
-    ign = models.CharField(max_length=20, null=True)
     kyaru_date = models.CharField(max_length=50, null=True)
     kyaru_author = models.CharField(max_length=50, null=True)
     kyaru_image_url = models.TextField(null=True)
@@ -56,7 +55,7 @@ class ClanBattleScore(models.Model):
             self.boss_lap = self.clan_battle.current_lap
             self.boss_number = self.clan_battle.current_boss
             self.actual_damage = min(self.damage, self.clan_battle.current_hp)
-            previous_hit_today = self.clan_battle.hits.filter(day=self.day, user=self.user).order_by('-order').first()
+            previous_hit_today = self.clan_battle.hits.filter(day=self.day, member=self.member).order_by('-order').first()
             if previous_hit_today and previous_hit_today.hit_type == ClanBattleHitType.LAST_HIT:
                 self.hit_type = ClanBattleHitType.CARRYOVER
             elif self.actual_damage == self.clan_battle.current_hp:
@@ -72,10 +71,10 @@ class ClanBattleScore(models.Model):
 
     @cached_property
     def displayed_username(self):
-        if self.ign:
-            return format_html('<span title="{}">{}</span>', self.user.plaindiscordname, self.ign)
+        if self.member.user:
+            return format_html('<span title="{}">{}</span>', self.member.user.plaindiscordname, self.member.ign)
         else:
-            return self.user.discordname
+            return self.member.ign
 
     @cached_property
     def killing_blow(self):

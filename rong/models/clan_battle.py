@@ -2,7 +2,6 @@ import datetime
 import math
 from collections import OrderedDict, defaultdict
 
-from django.apps import apps
 from django.db import models, connection
 from django.db.models import Sum
 from django.utils import timezone
@@ -180,12 +179,12 @@ class ClanBattle(models.Model):
             hit.boss_lap = self.current_lap
             hit.boss_number = self.current_boss
             hit.actual_damage = min(hit.damage, self.current_hp)
-            if hit.user_id in lasthit_users:
+            if hit.member_id in lasthit_users:
                 hit.hit_type = ClanBattleHitType.CARRYOVER
-                lasthit_users.remove(hit.user_id)
+                lasthit_users.remove(hit.member_id)
             elif hit.actual_damage == self.current_hp:
                 hit.hit_type = ClanBattleHitType.LAST_HIT
-                lasthit_users.append(hit.user_id)
+                lasthit_users.append(hit.member_id)
             else:
                 hit.hit_type = ClanBattleHitType.NORMAL
             self.current_hp -= hit.actual_damage
@@ -282,9 +281,22 @@ class ClanBattle(models.Model):
         with connection.cursor() as cur:
             cur.execute("""
             SELECT COALESCE(SUM(CASE WHEN "hit_type" = 'Normal' THEN 1 ELSE 0.5 END), 0)
-            FROM "rong_clanbattlescore"
-            WHERE "clan_battle_id" = %s AND "day" = %s AND "user_id" = %s
+            FROM "rong_clanbattlescore" cbs
+            JOIN "rong_member" m ON cbs."member_id" = m."id"
+            WHERE cbs."clan_battle_id" = %s AND cbs."day" = %s AND m."user_id" = %s
             """, [self.id, day, user_id])
+            return cur.fetchone()[0]
+
+    def member_hits_today(self, member_id):
+        return self.member_hits_on_day(member_id, self.current_day)
+
+    def member_hits_on_day(self, member_id, day):
+        with connection.cursor() as cur:
+            cur.execute("""
+            SELECT COALESCE(SUM(CASE WHEN "hit_type" = 'Normal' THEN 1 ELSE 0.5 END), 0)
+            FROM "rong_clanbattlescore" cbs
+            WHERE cbs."clan_battle_id" = %s AND cbs."day" = %s AND cbs."member_id" = %s
+            """, [self.id, day, member_id])
             return cur.fetchone()[0]
 
     @cached_property
@@ -305,7 +317,8 @@ class ClanBattle(models.Model):
         return self.user_damage_dealt_on_day(user_id, self.current_day)
 
     def user_damage_dealt_on_day(self, user_id, day):
-        return self.hits.filter(day=day, user_id=user_id).aggregate(Sum('actual_damage'))["actual_damage__sum"] or 0
+        return self.hits.filter(day=day, member__user_id=user_id).aggregate(Sum('actual_damage'))[
+                   "actual_damage__sum"] or 0
 
     @cached_property
     def ended(self):
@@ -353,11 +366,11 @@ class ClanBattle(models.Model):
         curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
         hit_matrix = OrderedDict()
         if self.in_progress:
-            # if CB in progress, include all members so 0/3 hit people can be seen
+            # if CB in progress, include all active members so 0/3 hit people can be seen
             members = list(self.clan.members.select_related('user'))
-            members.sort(key=lambda x: x.user_display_name.lower())
+            members.sort(key=lambda x: x.ign.lower())
             for member in members:
-                hit_matrix[member.user_id] = self.initial_matrix_row(member)
+                hit_matrix[member.id] = self.initial_matrix_row(member)
         stats = {
             "daily_damage": [0 for n in range(self.total_days)],
             "cumu_damage": [0 for n in range(self.total_days)],
@@ -378,15 +391,14 @@ class ClanBattle(models.Model):
         weightable_dmg = [[0 for n in range(5)] for i in range(len(boss_data))]
         weight_ts = 0
         weight_th = 0
-        ClanMember = apps.get_model("rong", "ClanMember")
-        for hit in self.hits.order_by('order').select_related('user', 'group').prefetch_related('tags'):
+        for hit in self.hits.order_by('order').select_related('member', 'member__user', 'group').prefetch_related(
+                'tags'):
             if boss_data[difficulty_idx].lap_to is not None and hit.boss_lap > boss_data[difficulty_idx].lap_to:
                 difficulty_idx += 1
                 curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
-            if hit.user_id not in hit_matrix:
-                fake_member = ClanMember(user=hit.user, clan=self.clan, ign=hit.ign)
-                hit_matrix[hit.user_id] = self.initial_matrix_row(fake_member)
-            entry = hit_matrix[hit.user_id]
+            if hit.member_id not in hit_matrix:
+                hit_matrix[hit.member_id] = self.initial_matrix_row(hit.member)
+            entry = hit_matrix[hit.member_id]
             if int(entry['days'][hit.day - 1]['hits']) >= ClanBattle.HITS_PER_DAY:
                 continue  # silently ignore extra hits to avoid kabooming the dashboard
             entry["hits"].append(hit)
@@ -426,14 +438,14 @@ class ClanBattle(models.Model):
         stats["tags"] = list(stats["tags"])
         for tag in stats["tags"]:
             tag.total = 0
-        for uid in hit_matrix:
-            entry = hit_matrix[uid]
+        for mid in hit_matrix:
+            entry = hit_matrix[mid]
             old_tags = entry["tags"]
             entry["tags"] = []
             for tag in stats["tags"]:
                 entry["tags"].append(old_tags[tag.id])
                 tag.total += old_tags[tag.id]
-            for hit in hit_matrix[uid]["hits"]:
+            for hit in hit_matrix[mid]["hits"]:
                 if weightable_hits[hit.difficulty][hit.boss_number - 1]:
                     norm_boss_score = weightable_hits[hit.difficulty][hit.boss_number - 1] / weight_th * weight_ts
                     norm_mult = norm_boss_score / weightable_dmg[hit.difficulty][hit.boss_number - 1]
