@@ -43,6 +43,21 @@ def login_required(function=None, redirect_field_name='next', login_url=None):
     return actual_decorator
 
 
+def clan_admin_view(func):
+    @wraps(func)
+    def _wrapped_view(request, clan, *args, **kwargs):
+        clan = get_object_or_404(Clan, slug=clan)
+        if request.user.is_authenticated and request.user.can_administrate(clan):
+            return func(request, clan, *args, **kwargs)
+        elif request.user.is_authenticated:
+            raise PermissionDenied()
+        else:
+            path = request.build_absolute_uri()
+            return redirect(reverse('rong:discordlogin') + '?' + urllib.parse.urlencode({'next': path}))
+
+    return _wrapped_view
+
+
 def clan_lead_view(func):
     @wraps(func)
     def _wrapped_view(request, clan, *args, **kwargs):
@@ -71,6 +86,7 @@ def clan_view(func):
             return redirect(reverse('rong:discordlogin') + '?' + urllib.parse.urlencode({'next': path}))
 
     return _wrapped_view
+
 
 def clanbattle_lead_view(func):
     @wraps(func)

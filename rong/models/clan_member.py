@@ -35,6 +35,7 @@ class ClanMember(models.Model):
             "discord_username": None if not self.user_id else self.user.name,
             "discord_discriminator": None if not self.user_id else self.user.discriminator,
             "active": self.active,
+            "box": self.box.meta_json()
         }
 
     @property

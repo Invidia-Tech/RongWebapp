@@ -12,6 +12,7 @@ urlpatterns = [
     path('clan/<slug:clan>/battles/<int:battle_id>/', manageclan.edit_battle, name='clan_edit_battle'),
     path('clan/<slug:clan>/battles/add/', manageclan.add_battle, name='clan_add_battle'),
     path('clan/<slug:clan>/battles/', manageclan.list_battles, name='clan_list_battles'),
+    path('clan/<slug:clan>/members/add/', manageclan.add_member, name='clan_add_member'),
     path('clan/<slug:clan>/members/<int:member_id>/', manageclan.edit_member, name='clan_edit_member'),
     path('clan/<slug:clan>/members/', manageclan.list_members, name='clan_list_members'),
     path('clanbattle/list/<slug:clan>/', clanbattle.list_battles, name='cb_list'),

@@ -14,7 +14,17 @@
 {% block title %}{{ clan.name }} - Manage Members{% endblock %}
 
 {% block content %}
-    <h2>{{ clan.name }} &gt; Members</h2>
+    <div class="row header mb-3">
+        <div class="col-md-6">
+            <h2>{{ clan.name }} &gt; Members</h2>
+        </div>
+        <div class="col-md-6 text-right">
+            {% if show_add %}
+                <button type="button" class="btn btn-primary" id="addMemberBtn">Add Member</button>
+            {% endif %}
+        </div>
+    </div>
+
     {{ boxes|json_script:"boxData" }}
     <h3>Active Members</h3>
     <table class="table dt w-100 dt-noPaging" id="memberListTable">

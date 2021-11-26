@@ -4,10 +4,10 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 
-from rong.decorators import clan_lead_view
+from rong.decorators import clan_lead_view, clan_admin_view
 from rong.forms.manageclan import HitGroupForm, EditClanBattleForm, AddClanBattleForm, FullEditClanMemberForm, \
     EditClanMemberForm, HitTagForm
-from rong.models import ClanBattle, HitGroup, HitTag, User
+from rong.models import ClanBattle, HitGroup, HitTag, User, ClanMember
 
 
 @clan_lead_view
@@ -157,6 +157,22 @@ def member_form(request, clan):
         return EditClanMemberForm
 
 
+@clan_admin_view
+def add_member(request, clan):
+    form_class = member_form(request, clan)
+    if request.method == 'POST':
+        member = ClanMember(clan=clan)
+        form = form_class(request.POST, instance=member)
+        if form.is_valid():
+            member.user = User.for_discord_id(form.cleaned_data["discord"])
+            form.save()
+            return JsonResponse({"success": True, "member": member.json})
+        else:
+            return JsonResponse({"success": False, "error": "Invalid member"})
+    else:
+        raise SuspiciousOperation()
+
+
 @clan_lead_view
 def edit_member(request, clan, member_id):
     member = get_object_or_404(clan.all_members, pk=member_id)
@@ -194,6 +210,7 @@ def list_members(request, clan):
         "active_members": active_members,
         "inactive_members": inactive_members,
         "form": member_form(request, clan)(),
-        "boxes": boxes
+        "boxes": boxes,
+        "show_add": request.user.can_administrate(clan)
     }
     return render(request, 'rong/manageclan/members.html', ctx)
