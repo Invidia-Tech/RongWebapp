@@ -17,7 +17,7 @@ def update_clan_boxes(apps, schema_editor):
             cm.box.save()
             cm.save()
         if cm.ign == 'Unnamed' and cm.user is not None:
-            cm.ign = cm.user.name
+            cm.ign = cm.user.name[:20]
             cm.save()
 
 class Migration(migrations.Migration):

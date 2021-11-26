@@ -43,6 +43,9 @@ jobs:
             source ~/django-env/bin/activate
             cp ~/config.uat.py ~/django/rongdjango/config.py
             cd ~/django
+            sed '/mod-wsgi/d' requirements2.txt
+            rm requirements.txt
+            mv requirements2.txt requirements.txt
             pip install -r requirements.txt
             python manage.py update_database en
             python manage.py update_database cn
