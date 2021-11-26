@@ -6,7 +6,6 @@ from django_extensions.db.fields import AutoSlugField
 
 class Clan(models.Model):
     name = models.CharField(max_length=50)
-    platform_id = models.CharField(max_length=30, db_index=True)
     admin = models.ForeignKey(
         'User', null=True, on_delete=models.SET_NULL, related_name='clans_administrated')
     slug = AutoSlugField(populate_from='name', unique=True)
