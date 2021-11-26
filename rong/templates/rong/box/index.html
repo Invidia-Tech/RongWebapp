@@ -7,18 +7,16 @@
 {% block title %}My Boxes{% endblock %}
 
 {% block content %}
-    {% if not user.single_mode %}
-        <div class="row header mb-3">
-            <div class="col-md-6">
-                <h2>My Boxes</h2>
-            </div>
-            <div class="col-md-6 text-right">
-                <button type="button" class="btn btn-primary box-create" id="createBoxBtn">Create
-                    Box
-                </button>
-            </div>
+    <div class="row header mb-3">
+        <div class="col-md-6">
+            <h2>My Boxes</h2>
         </div>
-    {% endif %}
+        <div class="col-md-6 text-right">
+            <button type="button" class="btn btn-primary box-create" id="createBoxBtn">Create
+                Box
+            </button>
+        </div>
+    </div>
 
     <div id="boxes">
     </div>
@@ -28,112 +26,14 @@
 
     <div class="template box" id="boxTemplate">
         <div class="row header box-header">
-            <div class="col-md-5">
+            <div class="col-md-6">
                 <h2 class="name"></h2>
             </div>
-            <div class="col-md-2">
-                {% if not user.single_mode %}
-                    Clan: <span class="box-clan-name"></span>
-                {% endif %}
-            </div>
-            <div class="col-md-5 actions">
-                <button type="button" class="btn btn-primary box-import">Import from TW Armory</button>
-                {% if not user.single_mode %}
-                    <button type="button" class="btn btn-primary box-edit">Edit</button>
-                    <button type="button" class="btn btn-danger box-delete">Delete</button>
-                {% endif %}
-            </div>
+            <div class="col-md-6 actions"></div>
         </div>
         <div class="box-units"></div>
     </div>
 
-    <!-- Add Unit modal -->
-    <div class="modal fade" id="addUnitModal" tabindex="-1" aria-labelledby="addUnitModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addUnitModalLabel">Add Units</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-header unit-filter-header">
-                    <ul class="position-selector">
-                        <li class="active" data-filter="all">All</li>
-                        <li data-filter="front"><img src="{% static 'rong/images/position_front.png' %}"/> Front</li>
-                        <li data-filter="middle"><img src="{% static 'rong/images/position_middle.png' %}"/> Middle</li>
-                        <li data-filter="back"><img src="{% static 'rong/images/position_back.png' %}"/> Back</li>
-                    </ul>
-                </div>
-                <div class="modal-body">
-
-                    <form id="addUnitForm">
-                        {% csrf_token %}
-                        <div class="units"></div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary add-button">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {% include "rong/includes/box_unit_modal.html" %}
-
-    <!-- Create/Edit Box modal -->
-    <div class="modal fade" id="boxModal" tabindex="-1" aria-labelledby="boxModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="boxModalLabel">Edit Box</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="boxForm">
-                        {% csrf_token %}
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label" for="boxNameField">Name:</label>
-                            <div class="col-md-9">
-                                <div class="input-group">
-                                    <input class="form-control" name="name" id="boxNameField" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-md-3 col-form-label" for="boxClanField">Clan:</label>
-                            <div class="col-md-9">
-                                <div class="input-group">
-                                    <select class="form-control" name="clan" id="boxClanField"></select>
-                                </div>
-
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="boxSaveBtn">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TW Armory Import modal -->
-    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="importModalLabel">Import from TW Armory</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include "rong/includes/box_editing.html" %}
 
 {% endblock %}

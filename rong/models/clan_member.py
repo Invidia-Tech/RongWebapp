@@ -1,6 +1,8 @@
 from django.apps import apps
 from django.db import models
 
+from .box import Box
+
 
 class ClanMember(models.Model):
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='all_clan_memberships', null=True)
@@ -23,14 +25,16 @@ class ClanMember(models.Model):
     def json(self):
         return {
             "id": self.id,
-            "name": self.user.name,
-            "discriminator": self.user.discriminator,
             "ign": self.ign,
             "player_id": self.player_id,
             "is_lead": self.is_lead,
             "group_num": self.group_num,
             "is_admin": self.user_id == self.clan.admin_id,
             "is_superadmin": self.user.is_superadmin,
+            "discord_id": None if not self.user_id else self.user.platform_id,
+            "discord_username": None if not self.user_id else self.user.name,
+            "discord_discriminator": None if not self.user_id else self.user.discriminator,
+            "active": self.active,
         }
 
     @property
@@ -41,4 +45,9 @@ class ClanMember(models.Model):
             return "%s#%04d" % (self.user.name, self.user.discriminator)
 
     def save(self, *args, **kwargs):
+        if not self.box:
+            self.box = Box()
+            self.box.save()
+        if not self.active:
+            self.is_lead = False
         super(ClanMember, self).save(*args, **kwargs)

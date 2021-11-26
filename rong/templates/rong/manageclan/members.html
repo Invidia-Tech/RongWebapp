@@ -16,28 +16,32 @@
 {% block content %}
     <h2>{{ clan.name }} &gt; Members</h2>
     {{ boxes|json_script:"boxData" }}
+    <h3>Active Members</h3>
     <table class="table dt w-100 dt-noPaging" id="memberListTable">
         <thead>
         <tr>
-            <th>Member</th>
-            <th>IGN</th>
+            <th>Name</th>
+            <th>Discord</th>
             <th>Player ID</th>
             <th>Lead?</th>
-            <th>Group</th>
             <th>Box</th>
             <th>Actions</th>
         </tr>
         </thead>
         <tbody>
-        {% for member in members %}
+        {% for member in active_members %}
             <tr data-id="{{ member.id }}">
-                <td class="member-name">{{ member.user.discordname }}</td>
-                <td class="member-ign">{% if member.ign %}{{ member.ign }}{% else %}N/A{% endif %}</td>
+                <td class="member-ign">{{ member.ign }}</td>
+                <td class="member-discord">
+                    {% if member.user %}
+                        {{ member.user.discordname }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
                 <td class="member-pid">{{ member.formatted_id }}</td>
                 <td class="member-lead">
-                    {% if member.user.is_superadmin %}
-                        SuperAdmin
-                    {% elif member.user_id == clan.admin_id %}
+                    {% if member.user_id == clan.admin_id %}
                         Leader
                     {% elif member.is_lead %}
                         Yes
@@ -45,52 +49,89 @@
                         No
                     {% endif %}
                 </td>
-                <td class="member-group">{{ member.group_num }}</td>
                 <td>
-                    {% if boxes|get_key:member.id is not None %}
-                        <button type="button" class="btn btn-primary show-member-box">Show</button>
-                    {% else %}
-                        No Data
-                    {% endif %}
+                    <button type="button" class="btn btn-primary show-member-box">Show</button>
                 </td>
-                <td><button type="button" class="btn btn-primary edit-member">Edit Details</button></td>
+                <td>
+                    <button type="button" class="btn btn-primary edit-member">Edit Details</button>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    <div class="modal fade" id="editMemberModal" tabindex="-1" aria-labelledby="editMemberModalLabel"
+    <hr/>
+
+    <h3>Inactive Members</h3>
+    <table class="table dt w-100 dt-noPaging" id="memberListInactiveTable">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Discord</th>
+            <th>Player ID</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for member in inactive_members %}
+            <tr data-id="{{ member.id }}">
+                <td class="member-ign">{{ member.ign }}</td>
+                <td class="member-discord">
+                    {% if member.user %}
+                        {{ member.user.discordname }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td class="member-pid">{{ member.formatted_id }}</td>
+                <td>
+                    <button type="button" class="btn btn-primary edit-member">Edit Details</button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="memberModal" tabindex="-1" aria-labelledby="memberModalLabel"
          aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editMemberModalLabel">Edit Member Details</h5>
+                    <h5 class="modal-title" id="memberModalLabel">Edit Member Details</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="editMemberForm">
+                    <form id="memberForm">
                         {% csrf_token %}
-                        <div class="row mb-3">
-                            <div class="col-md-3">Member:</div>
-                            <div class="col-md-9" id="editMemberName"><b class="name"></b><span class="discriminator"></span></div>
-                        </div>
                         {% bootstrap_field form.ign layout='horizontal' %}
                         {% bootstrap_field form.player_id layout='horizontal' %}
-                        {% bootstrap_field form.group_num layout='horizontal' %}
+                        {% bootstrap_field form.discord layout='horizontal' %}
                         {% if form.is_lead %}
                             {% bootstrap_field form.is_lead layout='horizontal' %}
+                        {% endif %}
+                        {% if form.active %}
+                            {% bootstrap_field form.active layout='horizontal' %}
                         {% endif %}
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="editMemberSaveBtn">Save</button>
+                    <button type="button" class="btn btn-primary" id="memberSaveBtn">Save</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="d-none api" data-api-url="{{ request.path }}"></div>
-    {% include "rong/includes/box_unit_modal.html" %}
+    {% include "rong/includes/box_editing.html" %}
+    <div class="template box" id="boxTemplate">
+        <div class="row header box-header">
+            <div class="col-md-6">
+                <h2 class="name"></h2>
+            </div>
+            <div class="col-md-6 actions"></div>
+        </div>
+        <div class="box-units"></div>
+    </div>
 {% endblock %}

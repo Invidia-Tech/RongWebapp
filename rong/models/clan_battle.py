@@ -189,7 +189,8 @@ class ClanBattle(models.Model):
                 hit.hit_type = ClanBattleHitType.NORMAL
             self.current_hp -= hit.actual_damage
             hit.boss_hp_left = self.current_hp
-            hit.save()
+            if hit.has_changed:
+                hit.save()
             if self.current_hp == 0:
                 if self.current_boss == 5:
                     self.current_lap += 1

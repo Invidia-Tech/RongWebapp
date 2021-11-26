@@ -12,6 +12,7 @@ import {
 import 'jquery-validation';
 import 'jquery-mask-plugin';
 import {boxUnitModal} from "../modules/box-unit-modal";
+import {renderBox, setupBoxes} from "../modules/box-editing";
 
 require("datatables.net-bs4/js/dataTables.bootstrap4");
 
@@ -20,21 +21,23 @@ page('clan_list_members', function () {
     let boxes = JSON.parse(document.getElementById('boxData').textContent);
 
     function saveMemberDetails(id) {
-        $('#editMemberForm').validate();
-        if ($('#editMemberForm').valid()) {
-            $('#editMemberModal').modal('hide');
+        $('#memberForm').validate();
+        if ($('#memberForm').valid()) {
+            $('#memberModal').modal('hide');
             $("#id_player_id").unmask();
             show_loading();
-            $.post($api.attr('data-api-url') + id + "/", $('#editMemberForm').serialize(), function (data) {
+            $.post($api.attr('data-api-url') + id + "/", $('#memberForm').serialize(), function (data) {
                 if (data.success) {
                     let $rootRow = $("tr[data-id='" + data.member.id + "'");
-                    $rootRow.find(".member-name").html(formatDiscordName(data.member.name, data.member.discriminator));
-                    $rootRow.find(".member-ign").text(data.member.ign || "N/A");
+                    if(data.member.discord_id) {
+                        $rootRow.find(".member-discord").html(formatDiscordName(data.member.discord_username, data.member.discord_discriminator));
+                    }
+                    else {
+                        $rootRow.find(".member-discord").html('N/A');
+                    }
+                    $rootRow.find(".member-ign").text(data.member.ign);
                     $rootRow.find(".member-pid").text(formatPlayerId(data.member.player_id));
-                    $rootRow.find(".member-group").text(data.member.group_num || "None");
-                    if (data.member.is_superadmin) {
-                        $rootRow.find(".member-lead").text("SuperAdmin");
-                    } else if (data.member.is_admin) {
+                    if (data.member.is_admin) {
                         $rootRow.find(".member-lead").text("Admin");
                     } else {
                         $rootRow.find(".member-lead").text(data.member.is_lead ? "Yes" : "No");
@@ -48,35 +51,36 @@ page('clan_list_members', function () {
         }
     }
 
-    function editMemberDetails(id) {
+    function memberDetails(id) {
         show_loading();
         $.get($api.attr('data-api-url') + id + "/", function (member) {
             hide_loading();
-            $("#editMemberName .name").text(member.name);
-            $("#editMemberName .discriminator").text("#" + member.discriminator.toString().padStart(4, "0"));
             $("#id_ign").val(member.ign ?? "");
-            $("#id_player_id").val(member.player_id ?? "");
+            $("#id_player_id").val(member.player_id ? formatPlayerId(member.player_id) : "");
             $("#id_player_id").mask('000 000 000');
             $("#id_group_num").val(member.group_num ?? "");
+            $("#id_discord").val(member.discord_id ?? "");
             if ($("#id_is_lead").length) {
-                if (member.is_superadmin || member.is_admin) {
+                if (member.is_admin) {
                     $("#id_is_lead").prop("checked", true);
                     $("#id_is_lead").prop("disabled", true);
                 } else {
                     $("#id_is_lead").prop("checked", member.is_lead);
                     $("#id_is_lead").prop("disabled", false);
                 }
+                $("#id_active").prop("checked", member.active);
+                $("#id_active").prop("disabled", false);
             }
-            $('#editMemberModal').modal();
-            $('#editMemberSaveBtn').off('click');
-            $('#editMemberSaveBtn').click(function () {
+            $('#memberModal').modal();
+            $('#memberSaveBtn').off('click');
+            $('#memberSaveBtn').click(function () {
                 saveMemberDetails(id);
             });
         }, 'json');
     }
 
     $('button.edit-member').click(function () {
-        editMemberDetails($(this).closest('tr').attr('data-id'));
+        memberDetails($(this).closest('tr').attr('data-id'));
     });
 
     $('button.show-member-box').click(function () {
@@ -91,32 +95,17 @@ page('clan_list_members', function () {
                 btn.text("Show");
             });
         } else {
-            if (boxes[id]) {
-                let box_units_el = $("<div></div>");
-                let box_data = boxes[id].units;
-                for (const uid in box_data) {
-                    const unit = box_data[uid];
-                    let unit_el = $("<div class='unit-icon clickable'></div>").addClass('u-' + icon_id(unit.unit.id, unit.star));
-                    unit_el.attr("data-mid", id);
-                    unit_el.attr("data-uid", uid);
-                    unit_el.append($("<i class='unit-icon-border'></i>").addClass(rank_color(unit.rank)));
-                    if (unit.star) {
-                        unit_el.append($('<div class="unit-icon-stars"></div>').addClass('s-' + unit.star));
-                    }
-                    box_units_el.append(unit_el);
-                }
-                row.child("<div class='slidable'>" + box_units_el.html() + "</div>").show();
-                $('div.slidable', row.child()).slideDown();
-                btn.text("Hide");
-                $("#memberListTable .unit-icon.clickable").off("click");
-                $("#memberListTable .unit-icon.clickable").click(function () {
-                    const unit = boxes[$(this).attr("data-mid")].units[$(this).attr("data-uid")];
-                    boxUnitModal(unit, {
-                        editable: false,
-                        titleText: "View Unit - <span class='unit-name'></span>",
-                    });
-                })
-            }
+            row.child("<div class='slidable' id='outer-box-"+id+"'></div>").show();
+            renderBox('#outer-box-'+id, boxes[id].id);
+            $('div.slidable', row.child()).slideDown();
+            btn.text("Hide");
         }
     });
+
+    let boxList = [];
+    for(var id in boxes) {
+        boxList.push(boxes[id]);
+    }
+    setupBoxes(boxList);
+
 });

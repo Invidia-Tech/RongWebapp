@@ -6,6 +6,8 @@ from django.utils.functional import cached_property
 from django.utils.html import format_html
 from requests_oauthlib import OAuth2Session
 
+from .bot_models import DiscordMember
+from .box import Box
 from .clan import Clan
 from .clan_battle import ClanBattle
 from .clan_battle_score import ClanBattleScore
@@ -16,31 +18,9 @@ class User(models.Model):
     discriminator = models.IntegerField()
     name = models.CharField(max_length=50)
     display_pic = models.CharField(max_length=6, default='105811')
-    single_mode = models.BooleanField(default=True)
     is_superadmin = models.BooleanField(default=False)
 
-    def check_single_mode(self):
-        if not self.single_mode:
-            return
-
-        num_clans = self.clan_memberships.count()
-        num_boxes = self.box_set.count()
-
-        if num_clans > 1 or num_boxes > 1:
-            self.single_mode = False
-            self.save()
-            return
-
-        if not num_boxes:
-            box = self.box_set.create(name='My Box')
-        else:
-            box = self.box_set.get()
-
-        if num_clans:
-            clanmemb = self.clan_memberships.get()
-            clanmemb.box = box
-            clanmemb.save()
-
+    @staticmethod
     def for_discord_session(session: OAuth2Session):
         r = session.get('%s/users/@me' % settings.DISCORD_BASE_URL)
         user_data = r.json()
@@ -51,6 +31,20 @@ class User(models.Model):
         user.discriminator = user_data['discriminator']
         user.save()
         return user
+
+    @staticmethod
+    def for_discord_id(discord_id):
+        memberdata = DiscordMember.objects.filter(member_id=discord_id).first()
+        if not memberdata:
+            return None
+        user = User.objects.filter(platform_id=discord_id).first()
+        if not user:
+            user = User(platform_id=discord_id)
+        user.name = memberdata.username
+        user.discriminator = memberdata.discriminator
+        user.save()
+        return user
+
 
     @cached_property
     def managed_clan_ids(self):
@@ -65,6 +59,17 @@ WHERE (
 	(cm."id" IS NOT NULL AND cm."is_lead" IS TRUE)
 	OR cl."admin_id" = %s
 );
+            """, [self.id] * 2)
+            return [row[0] for row in cur.fetchall()]
+
+    @cached_property
+    def own_box_ids(self):
+        with connection.cursor() as cur:
+            cur.execute("""
+SELECT box."id"
+FROM "rong_box" box
+LEFT JOIN "rong_clanmember" cm ON (box."id" = cm."box_id")
+WHERE box."user_id" = %s OR cm."user_id" = %s
             """, [self.id] * 2)
             return [row[0] for row in cur.fetchall()]
 
@@ -117,8 +122,8 @@ WHERE (
         return self.all_clan_memberships.filter(active=True)
 
     @property
-    def detailed_boxes(self):
-        return self.box_set.select_related("clanmember", "clanmember__clan").prefetch_related(
+    def boxes(self):
+        return Box.objects.filter(id__in=self.own_box_ids).select_related("clanmember", "clanmember__clan").prefetch_related(
             'boxunit_set__unit__ranks')
 
 

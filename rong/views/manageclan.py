@@ -7,7 +7,7 @@ from django.urls import reverse
 from rong.decorators import clan_lead_view
 from rong.forms.manageclan import HitGroupForm, EditClanBattleForm, AddClanBattleForm, FullEditClanMemberForm, \
     EditClanMemberForm, HitTagForm
-from rong.models import ClanBattle, HitGroup, HitTag
+from rong.models import ClanBattle, HitGroup, HitTag, User
 
 
 @clan_lead_view
@@ -159,11 +159,12 @@ def member_form(request, clan):
 
 @clan_lead_view
 def edit_member(request, clan, member_id):
-    member = get_object_or_404(clan.members, pk=member_id)
+    member = get_object_or_404(clan.all_members, pk=member_id)
     form_class = member_form(request, clan)
     if request.method == 'POST':
         form = form_class(request.POST, instance=member)
         if form.is_valid():
+            member.user = User.for_discord_id(form.cleaned_data["discord"])
             form.save()
             return JsonResponse({"success": True, "member": member.json})
         else:
@@ -177,15 +178,21 @@ def edit_member(request, clan, member_id):
 @clan_lead_view
 def list_members(request, clan):
     boxes = {}
-    members = clan.members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks')
+    members = clan.all_members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks')
+    active_members = []
+    inactive_members = []
     for member in members:
-        if member.box is not None and member.box.boxunit_set.count() > 0:
-            boxes[member.id] = member.box.meta_json()
+        if member.box is None:
+            member.save()  # create a box
+        boxes[member.id] = member.box.meta_json()
+        if member.active:
+            active_members.append(member)
         else:
-            boxes[member.id] = None
+            inactive_members.append(member)
     ctx = {
         "clan": clan,
-        "members": members,
+        "active_members": active_members,
+        "inactive_members": inactive_members,
         "form": member_form(request, clan)(),
         "boxes": boxes
     }

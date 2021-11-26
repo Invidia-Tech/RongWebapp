@@ -6,6 +6,8 @@ from django.utils.functional import cached_property
 from django.utils.html import format_html
 from django_enum_choices.fields import EnumChoiceField
 
+from rong.mixins import ModelDiffMixin
+
 
 class ClanBattleHitType(Enum):
     NORMAL = "Normal"
@@ -13,7 +15,7 @@ class ClanBattleHitType(Enum):
     CARRYOVER = "Carryover"
 
 
-class ClanBattleScore(models.Model):
+class ClanBattleScore(models.Model, ModelDiffMixin):
     clan_battle = models.ForeignKey('ClanBattle', on_delete=models.CASCADE, related_name='hits')
     member = models.ForeignKey('ClanMember', on_delete=models.CASCADE, null=True)
     day = models.PositiveIntegerField()

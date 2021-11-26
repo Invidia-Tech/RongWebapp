@@ -46,7 +46,6 @@ def discordcallback(request: HttpRequest):
                 client_secret=settings.DISCORD_CLIENT_SECRET,
                 authorization_response=request.build_absolute_uri())
             user = User.for_discord_session(discord)
-            user.check_single_mode()
             destination = request.session.get('redirect_url', '')
             if not destination:
                 destination = reverse('rong:index')

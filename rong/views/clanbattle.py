@@ -30,6 +30,7 @@ def edit_hit(request, battle: ClanBattle, hit_id):
         if form.is_valid():
             form.save()
             messages.add_message(request, messages.SUCCESS, 'Hit successfully edited.')
+            # return HttpResponse('<html><head><title>A</title></head><body>A</body></html>')
             return redirect('rong:cb_list_hits', battle.slug)
     else:
         form = HitForm(hit)
@@ -118,6 +119,8 @@ def hit_log_data(request, battle: ClanBattle):
         resp["unit_choices"] = [(unit.id,unit.name) for unit in Unit.valid_units().order_by('search_area_width')]
         resp["members"] = [(member.id,member.ign) for member in members]
         resp["boss_choices"] = [(num, getattr(battle, "boss%d_name" % num)) for num in range(1, 6)]
+        resp["members"].sort(key=lambda x:x[1].lower())
+        resp["unit_choices"].sort(key=lambda x: x[1].lower())
     return JsonResponse(resp)
 
 

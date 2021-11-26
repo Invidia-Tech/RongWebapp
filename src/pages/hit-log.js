@@ -277,13 +277,14 @@ page('cb_list_hits', function () {
                         $valueInput.remove();
                     }
                     let filter = filtersByName[currentFilter.type];
-                    $comparisonSelector = $("<select><option value=''>Select...</option></select>");
+                    $comparisonSelector = $("<select></select>");
                     for (let comparison of filter.comparisons) {
                         let $option = $("<option></option>");
                         $option.attr("value", comparison);
                         $option.text(comparison);
                         $comparisonSelector.append($option);
                     }
+                    currentFilter.comparison = filter.comparisons[0];
                     $comparisonSelector.insertBefore($deleteBtn);
                     if (filter.inputType == 'number') {
                         $valueInput = $('<input type="number" />');

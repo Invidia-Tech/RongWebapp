@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from rong.models import HitGroup, ClanMember, HitTag
+from rong.models.bot_models import DiscordMember
 from rong.models.clan_battle import CB_DATA_SOURCES, ClanBattle
 
 
@@ -19,6 +20,22 @@ def get_cb_data_source_choices(blank_str='--Choose--'):
             output.append(out_choice)
     except:
         pass
+    return output
+
+
+def get_discord_choices(blank_str='None'):
+    output = []
+    try:
+        for member in DiscordMember.objects.all():
+            if member.nickname is None or member.nickname == 'None' or member.nickname == member.username:
+                output.append((member.member_id, '%s#%04d' % (member.username, member.discriminator)))
+            else:
+                output.append(
+                    (member.member_id, '%s (%s#%04d)' % (member.nickname, member.username, member.discriminator)))
+    except:
+        pass
+    output.sort(key=lambda x: x[1].lower())
+    output.insert(0, ('', blank_str))
     return output
 
 
@@ -130,37 +147,36 @@ class HitTagForm(forms.ModelForm):
 
 
 class EditClanMemberForm(forms.ModelForm):
+    discord = forms.ChoiceField(choices=get_discord_choices, required=False)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['ign'].widget.attrs.update({'placeholder': 'In Game Name'})
-        self.fields['ign'].required = False
+        self.fields['ign'].required = True
         self.fields['player_id'].widget.attrs.update({'placeholder': 'XXX XXX XXX'})
         self.fields['player_id'].required = False
-        self.fields['group_num'].widget.attrs.update({'placeholder': ''})
-        self.fields['group_num'].required = False
 
     class Meta:
         model = ClanMember
-        fields = ['ign', 'player_id', 'group_num']
+        fields = ['ign', 'player_id']
         widgets = {
             'player_id': forms.TextInput()
         }
         labels = {
             'ign': 'IGN',
-            'player_id': 'Player ID',
-            'group_num': 'Group #'
+            'player_id': 'Player ID'
         }
 
 
 class FullEditClanMemberForm(EditClanMemberForm):
     class Meta:
         model = ClanMember
-        fields = ['ign', 'player_id', 'group_num', 'is_lead']
+        fields = ['ign', 'player_id', 'active', 'is_lead']
         widgets = {
             'player_id': forms.TextInput()
         }
         labels = {
             'ign': 'IGN',
             'player_id': 'Player ID',
-            'group_num': 'Group #'
+            'active': 'Active'
         }

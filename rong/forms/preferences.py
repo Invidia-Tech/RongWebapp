@@ -9,4 +9,4 @@ class PreferencesForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['display_pic', 'single_mode']
+        fields = ['display_pic']

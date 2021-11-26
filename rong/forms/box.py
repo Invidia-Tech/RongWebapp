@@ -1,24 +1,13 @@
 from django import forms
-from django.db import models
 
-from rong.forms.fields import CBLabelModelChoiceField, SimpleChoiceField
+from rong.forms.fields import SimpleChoiceField
 from rong.models import Box, BoxUnit
 
 
 class BoxForm(forms.ModelForm):
-    clan = CBLabelModelChoiceField(queryset=None, required=False, empty_label="---None---",
-                                   callback=lambda cm: cm.clan.name)
-
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["clan"].queryset = user.clan_memberships.select_related('clan').order_by('clan__name')
-        if self.instance.id:
-            # edit - clan can be its current value or any clan without an associated box
-            self.fields["clan"].queryset = self.fields["clan"].queryset.filter(
-                models.Q(box__isnull=True) | models.Q(box=self.instance))
-        else:
-            # create - clan can be any clan without an associated box
-            self.fields["clan"].queryset = self.fields["clan"].queryset.filter(box__isnull=True)
+        if not self.instance.id:
             self.instance.user = user
 
     class Meta:
