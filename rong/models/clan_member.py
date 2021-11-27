@@ -30,7 +30,7 @@ class ClanMember(models.Model):
             "is_lead": self.is_lead,
             "group_num": self.group_num,
             "is_admin": self.user_id == self.clan.admin_id,
-            "is_superadmin": self.user.is_superadmin,
+            "is_superadmin": False if not self.user_id else self.user.is_superadmin,
             "discord_id": None if not self.user_id else self.user.platform_id,
             "discord_username": None if not self.user_id else self.user.name,
             "discord_discriminator": None if not self.user_id else self.user.discriminator,
