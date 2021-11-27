@@ -283,7 +283,7 @@ class ClanBattle(models.Model):
             cur.execute("""
             SELECT COALESCE(SUM(CASE WHEN "hit_type" = 'Normal' THEN 1 ELSE 0.5 END), 0)
             FROM "rong_clanbattlescore" cbs
-            JOIN "rong_member" m ON cbs."member_id" = m."id"
+            JOIN "rong_clanmember" m ON cbs."member_id" = m."id"
             WHERE cbs."clan_battle_id" = %s AND cbs."day" = %s AND m."user_id" = %s
             """, [self.id, day, user_id])
             return cur.fetchone()[0]
