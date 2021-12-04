@@ -20,15 +20,19 @@ from rong.models import BoxUnit, Unit, Equipment, Box
 
 @login_required
 def alter_boxunit(request: HttpRequest, box_id, boxunit_id):
-    box = get_object_or_404(Box, pk=box_id)
+    box = get_object_or_404(Box.full_data_queryset(), pk=box_id)
     if not box.can_edit(request.user):
         raise Http404('No box found.')
     boxunit = get_object_or_404(box.boxunit_set, pk=boxunit_id)
     if request.method == 'POST':
         form = EditBoxUnitForm(request.POST, instance=boxunit)
         if form.is_valid():
+            box.set_item_quantity(boxunit.unit.shard_id, form.cleaned_data["shards"])
             form.save()
-            return JsonResponse({"success": True, "unit": boxunit.edit_json()})
+            # the inventory row is preloaded; so we need to manually make this reflect the new amount
+            unit_data = boxunit.edit_json()
+            unit_data["shards"] = form.cleaned_data["shards"]
+            return JsonResponse({"success": True, "unit": unit_data})
         else:
             return JsonResponse({"success": False, "errors": form.errors.get_json_data()})
     elif request.method == 'DELETE':
@@ -129,6 +133,7 @@ def import_box(request: HttpRequest, box_id):
                                 else:
                                     eq_val = None
                                 setattr(box_unit, 'equip%d' % (eq + 1), eq_val)
+                            box_unit.ue_level = int(unit["q"]) if unit["q"] != "" else None
                             save_units.append(box_unit)
                     elif missing_units == 'Error':
                         raise ValueError("Missing unit found in your import.")
@@ -154,7 +159,7 @@ def import_box(request: HttpRequest, box_id):
 
 @login_required
 def create_boxunit(request: HttpRequest, box_id):
-    box = get_object_or_404(Box, pk=box_id)
+    box = get_object_or_404(Box.full_data_queryset(), pk=box_id)
     if not box.can_edit(request.user):
         raise Http404('No box found.')
     if request.method == 'POST':

@@ -30,15 +30,20 @@ class CreateBoxUnitForm(forms.ModelForm):
 
 
 class EditBoxUnitForm(forms.ModelForm):
+    shards = forms.IntegerField(min_value=0, max_value=9999)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         for equip in range(1, 7):
             self.fields["equip%d" % equip].required = False
+        self.fields["ue_level"].required = False
+        self.fields["notes"].required = False
 
     class Meta:
         model = BoxUnit
-        fields = ['level', 'star', 'rank', 'equip1', 'equip2', 'equip3', 'equip4', 'equip5', 'equip6']
+        fields = ['level', 'star', 'rank', 'equip1', 'equip2', 'equip3', 'equip4', 'equip5', 'equip6', 'ue_level',
+                  'notes']
 
 
 class ImportTWArmoryBoxForm(forms.Form):

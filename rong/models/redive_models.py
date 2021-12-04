@@ -2,12 +2,39 @@ from django.db import models
 from django.utils.functional import cached_property
 
 
+class UnlockUnitCondition(models.Model):
+    id = models.AutoField(primary_key=True, db_column='unit_id')
+    condition_id_1 = models.IntegerField()
+
+    class Meta():
+        managed = False
+        db_table = u'redive_en"."unlock_unit_condition'
+
+
+class UnitUniqueEquip(models.Model):
+    id = models.AutoField(primary_key=True, db_column='equip_id')
+    unit = models.OneToOneField('Unit', db_column='unit_id', on_delete=models.DO_NOTHING, related_name='unique_equip')
+
+    class Meta():
+        managed = False
+        db_table = u'redive_en"."unit_unique_equip'
+
+
 class Unit(models.Model):
     id = models.AutoField(primary_key=True, db_column='unit_id')
     name = models.TextField(db_column='unit_name')
     cutin_1 = models.IntegerField()
     search_area_width = models.IntegerField()
     rarity = models.IntegerField()
+    unlock_condition = models.ForeignKey('UnlockUnitCondition', db_column='prefab_id', on_delete=models.DO_NOTHING)
+
+    @cached_property
+    def shard_id(self):
+        return self.unlock_condition.condition_id_1
+
+    @cached_property
+    def has_ue(self):
+        return hasattr(self, 'unique_equip')
 
     @staticmethod
     def valid_units():
@@ -75,6 +102,14 @@ class Equipment(models.Model):
     class Meta():
         managed = False
         db_table = u'redive_en"."equipment_data'
+
+
+class UniqueEquipmentEnhanceData(models.Model):
+    enhance_level = models.IntegerField(primary_key=True, db_column='enhance_level')
+
+    class Meta:
+        managed = False
+        db_table = u'redive_en"."unique_equipment_enhance_data'
 
 
 class WaveGroupData(models.Model):

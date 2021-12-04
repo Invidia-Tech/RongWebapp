@@ -1,7 +1,5 @@
 import $ from 'jquery';
-import {
-    icon_id, rank_color, equipment_stars
-} from './common';
+import {equipment_stars, icon_id, rank_color} from './common';
 import {equipmentData} from "./equipment";
 import 'jquery-ui/ui/widgets/dialog';
 
@@ -136,11 +134,14 @@ function save() {
             equip4: current_unit.equip4,
             equip5: current_unit.equip5,
             equip6: current_unit.equip6,
+            shards: current_unit.shards,
+            ue_level: current_unit.ue_level,
+            notes: current_unit.notes,
         });
     }
 }
 
-export function boxUnitModal (data, options) {
+export function boxUnitModal(data, options) {
     options = $.extend({}, boxUnitModal.defaults, options);
     editable = options.editable;
     saveFn = options.saveFunction;
@@ -181,15 +182,42 @@ export function boxUnitModal (data, options) {
     level_field.attr("max", current_unit.max_level);
     level_field.val(current_unit.level);
 
+    let shards_field = $('#boxUnitShardsField');
+    shards_field.attr("min", 0);
+    shards_field.attr("max", 9999);
+    shards_field.val(current_unit.shards);
+
+    let notes_field = $('#boxUnitNotesField');
+    notes_field.val(current_unit.notes);
+
+
+    if (current_unit.max_ue_level > 0) {
+        $("#boxUnitUERow").show();
+        let ue_checkbox = $('#boxUnitUECheckbox');
+        let ue_field = $('#boxUnitUEField');
+        ue_field.attr("min", 1);
+        ue_field.attr("max", current_unit.max_ue_level);
+        if (current_unit.ue_level !== null) {
+            ue_checkbox.prop('checked', true);
+            ue_field.attr('disabled', editable ? false : 'disabled');
+            ue_field.val(current_unit.ue_level);
+        } else {
+            ue_checkbox.prop('checked', false);
+            ue_field.attr('disabled', 'disabled');
+            ue_field.val("");
+        }
+        ue_checkbox.attr('disabled', editable ? false : 'disabled');
+    } else {
+        $("#boxUnitUERow").hide();
+    }
+
     // editable?
     if (editable) {
         $('.boxUnitAction').show();
-        rank_field.attr('disabled', false);
-        level_field.attr('disabled', false);
+        $('.boxEntryField').prop('disabled', false);
     } else {
         $('.boxUnitAction').hide();
-        rank_field.attr('disabled', 'disabled');
-        level_field.attr('disabled', 'disabled');
+        $('.boxEntryField').prop('disabled', true);
     }
 
     // done
@@ -259,6 +287,69 @@ $(document).ready(function () {
         }
         current_unit.level = new_level;
         dirty = true;
+    });
+
+    $('#boxUnitShardsField').change(function () {
+        if (setting_up) {
+            return;
+        }
+        let new_shards = $('#boxUnitShardsField').val();
+        if (new_shards < 0 || new_shards > 9999) {
+            setting_up = true;
+            new_shards = Math.min(Math.max(0, new_shards), 9999);
+            $('#boxUnitShardsField').val(new_shards);
+            setting_up = false;
+        }
+        current_unit.shards = new_shards;
+        dirty = true;
+    });
+
+    $('#boxUnitUEField').change(function () {
+        if (setting_up) {
+            return;
+        }
+        let new_level = $('#boxUnitUEField').val();
+        if (new_level <= 0 || new_level > current_unit.max_ue_level) {
+            setting_up = true;
+            new_level = Math.min(Math.max(1, new_level), current_unit.max_ue_level);
+            $('#boxUnitUEField').val(new_level);
+            setting_up = false;
+        }
+        current_unit.ue_level = new_level;
+        dirty = true;
+    });
+
+    $('#boxUnitNotesField').change(function () {
+        if (setting_up) {
+            return;
+        }
+        current_unit.notes = $('#boxUnitNotesField').val();
+        dirty = true;
+    });
+
+    $('#boxUnitUECheckbox').click(function () {
+        if (setting_up) {
+            return;
+        }
+        if ($(this).prop('checked')) {
+            $('#boxUnitUEField').attr('disabled', false);
+            if ($('#boxUnitUEField').val() == "") {
+                $('#boxUnitUEField').val(1);
+            }
+            current_unit.ue_level = $('#boxUnitUEField').val();
+        } else {
+            $('#boxUnitUEField').attr('disabled', 'disabled');
+            current_unit.ue_level = null;
+        }
+        dirty = true;
+    });
+
+    $('#boxUnitUEMaxBtn').click(function () {
+        setting_up = true;
+        $('#boxUnitUECheckbox').prop('checked', true);
+        $('#boxUnitUEField').prop('disabled', false);
+        setting_up = false;
+        $('#boxUnitUEField').val(current_unit.max_ue_level).change();
     });
 
     $('#boxUnitLevelMaxBtn').click(function () {

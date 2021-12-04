@@ -194,7 +194,10 @@ def edit_member(request, clan, member_id):
 @clan_lead_view
 def list_members(request, clan):
     boxes = {}
-    members = clan.all_members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks')
+    members = clan.all_members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks',
+                                                                              'box__boxunit_set__unit__unlock_condition',
+                                                                              'box__boxunit_set__unit__unique_equip',
+                                                                              'box__inventory')
     active_members = []
     inactive_members = []
     for member in members:

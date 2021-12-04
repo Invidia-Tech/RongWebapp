@@ -3,6 +3,7 @@ from collections import OrderedDict
 from django.db import models
 from django.utils.functional import cached_property
 
+from .box_item import BoxItem
 from .redive_models import Unit
 
 
@@ -52,7 +53,21 @@ class Box(models.Model):
             "is_clan": hasattr(self, "clanmember")
         }
 
+    def get_item_quantity(self, item):
+        stock = [i for i in self.inventory.all() if i.item == item]
+        if not stock:
+            return 0
+        return stock[0].quantity
+
+    def set_item_quantity(self, item, quantity):
+        stock = self.inventory.filter(item=item).first()
+        if not stock:
+            stock = BoxItem(box=self, item=item)
+        stock.quantity = quantity
+        stock.save()
+
     @staticmethod
     def full_data_queryset():
         return Box.objects.select_related("clanmember", "clanmember__clan").prefetch_related(
-            'boxunit_set__unit__ranks')
+            'boxunit_set__unit__ranks', 'boxunit_set__unit__unlock_condition', 'boxunit_set__unit__unique_equip',
+            'inventory')

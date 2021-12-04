@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import Max
 from django.forms.models import model_to_dict
 
-from .redive_models import Unit, SkillCost
+from .redive_models import Unit, SkillCost, UniqueEquipmentEnhanceData
 
 
 def valid_box_unit(value):
@@ -34,6 +34,7 @@ class BoxUnit(models.Model):
     star = models.PositiveIntegerField(default=1)
     rank = models.PositiveIntegerField(default=1)
     bond = models.PositiveIntegerField(default=1)
+    notes = models.TextField(default='')
     # null = unequipped or not specified, 0-5 = refinement stars
     equip1 = models.PositiveIntegerField(null=True)
     equip2 = models.PositiveIntegerField(null=True)
@@ -41,11 +42,17 @@ class BoxUnit(models.Model):
     equip4 = models.PositiveIntegerField(null=True)
     equip5 = models.PositiveIntegerField(null=True)
     equip6 = models.PositiveIntegerField(null=True)
+    ue_level = models.PositiveIntegerField(null=True)
 
     @staticmethod
     @functools.lru_cache
     def max_level():
         return SkillCost.objects.aggregate(Max('target_level'))['target_level__max']
+
+    @staticmethod
+    @functools.lru_cache
+    def max_ue_level():
+        return UniqueEquipmentEnhanceData.objects.aggregate(Max('enhance_level'))['enhance_level__max']
 
     def save(self, *args, **kwargs):
         if self.star is None or self.star < self.unit.rarity:
@@ -57,6 +64,8 @@ class BoxUnit(models.Model):
         base["unit"] = model_to_dict(self.unit)
         base["ranks"] = [[rk.equip1, rk.equip2, rk.equip3, rk.equip4, rk.equip5, rk.equip6] for rk in self.unit.ranks.all()]
         base["max_level"] = BoxUnit.max_level()
+        base["shards"] = self.box.get_item_quantity(self.unit.shard_id)
+        base["max_ue_level"] = BoxUnit.max_ue_level() if self.unit.has_ue else -1
         return base
 
     class Meta:

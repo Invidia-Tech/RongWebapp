@@ -3,6 +3,7 @@ from .user import User, AnonymousUser
 from .clan_member import ClanMember
 from .member_schedule import MemberSchedule
 from .box import Box
+from .box_item import BoxItem
 from .box_unit import BoxUnit
 from .clan_battle import ClanBattle
 from .clan_battle_score import ClanBattleScore

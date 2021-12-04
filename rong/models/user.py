@@ -69,7 +69,7 @@ WHERE (
 SELECT box."id"
 FROM "rong_box" box
 LEFT JOIN "rong_clanmember" cm ON (box."id" = cm."box_id")
-WHERE box."user_id" = %s OR cm."user_id" = %s
+WHERE box."user_id" = %s OR (cm."user_id" = %s AND cm."active" IS TRUE)
             """, [self.id] * 2)
             return [row[0] for row in cur.fetchall()]
 
@@ -123,8 +123,7 @@ WHERE box."user_id" = %s OR cm."user_id" = %s
 
     @property
     def boxes(self):
-        return Box.objects.filter(id__in=self.own_box_ids).select_related("clanmember", "clanmember__clan").prefetch_related(
-            'boxunit_set__unit__ranks')
+        return Box.full_data_queryset().filter(id__in=self.own_box_ids)
 
 
 class AnonymousUser:

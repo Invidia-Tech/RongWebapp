@@ -1,8 +1,6 @@
 #boxUnitModal {
 
   .equipment {
-    margin-left: 40px;
-    margin-right: 40px;
     font-size: 125%;
   }
 
@@ -45,6 +43,8 @@
   .unit-star-holder {
     border: none;
     line-height: 1;
+    padding-top: 0;
+    padding-bottom: 0;
 
     .star {
       cursor: default;
@@ -54,5 +54,9 @@
         cursor: pointer;
       }
     }
+  }
+
+  #boxUnitNotesField {
+    height: calc(6rem + 0.75rem + 2px);
   }
 }
