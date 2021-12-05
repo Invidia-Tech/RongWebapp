@@ -2,15 +2,6 @@ from django.db import models
 from django.utils.functional import cached_property
 
 
-class UnlockUnitCondition(models.Model):
-    id = models.AutoField(primary_key=True, db_column='unit_id')
-    condition_id_1 = models.IntegerField()
-
-    class Meta():
-        managed = False
-        db_table = u'redive_en"."unlock_unit_condition'
-
-
 class UnitUniqueEquip(models.Model):
     id = models.AutoField(primary_key=True, db_column='equip_id')
     unit = models.OneToOneField('Unit', db_column='unit_id', on_delete=models.DO_NOTHING, related_name='unique_equip')
@@ -26,11 +17,10 @@ class Unit(models.Model):
     cutin_1 = models.IntegerField()
     search_area_width = models.IntegerField()
     rarity = models.IntegerField()
-    unlock_condition = models.ForeignKey('UnlockUnitCondition', db_column='prefab_id', on_delete=models.DO_NOTHING)
 
     @cached_property
     def shard_id(self):
-        return self.unlock_condition.condition_id_1
+        return 30000 + self.id // 100
 
     @cached_property
     def has_ue(self):

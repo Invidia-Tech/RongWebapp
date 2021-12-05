@@ -34,7 +34,7 @@ class BoxUnit(models.Model):
     star = models.PositiveIntegerField(default=1)
     rank = models.PositiveIntegerField(default=1)
     bond = models.PositiveIntegerField(default=1)
-    notes = models.TextField(default='')
+    notes = models.TextField(default='', max_length=300)
     # null = unequipped or not specified, 0-5 = refinement stars
     equip1 = models.PositiveIntegerField(null=True)
     equip2 = models.PositiveIntegerField(null=True)

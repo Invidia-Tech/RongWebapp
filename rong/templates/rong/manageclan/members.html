@@ -1,4 +1,5 @@
 {% extends 'rong/layout.html' %}
+{% load humanize %}
 {% load rong_common %}
 {% load unit_icons %}
 
@@ -35,6 +36,7 @@
             <th>Player ID</th>
             <th>Lead?</th>
             <th>Box</th>
+            <th>Last Box Update</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -61,6 +63,13 @@
                 </td>
                 <td>
                     <button type="button" class="btn btn-primary show-member-box">Show</button>
+                </td>
+                <td class="member-box-update">
+                    {% if member.box.last_update %}
+                        {{ member.box.last_update|naturaltime }}
+                    {% else %}
+                        N/A
+                    {% endif %}
                 </td>
                 <td>
                     <button type="button" class="btn btn-primary edit-member">Edit Details</button>

@@ -29,14 +29,13 @@ def alter_boxunit(request: HttpRequest, box_id, boxunit_id):
         if form.is_valid():
             box.set_item_quantity(boxunit.unit.shard_id, form.cleaned_data["shards"])
             form.save()
-            # the inventory row is preloaded; so we need to manually make this reflect the new amount
-            unit_data = boxunit.edit_json()
-            unit_data["shards"] = form.cleaned_data["shards"]
-            return JsonResponse({"success": True, "unit": unit_data})
+            box.flag_updated()
+            return JsonResponse({"success": True, "unit": boxunit.edit_json()})
         else:
             return JsonResponse({"success": False, "errors": form.errors.get_json_data()})
     elif request.method == 'DELETE':
         boxunit.delete()
+        box.flag_updated()
         return JsonResponse({"success": True})
     elif request.method == 'GET':
         # return data needed to populate the unit editor
@@ -143,6 +142,7 @@ def import_box(request: HttpRequest, box_id):
 
                 if mode == 'Overwrite':
                     box.boxunit_set.exclude(id__in=[bu.id for bu in save_units]).delete()
+                box.flag_updated()
             except ValueError as ex:
                 messages.add_message(request, messages.ERROR, "Could not import box data. " + str(ex))
                 return redirect('rong:box_index')
@@ -168,6 +168,7 @@ def create_boxunit(request: HttpRequest, box_id):
             results = [BoxUnit(box=box, unit=unit) for unit in form.cleaned_data["units"]]
             for result in results:
                 result.save()
+            box.flag_updated()
             return JsonResponse({"success": True, "units": [result.edit_json() for result in results]})
         else:
             return JsonResponse({"success": False, "errors": form.errors.get_json_data()})
@@ -189,7 +190,7 @@ def alter_box(request: HttpRequest, box_id):
         form = BoxForm(request.user, request.POST, instance=box)
         if form.is_valid():
             form.save()
-            return JsonResponse({"success": True, "box": box.meta_json()})
+            return JsonResponse({"success": True, "box": box.as_json()})
         else:
             return JsonResponse({"success": False, "error": "Invalid box"})
     elif request.method == 'DELETE':
@@ -207,7 +208,7 @@ def create_box(request: HttpRequest):
         form = BoxForm(request.user, request.POST)
         if form.is_valid():
             form.save()
-            return JsonResponse({"success": True, "box": form.instance.meta_json()})
+            return JsonResponse({"success": True, "box": form.instance.as_json()})
         else:
             return JsonResponse({"success": False, "error": "Invalid box"})
     else:
@@ -216,5 +217,5 @@ def create_box(request: HttpRequest):
 
 @login_required
 def index(request: HttpRequest):
-    boxes = [box.meta_json() for box in request.user.boxes.all()]
+    boxes = [box.as_json() for box in request.user.boxes.all()]
     return render(request, 'rong/box/index.html', {"boxes": boxes})

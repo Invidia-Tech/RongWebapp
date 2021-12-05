@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.contrib.humanize.templatetags import humanize
 from django.db import models
 
 from .box import Box
@@ -23,6 +24,9 @@ class ClanMember(models.Model):
 
     @property
     def json(self):
+        return self.as_json(include_units=False)
+
+    def as_json(self, include_units):
         return {
             "id": self.id,
             "ign": self.ign,
@@ -35,7 +39,7 @@ class ClanMember(models.Model):
             "discord_username": None if not self.user_id else self.user.name,
             "discord_discriminator": None if not self.user_id else self.user.discriminator,
             "active": self.active,
-            "box": self.box.meta_json()
+            "box": self.box.as_json(include_units=include_units),
         }
 
     @property

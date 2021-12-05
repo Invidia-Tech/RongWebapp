@@ -195,7 +195,6 @@ def edit_member(request, clan, member_id):
 def list_members(request, clan):
     boxes = {}
     members = clan.all_members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks',
-                                                                              'box__boxunit_set__unit__unlock_condition',
                                                                               'box__boxunit_set__unit__unique_equip',
                                                                               'box__inventory')
     active_members = []
@@ -203,7 +202,7 @@ def list_members(request, clan):
     for member in members:
         if member.box is None:
             member.save()  # create a box
-        boxes[member.id] = member.box.meta_json()
+        boxes[member.id] = member.box.as_json()
         if member.active:
             active_members.append(member)
         else:

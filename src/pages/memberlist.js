@@ -22,6 +22,7 @@ page('clan_list_members', function () {
                 "                <td>\n" +
                 "                    <button type=\"button\" class=\"btn btn-primary show-member-box\">Show</button>\n" +
                 "                </td>\n" +
+                "                <td class=\"member-box-update\"></td>\n" +
                 "                <td>\n" +
                 "                    <button type=\"button\" class=\"btn btn-primary edit-member\">Edit Details</button>\n" +
                 "                </td>\n" +
@@ -54,6 +55,7 @@ page('clan_list_members', function () {
         } else {
             $rootRow.find(".member-lead").text(data.member.is_lead ? "Yes" : "No");
         }
+        $rootRow.find(".member-box-update").text(data.member.box.last_update);
         $rootRow.parents('table').DataTable().rows().invalidate('dom').draw();
     }
 
