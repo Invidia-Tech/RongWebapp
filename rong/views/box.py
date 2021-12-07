@@ -32,7 +32,7 @@ def edit_inventory(request: HttpRequest, box_id):
                 raise BadRequest()
             quantities[item.id] = int(request.POST[item_key])
         box.bulk_update_inventory(quantities)
-        return JsonResponse({"success": True, "inventory": box.inventory_json(items), "queries": connection.queries})
+        return JsonResponse({"success": True, "inventory": box.inventory_json(items)})
     return JsonResponse(box.inventory_json(items), safe=False)
 
 
