@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 
 from .box_item import BoxItem
-from .redive_models import Unit
+from .redive_models import Unit, Item
 
 
 class Box(models.Model):
@@ -65,21 +65,42 @@ class Box(models.Model):
                 stock = filtered[0]
         else:
             stock = self.inventory.filter(item=item).first()
+        is_new = False
         if not stock:
+            is_new = True
             stock = BoxItem(box=self, item=item, quantity=0)
-        return stock
+        return stock, is_new
 
     def get_item_quantity(self, item):
-        return self.get_inventory_item(item).quantity
+        return self.get_inventory_item(item)[0].quantity
 
     def set_item_quantity(self, item, quantity):
-        stock = self.get_inventory_item(item)
+        stock, is_new = self.get_inventory_item(item)
         stock.quantity = quantity
         stock.save()
+
+    def bulk_update_inventory(self, quantities):
+        updates = []
+        new_rows = []
+        for item in quantities:
+            stock, is_new = self.get_inventory_item(item)
+            stock.quantity = quantities[item]
+            if is_new:
+                new_rows.append(stock)
+            else:
+                updates.append(stock)
+        BoxItem.objects.bulk_update(updates, ['quantity'])
+        for stock in new_rows:
+            stock.save()
 
     def flag_updated(self):
         self.last_update = timezone.now()
         self.save()
+
+    def inventory_json(self, items=None):
+        if items is None:
+            items = Item.inventory_items()
+        return [{"id": item.id, "name": item.name, "quantity": self.get_item_quantity(item.id), "limit": item.limit_num} for item in items]
 
     @staticmethod
     def full_data_queryset():

@@ -4,22 +4,39 @@ import re
 import zlib
 
 from django.contrib import messages
-from django.core.exceptions import SuspiciousOperation
-from django.http import HttpRequest, Http404
+from django.core.exceptions import SuspiciousOperation, BadRequest
+from django.http import HttpRequest, Http404, HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 
 from rong.decorators import login_required
 from rong.forms.box import EditBoxUnitForm, ImportTWArmoryBoxForm, CreateBoxUnitBulkForm, BoxForm
-from rong.models import BoxUnit, Unit, Equipment, Box
+from rong.models import BoxUnit, Unit, Equipment, Box, Item
 
 
 # views for box management
 
+@login_required
+def edit_inventory(request: HttpRequest, box_id):
+    box = get_object_or_404(Box.full_data_queryset(), pk=box_id)
+    if not box.can_edit(request.user):
+        raise Http404('No box found.')
+    items = Item.inventory_items()
+    if request.method == 'POST':
+        quantities = {}
+        for item in items:
+            item_key = "qty_%d" % item.id
+            if item_key not in request.POST or not request.POST[item_key].isdigit():
+                raise BadRequest()
+            quantities[item.id] = int(request.POST[item_key])
+        box.bulk_update_inventory(quantities)
+        return JsonResponse({"success": True, "inventory": box.inventory_json(items)})
+    return JsonResponse(box.inventory_json(items), safe=False)
+
 
 @login_required
-def alter_boxunit(request: HttpRequest, box_id, boxunit_id):
+def edit_boxunit(request: HttpRequest, box_id, boxunit_id):
     box = get_object_or_404(Box.full_data_queryset(), pk=box_id)
     if not box.can_edit(request.user):
         raise Http404('No box found.')
@@ -180,7 +197,7 @@ def create_boxunit(request: HttpRequest, box_id):
 
 
 @login_required
-def alter_box(request: HttpRequest, box_id):
+def edit_box(request: HttpRequest, box_id):
     box = get_object_or_404(Box.full_data_queryset(), pk=box_id)
     if not box.can_edit(request.user):
         raise Http404('No box found.')

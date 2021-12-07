@@ -94,6 +94,21 @@ class Equipment(models.Model):
         db_table = u'redive_en"."equipment_data'
 
 
+class Item(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='item_id')
+    name = models.TextField(db_column='item_name')
+    item_type = models.IntegerField()
+    limit_num = models.IntegerField()
+
+    @staticmethod
+    def inventory_items():
+        return Item.objects.filter(item_type__in=[11, 12]).order_by('-item_type', 'id')
+
+    class Meta():
+        managed = False
+        db_table = u'redive_en"."item_data'
+
+
 class UniqueEquipmentEnhanceData(models.Model):
     enhance_level = models.IntegerField(primary_key=True, db_column='enhance_level')
 

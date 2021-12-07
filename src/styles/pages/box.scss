@@ -57,3 +57,27 @@
     padding-bottom: 0.5rem;
   }
 }
+
+#inventoryModal {
+  #inventoryHolder {
+    display: block;
+    width: 100%;
+    .inventory-editor-item {
+      display: inline-block;
+      width: 52px;
+      text-align: center;
+      padding: 2px 2px;
+
+      img {
+        width: 48px;
+      }
+
+      input {
+        font-size: 75%;
+        padding: 0.125rem 0.125rem;
+      }
+
+    }
+  }
+
+}

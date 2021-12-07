@@ -1,7 +1,8 @@
 import $ from 'jquery';
-import {hide_loading, icon_id, make_alert, page, rank_color, show_loading, unit_position} from './common';
+import {hide_loading, icon_id, make_alert, rank_color, show_loading, unit_position} from './common';
 import {boxUnitModal} from "./box-unit-modal";
 import 'jquery-validation';
+
 export let boxes = {};
 
 function editUnit(box_id, unit_id) {
@@ -54,12 +55,12 @@ function doAddUnit(id) {
     show_loading();
     $.post("/box/" + id + "/unit/create/", $('#addUnitForm').serialize(), function (data) {
         if (data.success) {
-            for(let unit of data.units) {
+            for (let unit of data.units) {
                 boxes[id].units[unit.id] = unit;
             }
             let utext = 'Unit' + (data.units.length > 1 ? 's' : '');
             renderBoxUnits(id);
-            make_alert($('#mainContent'), 'success', utext+' added to box.');
+            make_alert($('#mainContent'), 'success', utext + ' added to box.');
         } else {
             make_alert($('#mainContent'), 'danger', 'Unit(s) could not be added to box.');
         }
@@ -209,6 +210,64 @@ function editBox(id) {
     }, "json");
 }
 
+function saveInventory(id) {
+    $('#inventoryForm').validate();
+    if ($('#inventoryForm').valid()) {
+        $('#inventoryModal').modal('hide');
+        show_loading();
+        $.post("/box/" + id + "/inventory/", $('#inventoryForm').serialize(), function (data) {
+            if (data.success) {
+                // Update shard count on box units
+                let box_data = boxes[id].units;
+                for(const item of data.inventory) {
+                    if(item.id >= 31000 && item.id < 32000) {
+                        let unit_id = (item.id - 30000) * 100 + 1;
+                        for (const uid in box_data) {
+                            if(box_data[uid].unit.id === unit_id) {
+                                box_data[uid].shards = item.quantity;
+                                break;
+                            }
+                        }
+                    }
+                }
+                make_alert($('#mainContent'), 'success', 'Inventory edited successfully.');
+            } else {
+                make_alert($('#mainContent'), 'danger', 'Could not edit inventory.');
+            }
+            hide_loading();
+        });
+    }
+}
+
+function editInventory(id) {
+    show_loading();
+    $.get("/box/" + id + "/inventory/", function (data) {
+        hide_loading();
+        let inventoryHolder = $('#inventoryHolder');
+        inventoryHolder.empty();
+        for (const item of data) {
+            let itemImage = $("<img>");
+            itemImage.attr("src", '/static/rong/images/items/' + item.id + '.png');
+            itemImage.attr("alt", item.name);
+            itemImage.attr("title", item.name);
+            let itemEle = $("<div class='col-md-2 inventory-editor-item'></div>");
+            itemEle.append(itemImage);
+            itemEle.append("<br />");
+            let itemQty = $("<input type='number' class='form-control' />");
+            itemQty.attr("min", 0);
+            itemQty.attr("max", item.limit);
+            itemQty.attr("value", item.quantity);
+            itemQty.attr("name", "qty_" + item.id);
+            itemEle.append(itemQty);
+            inventoryHolder.append(itemEle);
+        }
+        $('#inventorySaveBtn').off('click').click(function () {
+            saveInventory(id);
+        });
+        $('#inventoryModal').modal();
+    }, "json");
+}
+
 export function renderBox(destination, id) {
     const box = boxes[id];
     // Render the box itself
@@ -224,8 +283,14 @@ export function renderBox(destination, id) {
             $('#importModal').modal();
         }, "html");
     });
-    actionsEle.append(armoryEle)
-    if(!box.is_clan) {
+    actionsEle.append(armoryEle);
+    let inventoryEle = $('<button type="button" class="btn btn-primary box-inventory">Edit Inventory</button>');
+    inventoryEle.click(function () {
+        editInventory(id);
+    });
+    actionsEle.append(' ');
+    actionsEle.append(inventoryEle);
+    if (!box.is_clan) {
         let editEle = $('<button type="button" class="btn btn-primary box-edit">Edit</button>');
         editEle.click(function () {
             editBox(id);
@@ -233,7 +298,7 @@ export function renderBox(destination, id) {
         actionsEle.append(' ');
         actionsEle.append(editEle);
         let deleteEle = $('<button type="button" class="btn btn-danger box-delete">Delete</button>');
-        deleteEle.click(function() {
+        deleteEle.click(function () {
             doDeleteBox(id);
         });
         actionsEle.append(' ');
