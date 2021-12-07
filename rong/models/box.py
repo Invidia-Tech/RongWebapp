@@ -57,38 +57,36 @@ class Box(models.Model):
             "last_update": "N/A" if not self.last_update else humanize.naturaltime(self.last_update),
         }
 
-    def get_inventory_item(self, item):
-        stock = None
+    def setup_inventory_cache(self):
         if not hasattr(self, '_inventory_cache'):
-            self._inventory_cache = list(self.inventory.all())
-        filtered = [i for i in self._inventory_cache if i.item == item]
-        if filtered:
-            return filtered[0]
-        else:
-            stock = BoxItem(box=self, item=item, quantity=0)
-            self._inventory_cache.append(stock)
-            return stock
+            self._inventory_cache = {stock.item: stock for stock in self.inventory.all()}
 
     def get_item_quantity(self, item):
-        return self.get_inventory_item(item).quantity
+        self.setup_inventory_cache()
+        if item not in self._inventory_cache:
+            return 0
+        return self._inventory_cache[item].quantity
 
     def set_item_quantity(self, item, quantity):
-        stock = self.get_inventory_item(item)
-        if stock.id or quantity:
-            stock.quantity = quantity
-            stock.save()
+        self.setup_inventory_cache()
+        if item not in self._inventory_cache:
+            self._inventory_cache[item] = BoxItem(box=self, item=item, quantity=0)
+        if quantity != self._inventory_cache[item].quantity:
+            self._inventory_cache[item].quantity = quantity
+            self._inventory_cache[item].save()
 
     def bulk_update_inventory(self, quantities):
+        self.setup_inventory_cache()
         updates = []
         for item in quantities:
-            stock = self.get_inventory_item(item)
-            if not stock.id and quantities[item]:
-                # new non-zero
-                stock.quantity = quantities[item]
-                stock.save()
-            elif stock.id and stock.quantity != quantities[item]:
-                stock.quantity = quantities[item]
-                updates.append(stock)
+            if item not in self._inventory_cache:
+                if quantities[item]:
+                    self._inventory_cache[item] = BoxItem(box=self, item=item, quantity=quantities[item])
+                    self._inventory_cache[item].save()
+            elif self._inventory_cache[item].quantity != quantities[item]:
+                self._inventory_cache[item].quantity = quantities[item]
+                updates.append(self._inventory_cache[item])
+
         if updates:
             BoxItem.objects.bulk_update(updates, ['quantity'])
 

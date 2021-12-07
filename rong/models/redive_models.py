@@ -102,7 +102,7 @@ class Item(models.Model):
 
     @staticmethod
     def inventory_items():
-        return Item.objects.filter(item_type__in=[11, 12]).order_by('-item_type', 'id')
+        return Item.objects.filter(models.Q(item_type=11) | models.Q(id=90005)).order_by('-item_type', 'name')
 
     class Meta():
         managed = False

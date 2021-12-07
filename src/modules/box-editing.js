@@ -5,6 +5,8 @@ import 'jquery-validation';
 
 export let boxes = {};
 
+let inventory_dirty = false;
+
 function editUnit(box_id, unit_id) {
     boxUnitModal(boxes[box_id].units[unit_id], {
         editable: true,
@@ -213,6 +215,7 @@ function editBox(id) {
 function saveInventory(id) {
     $('#inventoryForm').validate();
     if ($('#inventoryForm').valid()) {
+        inventory_dirty = false;
         $('#inventoryModal').modal('hide');
         show_loading();
         $.post("/box/" + id + "/inventory/", $('#inventoryForm').serialize(), function (data) {
@@ -253,7 +256,7 @@ function editInventory(id) {
             let itemEle = $("<div class='col-md-2 inventory-editor-item'></div>");
             itemEle.append(itemImage);
             itemEle.append("<br />");
-            let itemQty = $("<input type='number' class='form-control' />");
+            let itemQty = $("<input type='number' class='form-control inventory-qty' />");
             itemQty.attr("min", 0);
             itemQty.attr("max", item.limit);
             itemQty.attr("value", item.quantity);
@@ -263,6 +266,10 @@ function editInventory(id) {
         }
         $('#inventorySaveBtn').off('click').click(function () {
             saveInventory(id);
+        });
+        inventory_dirty = false;
+        $(".inventory-qty").off('keyup').keyup(function() {
+            inventory_dirty = true;
         });
         $('#inventoryModal').modal();
     }, "json");
@@ -323,4 +330,32 @@ export function setupBoxes(rawBoxes) {
 
 $('#addUnitModal ul.position-selector li').click(function () {
     addUnitFilter($(this).attr('data-filter'));
+});
+
+$('#inventoryModal').on('hide.bs.modal', function (e) {
+    if (inventory_dirty) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        let dialog = $('<p>You have unsaved changes. Save them?</p>').dialog(
+            {
+                buttons: {
+                    "Yes": function () {
+                        dialog.dialog('destroy');
+                        $("#inventorySaveBtn").click();
+                    },
+                    "No": function () {
+                        dialog.dialog('destroy');
+                        inventory_dirty = false;
+                        $('#inventoryModal').modal('hide');
+                    },
+                    "Cancel": function () {
+                        dialog.dialog('destroy');
+                    }
+                },
+                appendTo: '#inventoryModal',
+                modal: true,
+            }
+        );
+        return false;
+    }
 });
