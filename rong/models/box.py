@@ -82,7 +82,7 @@ class Box(models.Model):
         updates = []
         for item in quantities:
             stock = self.get_inventory_item(item)
-            if not stock.id and stock.quantity:
+            if not stock.id and quantities[item]:
                 # new non-zero
                 stock.quantity = quantities[item]
                 stock.save()
