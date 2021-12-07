@@ -5,6 +5,7 @@ import zlib
 
 from django.contrib import messages
 from django.core.exceptions import SuspiciousOperation, BadRequest
+from django.db import connection
 from django.http import HttpRequest, Http404, HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -31,7 +32,7 @@ def edit_inventory(request: HttpRequest, box_id):
                 raise BadRequest()
             quantities[item.id] = int(request.POST[item_key])
         box.bulk_update_inventory(quantities)
-        return JsonResponse({"success": True, "inventory": box.inventory_json(items)})
+        return JsonResponse({"success": True, "inventory": box.inventory_json(items), "queries": connection.queries})
     return JsonResponse(box.inventory_json(items), safe=False)
 
 

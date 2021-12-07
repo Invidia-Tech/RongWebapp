@@ -59,39 +59,38 @@ class Box(models.Model):
 
     def get_inventory_item(self, item):
         stock = None
-        if hasattr(self, '_prefetched_objects_cache') and 'inventory' in self._prefetched_objects_cache:
-            filtered = [i for i in self.inventory.all() if i.item == item]
-            if filtered:
-                stock = filtered[0]
+        if not hasattr(self, '_inventory_cache'):
+            self._inventory_cache = list(self.inventory.all())
+        filtered = [i for i in self._inventory_cache if i.item == item]
+        if filtered:
+            return filtered[0]
         else:
-            stock = self.inventory.filter(item=item).first()
-        is_new = False
-        if not stock:
-            is_new = True
             stock = BoxItem(box=self, item=item, quantity=0)
-        return stock, is_new
+            self._inventory_cache.append(stock)
+            return stock
 
     def get_item_quantity(self, item):
-        return self.get_inventory_item(item)[0].quantity
+        return self.get_inventory_item(item).quantity
 
     def set_item_quantity(self, item, quantity):
-        stock, is_new = self.get_inventory_item(item)
-        stock.quantity = quantity
-        stock.save()
+        stock = self.get_inventory_item(item)
+        if stock.id or quantity:
+            stock.quantity = quantity
+            stock.save()
 
     def bulk_update_inventory(self, quantities):
         updates = []
-        new_rows = []
         for item in quantities:
-            stock, is_new = self.get_inventory_item(item)
-            stock.quantity = quantities[item]
-            if is_new:
-                new_rows.append(stock)
-            else:
+            stock = self.get_inventory_item(item)
+            if not stock.id and stock.quantity:
+                # new non-zero
+                stock.quantity = quantities[item]
+                stock.save()
+            elif stock.id and stock.quantity != quantities[item]:
+                stock.quantity = quantities[item]
                 updates.append(stock)
-        BoxItem.objects.bulk_update(updates, ['quantity'])
-        for stock in new_rows:
-            stock.save()
+        if updates:
+            BoxItem.objects.bulk_update(updates, ['quantity'])
 
     def flag_updated(self):
         self.last_update = timezone.now()
@@ -100,10 +99,10 @@ class Box(models.Model):
     def inventory_json(self, items=None):
         if items is None:
             items = Item.inventory_items()
-        return [{"id": item.id, "name": item.name, "quantity": self.get_item_quantity(item.id), "limit": item.limit_num} for item in items]
+        return [{"id": item.id, "name": item.name, "quantity": self.get_item_quantity(item.id), "limit": item.limit_num}
+                for item in items]
 
     @staticmethod
     def full_data_queryset():
         return Box.objects.select_related("clanmember", "clanmember__clan").prefetch_related(
-            'boxunit_set__unit__ranks', 'boxunit_set__unit__unique_equip',
-            'inventory')
+            'boxunit_set__unit__ranks', 'boxunit_set__unit__unique_equip', 'inventory')
