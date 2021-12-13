@@ -90,6 +90,8 @@ def import_box(request: HttpRequest, box_id):
                     assert 1 <= unit["r"] <= 6
                     unit["u"] = int(unit["u"], 16)
                     assert 1000 <= unit["u"] < 2000
+                    if type(unit["t"]) != str:
+                        unit["t"] = str(unit["t"]).lower()
                     assert re.fullmatch(r"(true|false|[1-9][0-9]*(\.[3-5])*)", unit["t"])
             except Exception as ex:
                 messages.add_message(request, messages.ERROR,
