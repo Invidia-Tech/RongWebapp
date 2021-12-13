@@ -64,7 +64,7 @@
                 <td>
                     <button type="button" class="btn btn-primary show-member-box">Show</button>
                 </td>
-                <td class="member-box-update">
+                <td class="member-box-update" data-sort="{% if member.box.last_update %}{{ member.box.last_update|date:"U" }}{% else %}0{% endif %}">
                     {% if member.box.last_update %}
                         {{ member.box.last_update|naturaltime }}
                     {% else %}

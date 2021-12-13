@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from django.contrib.humanize.templatetags import humanize
 from django.db import models
-from django.utils import timezone
+from django.utils import timezone, dateformat
 from django.utils.functional import cached_property
 
 from .box_item import BoxItem
@@ -55,6 +55,7 @@ class Box(models.Model):
             "units": units,
             "is_clan": hasattr(self, "clanmember"),
             "last_update": "N/A" if not self.last_update else humanize.naturaltime(self.last_update),
+            "last_update_unixtime": 0 if not self.last_update else dateformat.format(self.last_update, 'U')
         }
 
     def setup_inventory_cache(self):

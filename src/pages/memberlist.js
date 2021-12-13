@@ -22,7 +22,7 @@ page('clan_list_members', function () {
                 "                <td>\n" +
                 "                    <button type=\"button\" class=\"btn btn-primary show-member-box\">Show</button>\n" +
                 "                </td>\n" +
-                "                <td class=\"member-box-update\"></td>\n" +
+                "                <td class=\"member-box-update\" data-sort='"+data.member.box.last_update_unixtime+"'></td>\n" +
                 "                <td>\n" +
                 "                    <button type=\"button\" class=\"btn btn-primary edit-member\">Edit Details</button>\n" +
                 "                </td>\n" +
