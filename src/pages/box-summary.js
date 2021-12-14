@@ -35,7 +35,16 @@ page('clan_box_summary', function () {
                             eq_count++;
                         }
                     }
-                    return data.star + "* R" + data.rank + "-" + eq_count + "<br />Lv" + data.level;
+                    let ue = "";
+                    if(data.max_ue_level > -1) {
+                        if(data.ue_level === null) {
+                            ue = "<br />No UE";
+                        }
+                        else {
+                            ue = "<br />UE"+data.ue_level;
+                        }
+                    }
+                    return data.star + "* R" + data.rank + "-" + eq_count + "<br />Lv" + data.level+ue;
                 } else {
                     if (data === undefined) {
                         return 0;
