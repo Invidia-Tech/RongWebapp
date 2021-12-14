@@ -18,6 +18,7 @@ class ClanBattleHitType(Enum):
 class ClanBattleScore(models.Model, ModelDiffMixin):
     clan_battle = models.ForeignKey('ClanBattle', on_delete=models.CASCADE, related_name='hits')
     member = models.ForeignKey('ClanMember', on_delete=models.CASCADE, null=True)
+    pilot = models.ForeignKey('ClanMember', on_delete=models.SET_NULL, null=True, related_name='pilots')
     day = models.PositiveIntegerField()
     damage = models.PositiveIntegerField()
     team = models.ForeignKey('Team', null=True, on_delete=models.SET_NULL)
@@ -39,6 +40,7 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
     kyaru_author = models.CharField(max_length=50, null=True)
     kyaru_image_url = models.TextField(null=True)
     kyaru_boss_number = models.PositiveIntegerField(null=True)
+    kyaru_pilot = models.CharField(max_length=50, null=True)
 
     def clear_unit_damage(self):
         for unit in range(1, 6):

@@ -28,11 +28,19 @@ require("font-awesome/css/font-awesome.css");
 
 const flatpickr = require("flatpickr").default;
 
-$.fn.outerHTML = function() {
+$.fn.outerHTML = function () {
     return $(this).clone().wrap('<div></div>').parent().html();
 };
 
+$.fn.hasAttr = function (name) {
+    let attr = this.attr(name);
+    return typeof attr !== 'undefined' && attr !== false;
+};
+
 $(document).ready(function () {
+    $(".transition-delay").each(function (index, element) {
+        setTimeout(function () { $(element).removeClass("transition-delay") }, 10);
+    });
     $(".dt").each(function () {
         let $t = $(this);
         let opt = {};
@@ -64,10 +72,12 @@ $(document).ready(function () {
         document.querySelector(".select2-container--open .select2-search__field").focus();
     });
 
-    $('.select2-dd').select2({
-        theme: 'bootstrap',
-        placeholder: "Select...",
-        allowClear: true
+    $('.select2-dd').each(function () {
+        $(this).select2({
+            theme: 'bootstrap',
+            placeholder: $(this).hasAttr("placeholder") ? $(this).attr("placeholder") : "Select...",
+            allowClear: true
+        });
     });
 
     $('.select2-multi').select2({

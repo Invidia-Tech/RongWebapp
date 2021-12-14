@@ -12,6 +12,7 @@ from rong.models.team import create_team
 class HitForm(forms.Form):
     day = forms.IntegerField(min_value=1, max_value=31)
     member = forms.ChoiceField()
+    pilot = forms.ChoiceField(required=False)
     damage = forms.IntegerField(min_value=0)
     group = CBLabelModelChoiceField(callback=lambda x: x.name, queryset=None,
                                     widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}), blank=True,
@@ -48,11 +49,17 @@ class HitForm(forms.Form):
                 self.fields["tags"].initial = hit.tags.all()
         member_list = list(hit.clan_battle.clan.members.select_related('user'))
         member_list.sort(key=lambda member: member.ign.lower())
-        choices = [('', '--Select--')] + [(x.id, x.ign) for x in member_list]
+        member_choices = [('', '--Select--')] + [(x.id, x.ign) for x in member_list]
         if hit.id and hit.member_id not in [x.id for x in member_list]:
-            choices.append((hit.member_id, hit.member.ign))
-        self.fields["member"].choices = choices
+            member_choices.append((hit.member_id, hit.member.ign))
+        pilot_choices = [('', '(None)')] + [(x.id, x.ign) for x in member_list]
+        if hit.id and hit.pilot_id and hit.pilot_id not in [x.id for x in member_list]:
+            pilot_choices.append((hit.pilot_id, hit.pilot.ign))
+        self.fields["member"].choices = member_choices
         self.fields["member"].widget.attrs["class"] = "select2-dd"
+        self.fields["pilot"].choices = pilot_choices
+        self.fields["pilot"].widget.attrs["class"] = "select2-dd"
+        self.fields["pilot"].widget.attrs["placeholder"] = "(None)"
         if hit.clan_battle.in_progress:
             self.fields["day"].initial = hit.clan_battle.current_day
         else:
@@ -64,6 +71,7 @@ class HitForm(forms.Form):
         if hit.id:
             self.fields["day"].initial = hit.day
             self.fields["member"].initial = hit.member_id
+            self.fields["pilot"].initial = hit.pilot_id
             self.fields["damage"].initial = hit.damage
 
             if hit.team:
@@ -123,6 +131,7 @@ class HitForm(forms.Form):
         damage_changed = self.hit.damage != int(self.cleaned_data["damage"])
         self.hit.day = self.cleaned_data["day"]
         self.hit.member_id = self.cleaned_data["member"]
+        self.hit.pilot_id = self.cleaned_data["pilot"]
         self.hit.damage = self.cleaned_data["damage"]
         if "group" in self.cleaned_data:
             self.hit.group = self.cleaned_data["group"]

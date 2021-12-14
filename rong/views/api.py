@@ -67,6 +67,9 @@ def add_hit(request):
         for i in range(len(data["damages"]), 5):
             setattr(hit, "unit%d_damage" % (i + 1), None)
         hit.ign = hitter.ign
+        if "pilot" in data:
+            hit.kyaru_pilot = data["pilot"]
+            hit.pilot = clan.members.filter(ign__iexact=data['pilot']).first()
         hit.save()
         return JsonResponse({"success": True})
 
