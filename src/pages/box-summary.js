@@ -44,7 +44,7 @@ page('clan_box_summary', function () {
                             ue = "<br />UE"+data.ue_level;
                         }
                     }
-                    return data.star + "* R" + data.rank + "-" + eq_count + "<br />Lv" + data.level+ue;
+                    return data.star + "★ R" + data.rank + "-" + eq_count + "<br />Lv" + data.level+ue;
                 } else {
                     if (data === undefined) {
                         return 0;
@@ -78,6 +78,26 @@ page('clan_box_summary', function () {
         scrollY: "70vh",
         scrollX: true,
         autoWidth: false,
+    });
+
+    let unitData = [];
+    for(const unit of units) {
+        let unitRow = [unit.name, 0, 0, 0, 0, 0, 0, 0];
+        for(const member of members) {
+            if(member.hasOwnProperty("unit_" + unit.id)) {
+                unitRow[member["unit_"+unit.id]["star"] + 1] += 1;
+                unitRow[7] += 1;
+            }
+            else {
+                unitRow[1] += 1;
+            }
+        }
+        unitData.push(unitRow);
+    }
+
+    $('#unitCountsTable').DataTable({
+        data: unitData,
+        paging: false
     });
 
     function applyUnitFilter() {
