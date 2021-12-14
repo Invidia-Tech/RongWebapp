@@ -16,13 +16,14 @@ page('clan_box_summary', function () {
     }
     let units = JSON.parse(document.getElementById('unitData').textContent);
     let columns = [];
-    columns.push({title: "Name", data: "ign"});
+    columns.push({title: "Name", data: "ign", className: "unit-viewer-name-column"});
     for (let unit of units) {
         let unit_el = $("<div class='unit-icon'></div>").addClass('u-' + icon_id(unit.id, unit.rarity));
         unit_el.attr('title', unit.name);
         columns.push({
             title: unit_el.outerHTML(),
             data: "unit_" + unit["id"],
+            width: "100px",
             render: function (data, type) {
                 if (type === 'display') {
                     if (data === undefined) {
@@ -67,6 +68,7 @@ page('clan_box_summary', function () {
         paging: false,
         scrollY: "70vh",
         scrollX: true,
+        autoWidth: false,
     });
 
     function applyUnitFilter() {
