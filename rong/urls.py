@@ -4,6 +4,7 @@ from .views import core, box, clanbattle, manageclan, api
 app_name = 'rong'
 urlpatterns = [
     path('api/add_hit/', api.add_hit, name='api_add_hit'),
+    path('clan/<slug:clan>/boxes/', manageclan.box_summary, name='clan_box_summary'),
     path('clan/<slug:clan>/tags/<int:tag_id>/', manageclan.edit_hit_tag, name='clan_edit_hit_tag'),
     path('clan/<slug:clan>/tags/add/', manageclan.add_hit_tag, name='clan_add_hit_tag'),
     path('clan/<slug:clan>/tags/', manageclan.list_hit_tags, name='clan_list_hit_tags'),

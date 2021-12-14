@@ -1,0 +1,50 @@
+{% extends 'rong/layout.html' %}
+{% load humanize %}
+{% load rong_common %}
+{% load unit_icons %}
+
+{% load static %}
+{% load bootstrap4 %}
+
+{% block extra_js %}
+{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block title %}{{ clan.name }} - Box Summary{% endblock %}
+
+{% block content %}
+    <div class="row header mb-3">
+        <div class="col-md-6">
+            <h2>{{ clan.name }} &gt; Box Summary</h2>
+        </div>
+        <div class="col-md-6 text-right">
+            <button type="button" class="btn btn-primary" id="selectUnitsBtn">Select Units</button>
+        </div>
+    </div>
+    {{ members|json_script:"memberData" }}
+    {{ units|json_script:"unitData" }}
+    <table class="table w-100" id="boxSummaryTable">
+    </table>
+
+    <!-- Select Units modal -->
+    <div class="modal fade" id="unitSelectorModal" tabindex="-1" aria-labelledby="unitSelectorLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="unitSelectorLabel">Select Units</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="unitSelectorBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="selectAllBtn">Select All</button>
+                    <button type="button" class="btn btn-primary" id="selectNoneBtn">Select None</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

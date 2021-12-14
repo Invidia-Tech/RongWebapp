@@ -91,3 +91,13 @@ html.webp {
     margin-right: 10px;
   }
 }
+
+.unit-icon, .unit-ddicon {
+  &.unit-selector-icon {
+    margin-right: 5px;
+    cursor: pointer;
+  }
+  &.inactive {
+    filter: grayscale(100%);
+  }
+}
