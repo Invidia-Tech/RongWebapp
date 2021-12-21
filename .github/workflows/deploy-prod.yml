@@ -38,4 +38,5 @@ jobs:
             python manage.py update_database jp
             python manage.py migrate
             python manage.py collectstatic --no-input
+            python manage.py populate_aliases
             touch rongdjango/wsgi.py
