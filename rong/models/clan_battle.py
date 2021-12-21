@@ -361,6 +361,11 @@ class ClanBattle(models.Model):
         }
 
     @cached_property
+    def hit_data_for_stats(self):
+        return list(self.hits.order_by('order').select_related('member', 'member__user', 'pilot', 'pilot__user',
+                                                               'group').prefetch_related('tags'))
+
+    @cached_property
     def hit_stats(self):
         boss_data = list(self.bosses.order_by('difficulty').all())
         difficulty_idx = 0
@@ -392,13 +397,14 @@ class ClanBattle(models.Model):
         weightable_dmg = [[0 for n in range(5)] for i in range(len(boss_data))]
         weight_ts = 0
         weight_th = 0
-        for hit in self.hits.order_by('order').select_related('member', 'member__user', 'group').prefetch_related(
-                'tags'):
+        for hit in self.hit_data_for_stats:
             if boss_data[difficulty_idx].lap_to is not None and hit.boss_lap > boss_data[difficulty_idx].lap_to:
                 difficulty_idx += 1
                 curr_boss_info = self.get_boss_info(boss_data, difficulty_idx)
             if hit.member_id not in hit_matrix:
                 hit_matrix[hit.member_id] = self.initial_matrix_row(hit.member)
+            if hit.pilot_id and hit.pilot_id not in hit_matrix:
+                hit_matrix[hit.pilot_id] = self.initial_matrix_row(hit.pilot)
             entry = hit_matrix[hit.member_id]
             if int(entry['days'][hit.day - 1]['hits']) >= ClanBattle.HITS_PER_DAY:
                 continue  # silently ignore extra hits to avoid kabooming the dashboard
@@ -466,3 +472,48 @@ class ClanBattle(models.Model):
             stats["cumu_laps"][n] = sum(stats["daily_laps"][0:n + 1])
         stats["players"] = list(hit_matrix.values())
         return stats
+
+    def get_pilot_stats(self, overtime_as_full):
+        def initial_row(member):
+            return {
+                "member": member,
+                "total_own": 0,
+                "total_piloted": 0,
+                "total_total": 0,
+                "days": [{
+                    "own": 0,
+                    "piloted": 0,
+                    "total": 0,
+                } for n in range(self.total_days)],
+            }
+
+        pilot_matrix = {}
+        for hit in self.hit_data_for_stats:
+            if hit.member_id not in pilot_matrix:
+                pilot_matrix[hit.member_id] = initial_row(hit.member)
+            if hit.pilot_id and hit.pilot_id not in pilot_matrix:
+                pilot_matrix[hit.pilot_id] = initial_row(hit.pilot)
+
+            value = 0.5 if (not overtime_as_full and not hit.hit_type == ClanBattleHitType.NORMAL) else 1
+
+            if not hit.pilot_id or hit.pilot_id == hit.member_id:
+                pilot_matrix[hit.member_id]["total_own"] += value
+                pilot_matrix[hit.member_id]["total_total"] += value
+                pilot_matrix[hit.member_id]["days"][hit.day - 1]["own"] += value
+                pilot_matrix[hit.member_id]["days"][hit.day - 1]["total"] += value
+            else:
+                pilot_matrix[hit.pilot_id]["total_piloted"] += value
+                pilot_matrix[hit.pilot_id]["total_total"] += value
+                pilot_matrix[hit.pilot_id]["days"][hit.day - 1]["piloted"] += value
+                pilot_matrix[hit.pilot_id]["days"][hit.day - 1]["total"] += value
+
+        return list(pilot_matrix.values())
+
+    @cached_property
+    def pilot_stats_clashes(self):
+        return self.get_pilot_stats(True)
+
+    @cached_property
+    def pilot_stats_hitcount(self):
+        return self.get_pilot_stats(False)
+

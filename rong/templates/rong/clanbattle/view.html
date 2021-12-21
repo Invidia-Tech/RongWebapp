@@ -144,6 +144,10 @@
                     <li class="nav-item"><a href="#tagged-hits" data-toggle="tab" class="nav-link small">Tagged Hits</a>
                     </li>
                 {% endif %}
+                <li class="nav-item"><a href="#pilots-clashes" data-toggle="tab" class="nav-link small">Pilots (#
+                    Clashes)</a></li>
+                <li class="nav-item"><a href="#pilots-hitcount" data-toggle="tab" class="nav-link small">Pilots (Hit
+                    Count)</a></li>
             </ul>
             <br>
             <div id="tabsContent" class="tab-content">
@@ -215,6 +219,12 @@
                         </table>
                     </div>
                 {% endif %}
+                <div id="pilots-clashes" class="tab-pane">
+                    {% include "rong/includes/cb_pilottable.html" with table_id="pilotsClashesTable" data=battle.pilot_stats_clashes %}
+                </div>
+                <div id="pilots-hitcount" class="tab-pane">
+                    {% include "rong/includes/cb_pilottable.html" with table_id="pilotsHitcountTable" data=battle.pilot_stats_hitcount %}
+                </div>
             </div>
             <hr>
         {% endif %}

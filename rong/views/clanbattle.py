@@ -165,8 +165,8 @@ def view_battle(request, battle: ClanBattle):
     ctx = {
         'in_clan': request.user.in_clan(battle.clan),
         'battle': battle,
-        'hits': battle.hits.select_related('member', 'member__user').order_by('-order')[:30],
-        'myhits': battle.hits.filter(member__user=request.user).order_by('-order')[:30],
+        'hits': list(battle.hits.select_related('member', 'member__user').order_by('-order'))[:30],
+        'myhits': list(battle.hits.filter(member__user=request.user).order_by('-order'))[:30],
     }
     return render(request, 'rong/clanbattle/view.html', ctx)
 

@@ -1,0 +1,46 @@
+{% load humanize %}
+{% load clan_battle %}
+{% load rong_common %}
+<table class="dt w-100 table dt-noPaging stats-table daily-table" id="{{ table_id }}">
+    <thead>
+    <tr>
+        <th rowspan="2">Player</th>
+        {% for day in battle.day_range %}
+            <th colspan="3">Day {{ day }}</th>
+        {% endfor %}
+        <th colspan="3">Total {{ name }}</th>
+    </tr>
+    <tr>
+        {% for day in battle.day_range %}
+            <th>Own</th>
+            <th>Pilots</th>
+            <th>Total</th>
+        {% endfor %}
+        <th>Own</th>
+        <th>Pilots</th>
+        <th>Total</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for player in data %}
+        <tr>
+            <td class="name">{{ player.member.ign }}</td>
+            {% for day in player.days %}
+                {% day_reached battle forloop.counter as active %}
+                {% if active %}
+                    <td>{{ day.own|format_hits }}</td>
+                    <td>{{ day.piloted|format_hits }}</td>
+                    <td>{{ day.total|format_hits }}</td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                {% endif %}
+            {% endfor %}
+            <td>{{ player.total_own|format_hits }}</td>
+            <td>{{ player.total_piloted|format_hits }}</td>
+            <td>{{ player.total_total|format_hits }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

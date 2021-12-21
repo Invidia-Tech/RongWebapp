@@ -44,10 +44,10 @@ class ClanMember(models.Model):
 
     @property
     def user_display_name(self):
-        if self.ign:
+        if self.user_id:
             return "%s (%s#%04d)" % (self.ign, self.user.name, self.user.discriminator)
         else:
-            return "%s#%04d" % (self.user.name, self.user.discriminator)
+            return self.ign
 
     def save(self, *args, **kwargs):
         if not self.box:

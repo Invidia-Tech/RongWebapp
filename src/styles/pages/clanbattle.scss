@@ -120,3 +120,35 @@
 #hitLogTable_wrapper .dataTables_filter {
   display: none;
 }
+
+#pilotsClashesTable, #pilotsHitcountTable {
+  th {
+    padding-left: 4px;
+    padding-right: calc(1.5em + 2px);
+  }
+  td {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  thead {
+    tr:first-child {
+      th {
+        border-right: 3px solid black;
+      }
+    }
+    tr:last-child {
+      th:nth-child(3n) {
+        border-right: 3px solid black;
+      }
+    }
+  }
+  tbody {
+    tr td:nth-child(3n + 1) {
+      border-right: 3px solid black;
+    }
+    td:not(:first-child) {
+      text-align: right;
+    }
+  }
+}
