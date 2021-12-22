@@ -14,16 +14,19 @@ class Command(BaseCommand):
         multipliers = [
             [2585/2460,2585/2585,2585/2210,2585/1988,2585/2375,2585/2346,2585/1956],
             [2585/2460,2585/2585,2585/2210,2585/1988,2585/2375,2585/2346,2585/1956],
-            [2585/2290,2585/2350,2585/1972,2585/2050,2585/1962,2585/1956,2585/1674.5,2585/1600],
+            [2585/2290,2585/2350,2585/1972,2585/1973,2585/1962,2585/1956,2585/1674.5,2585/1600],
             [2585/1581.5,2585/1850,2585/1700,2585/2064,2585/1570,2585/1722,2585/2064,2585/1400]
         ]
         cb = ClanBattle.objects.get(slug='ethereal-cb11-aquarius')
         boss_data = list(cb.bosses.order_by('difficulty').all())
         difficulty_idx = 0
-        hits = list(cb.hits.order_by('order').select_related('member', 'team'))
+        hits = list(cb.hits.order_by('order').select_related('member', 'team', 'pilot'))
         scores = {}
+        counts = {}
 
         for hit in hits:
+            if hit.hit_type != ClanBattleHitType.NORMAL or hit.actual_damage == 0 or (hit.boss_number==3 and hit.boss_lap==4):
+                continue
             if boss_data[difficulty_idx].lap_to is not None and hit.boss_lap > boss_data[difficulty_idx].lap_to:
                 difficulty_idx += 1
             team_units = []
@@ -57,16 +60,16 @@ class Command(BaseCommand):
             if difficulty_idx == 3 and mult_index == 4 and 107801 in team_units:
                 # magic aqua3
                 mult_index = 7
-            if hit.member.ign not in scores:
-                scores[hit.member.ign] = 0
-            if hit.member.ign == "Lindmay":
-                print("hit %d/%d/%d/%d" % (difficulty_idx, hit.boss_number - 1, mult_index, hit.actual_damage))
-            scores[hit.member.ign] += hit.actual_damage * multipliers[difficulty_idx][mult_index]
-        score_sum = sum(scores[k] for k in scores)
-        score_list = [[k, scores[k], scores[k] / 2585000 / 15] for k in scores]
+            pilot = hit.member if not hit.pilot_id else hit.pilot
+            if pilot.ign not in scores:
+                scores[pilot.ign] = 0
+                counts[pilot.ign] = 0
+            scores[pilot.ign] += hit.actual_damage * multipliers[difficulty_idx][mult_index] / 2585000
+            counts[pilot.ign] += 1
+        score_list = [[k, scores[k] / counts[k]] for k in scores]
         score_list.sort(key=lambda v: -v[1])
         for item in score_list:
-            print("%s: %.04f" % (item[0], item[2]))
+            print("%s: %.04f" % (item[0], item[1]))
         print(sum(v[1] for v in score_list))
 
 

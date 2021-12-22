@@ -99,7 +99,7 @@ WHERE box."user_id" = %s OR (cm."user_id" = %s AND cm."active" IS TRUE)
     def participated_in(self, battle):
         if hasattr(self, 'cbs_with_scores'):
             return battle.id in self.cbs_with_scores
-        return battle.hits.filter(user=self).exists()
+        return battle.hits.filter(member__user=self).exists()
 
     @property
     def is_authenticated(self):
