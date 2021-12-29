@@ -1,6 +1,7 @@
 import base64
 import json
 import re
+import traceback
 import zlib
 
 from django.contrib import messages
@@ -76,7 +77,7 @@ def import_box(request: HttpRequest, box_id):
                     zlib.decompress(base64.b64decode(form.cleaned_data["data"].strip()), 16 + zlib.MAX_WBITS).decode(
                         "UTF-8"))
                 assert type(armory_import) == list
-                assert len(armory_import) == 2
+                assert len(armory_import) == 2 or len(armory_import) == 3
                 units = armory_import[0]
                 assert type(units) == list
                 for unit in units:

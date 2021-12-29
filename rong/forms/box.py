@@ -50,7 +50,7 @@ class ImportTWArmoryBoxForm(forms.Form):
     data = forms.CharField(widget=forms.Textarea,
                            required=True,
                            label='TW Armory Export Text',
-                           max_length=3000,
+                           max_length=8000,
                            help_text='Go to the <a href="https://pcredivewiki.tw/Armory">TW Armory</a>, select '
                                      'Export&amp;Import then Export Team. Choose "Generate export text" and then copy '
                                      'the text into this box.')
