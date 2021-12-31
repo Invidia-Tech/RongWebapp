@@ -85,12 +85,14 @@ class ClanBattle(models.Model):
         difficulty = 1
         for map_entry in map_entries:
             if source_info["dataType"] == "old":
-                current_id = map_entry.boss_group_id
+                boss_groups = [{"wave_group": bg.wave_group_id, "multiplier": bg.score_coefficient} for bg in
+                               source_info["bossGroupModel"].objects.filter(
+                                   id=map_entry.boss_group_id).order_by('order_num')]
             else:
-                current_id = []
-                for boss in range(5):
-                    current_id += [getattr(map_entry, 'wave_group_id_%d' % (
-                            boss + 1)), getattr(map_entry, 'score_coefficient_%d' % (boss + 1))]
+                boss_groups = [{"wave_group": getattr(map_entry, 'wave_group_id_%d' % (i+1)), "multiplier": getattr(map_entry, 'score_coefficient_%d' % (i + 1))} for i in
+                               range(5)]
+            current_id = source_info["waveGroupModel"].objects.get(id=boss_groups[0]["wave_group"]).enemy_id_1
+            assert len(boss_groups) == 5
 
             if current_id == last_id:
                 # identical boss info and scoring, so this only changed rewards
@@ -105,19 +107,11 @@ class ClanBattle(models.Model):
                     lap_from=map_entry.lap_num_from,
                     lap_to=None if map_entry.lap_num_to == -1 else map_entry.lap_num_to
                 )
-                if source_info["dataType"] == "old":
-                    boss_groups = [{"wave_group": bg.wave_group_id, "multiplier": bg.score_coefficient} for bg in
-                                   source_info["bossGroupModel"].objects.filter(
-                                       id=map_entry.boss_group_id).order_by('order_num')]
-                else:
-                    boss_groups = [{"wave_group": current_id[i * 2], "multiplier": current_id[i * 2 + 1]} for i in
-                                   range(5)]
-                assert len(boss_groups) == 5
+
                 for boss_index, boss_group in enumerate(boss_groups):
                     wave_group = source_info["waveGroupModel"].objects.get(id=boss_group["wave_group"])
                     enemy_data = source_info["enemyModel"].objects.get(
                         id=wave_group.enemy_id_1)
-                    print(enemy_data.__dict__)
                     field_prefix = 'boss%d_' % (boss_index + 1)
                     map_info.populate_boss(boss_index + 1, enemy_data, boss_group["multiplier"])
                     setattr(self, field_prefix + 'iconid', enemy_data.unit_id)
