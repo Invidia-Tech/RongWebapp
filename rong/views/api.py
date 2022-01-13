@@ -1,4 +1,5 @@
 import json
+import traceback
 from collections import defaultdict
 
 from django.contrib import messages
@@ -32,7 +33,7 @@ def add_hit(request):
             return JsonResponse({"success": False, "error": "Could not find account"})
         if len(data["units"]) != len(data["damages"]):
             return JsonResponse({"success": False, "error": "Missing or extra damages"})
-        all_units = {unit.id:unit for unit in Unit.valid_units()}
+        all_units = {unit.id:unit for unit in Unit.objects.all()}
         aliases = {al.name.lower():all_units[al.unit_id] for al in UnitAlias.objects.all()}
         aliases.update({unit.name.lower():unit for unit in all_units.values()})
         valid_units = []
@@ -75,4 +76,5 @@ def add_hit(request):
 
     except Exception as ex:
         return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed"})
+
 
