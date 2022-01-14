@@ -33,8 +33,11 @@ def add_hit(request):
             return JsonResponse({"success": False, "error": "Could not find account"})
         if len(data["units"]) != len(data["damages"]):
             return JsonResponse({"success": False, "error": "Missing or extra damages"})
-        all_units = {unit.id:unit for unit in Unit.objects.all()}
-        aliases = {al.name.lower():all_units[al.unit_id] for al in UnitAlias.objects.all()}
+        all_units = {unit.id:unit for unit in Unit.valid_units()}
+        aliases = {}
+        for al in UnitAlias.objects.all():
+            if al.unit_id in all_units:
+                aliases[al.name.lower()] = all_units[al.unit_id]
         aliases.update({unit.name.lower():unit for unit in all_units.values()})
         valid_units = []
         invalid_units = []
