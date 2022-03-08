@@ -29,6 +29,7 @@ urlpatterns = [
     path('box/<int:box_id>/unit/create/', box.create_boxunit, name='box_createunit'),
     path('box/<int:box_id>/unit/<int:boxunit_id>/', box.edit_boxunit, name='box_editunit'),
     path('box/<int:box_id>/import/', box.import_box, name='box_import'),
+    path('box/<int:box_id>/importli/', box.import_loadindex, name='box_import_li'),
     path('preferences/', core.preferences, name='preferences'),
     path('auth/logout/', core.logout, name='logout'),
     path('auth/login/discord/', core.discordlogin, name='discordlogin'),

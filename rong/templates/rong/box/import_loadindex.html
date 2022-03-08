@@ -1,5 +1,5 @@
 {% load bootstrap4 %}
-<form role="form" method="post" action="{% url 'rong:box_import' box.id %}">
+<form role="form" method="post" action="{% url 'rong:box_import_li' box.id %}">
     {% csrf_token %}
     {% bootstrap_form form layout='horizontal' bound_css_class='' %}
     <input type="hidden" id="redirect_url" name="next" value="">

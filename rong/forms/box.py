@@ -77,3 +77,11 @@ class ImportTWArmoryBoxForm(forms.Form):
                                       widget=forms.RadioSelect(attrs={'class': 'form-check-inline'}),
                                       choices=['Ignore', 'Error'],
                                       initial='Ignore')
+
+
+class ImportLoadIndexBoxForm(forms.Form):
+    data = forms.CharField(widget=forms.Textarea,
+                           required=True,
+                           label='Load Index Text',
+                           max_length=200000,
+                           help_text='Acquire your /load/index response via whatever means...')

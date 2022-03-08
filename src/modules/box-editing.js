@@ -287,10 +287,23 @@ export function renderBox(destination, id) {
         $.get("/box/" + id + "/import/", function (data) {
             hide_loading();
             $('#importModal').find('.modal-body').html(data);
+            $('#importModalLabel').text('Import from TW Armory');
+            $('#redirect_url').val(window.location.pathname);
             $('#importModal').modal();
         }, "html");
     });
-    actionsEle.append(armoryEle);
+    let loadIndexEle = $('<button type="button" class="btn btn-primary box-import">Import from /load/index</button>');
+    loadIndexEle.click(function () {
+        show_loading();
+        $.get("/box/" + id + "/importli/", function (data) {
+            hide_loading();
+            $('#importModal').find('.modal-body').html(data);
+            $('#importModalLabel').text('Import from /load/index');
+            $('#redirect_url').val(window.location.pathname);
+            $('#importModal').modal();
+        }, "html");
+    });
+    actionsEle.append(loadIndexEle);
     let inventoryEle = $('<button type="button" class="btn btn-primary box-inventory">Edit Inventory</button>');
     inventoryEle.click(function () {
         editInventory(id);
