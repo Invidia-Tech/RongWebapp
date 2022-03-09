@@ -292,6 +292,7 @@ export function renderBox(destination, id) {
             $('#importModal').modal();
         }, "html");
     });
+    actionsEle.append(armoryEle);
     let loadIndexEle = $('<button type="button" class="btn btn-primary box-import">Import from /load/index</button>');
     loadIndexEle.click(function () {
         show_loading();
