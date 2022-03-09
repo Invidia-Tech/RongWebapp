@@ -57,12 +57,12 @@
                     {% endwith %}
 
                     {# Clan Management #}
-                    {% if user.managed_clans|length %}
+                    {% if user.listed_clans|length %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#">Manage Clans</a>
                             <ul class="dropdown-menu">
-                                {% if user.managed_clans|length < 3 %}
-                                    {% for clan in user.managed_clans %}
+                                {% if user.listed_clans|length < 3 %}
+                                    {% for clan in user.listed_clans %}
                                         {% if not forloop.first %}
                                             <li class="dropdown-divider"></li>
                                         {% endif %}
@@ -70,7 +70,7 @@
                                         {% include "./includes/clan_management_menu_items.html" %}
                                     {% endfor %}
                                 {% else %}
-                                    {% for clan in user.managed_clans %}
+                                    {% for clan in user.listed_clans %}
                                         <li class="dropdown">
                                             <a class="dropdown-item dropdown-toggle" href="#">{{ clan.name }}</a>
                                             <ul class="dropdown-menu">

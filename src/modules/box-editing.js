@@ -304,6 +304,7 @@ export function renderBox(destination, id) {
             $('#importModal').modal();
         }, "html");
     });
+    actionsEle.append(' ');
     actionsEle.append(loadIndexEle);
     let inventoryEle = $('<button type="button" class="btn btn-primary box-inventory">Edit Inventory</button>');
     inventoryEle.click(function () {

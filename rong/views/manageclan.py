@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 
-from rong.decorators import clan_lead_view, clan_admin_view
+from rong.decorators import clan_lead_view, clan_admin_view, clan_boxes_view
 from rong.forms.manageclan import HitGroupForm, EditClanBattleForm, AddClanBattleForm, FullEditClanMemberForm, \
     EditClanMemberForm, HitTagForm
 from rong.models import ClanBattle, HitGroup, HitTag, User, ClanMember
@@ -191,7 +191,7 @@ def edit_member(request, clan, member_id):
         raise SuspiciousOperation()
 
 
-@clan_lead_view
+@clan_boxes_view
 def box_summary(request, clan):
     member_data = clan.members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks',
                                                                               'box__boxunit_set__unit__unique_equip',

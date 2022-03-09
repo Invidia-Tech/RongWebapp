@@ -10,6 +10,7 @@ class Clan(models.Model):
     admin = models.ForeignKey(
         'User', null=True, on_delete=models.SET_NULL, related_name='clans_administrated')
     slug = AutoSlugField(populate_from='name', unique=True)
+    box_summary_public = models.BooleanField(default=False)
 
     def get_clan_id(self):
         return self.id

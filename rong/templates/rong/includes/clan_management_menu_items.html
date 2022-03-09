@@ -1,4 +1,8 @@
-<li><a class="dropdown-item" href="{% url 'rong:clan_list_members' clan.slug %}">Members</a></li>
-<li><a class="dropdown-item" href="{% url 'rong:clan_list_battles' clan.slug %}">Clan Battles</a></li>
-<li><a class="dropdown-item" href="{% url 'rong:clan_list_hit_tags' clan.slug %}">Hit Tags</a></li>
+{% load clan_battle %}
+{% can_manage request.user clan as manageable %}
+{% if manageable %}
+    <li><a class="dropdown-item" href="{% url 'rong:clan_list_members' clan.slug %}">Members</a></li>
+    <li><a class="dropdown-item" href="{% url 'rong:clan_list_battles' clan.slug %}">Clan Battles</a></li>
+    <li><a class="dropdown-item" href="{% url 'rong:clan_list_hit_tags' clan.slug %}">Hit Tags</a></li>
+{% endif %}
 <li><a class="dropdown-item" href="{% url 'rong:clan_box_summary' clan.slug %}">Box Summary</a></li>

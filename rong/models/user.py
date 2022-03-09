@@ -45,22 +45,40 @@ class User(models.Model):
         user.save()
         return user
 
+    @cached_property
+    def clan_associations(self):
+        if self.is_superadmin:
+            where_part = ""
+            args = [self.id]
+        else:
+            where_part = ' WHERE cm."id" IS NOT NULL OR cl."admin_id" = %s'
+            args = [self.id] * 2
+        with connection.cursor() as cur:
+            cur.execute("""
+SELECT cl."id", cl."box_summary_public", cl."admin_id", cm."id", cm."is_lead"
+FROM "rong_clan" cl
+LEFT JOIN "rong_clanmember" cm ON (cl."id" = cm."clan_id" AND cm."user_id" = %s AND cm."active" is TRUE)""" + where_part+"""
+ORDER BY (cm."id" IS NOT NULL) DESC, cl."name" ASC;
+""", args)
+            clan_results = list(cur.fetchall())
+        clans = []
+        for clan in clan_results:
+            manager = self.is_superadmin or clan[2] == self.id or (clan[3] is not None and clan[4])
+            clans.append({
+                "id": clan[0],
+                "is_member": clan[3] is not None,
+                "is_manager": manager,
+                "boxes_viewable": manager or clan[1]
+            })
+        return clans
 
     @cached_property
     def managed_clan_ids(self):
-        if self.is_superadmin:
-            return Clan.objects.values_list('id', flat=True)
-        with connection.cursor() as cur:
-            cur.execute("""
-SELECT cl."id"
-FROM "rong_clan" cl
-LEFT JOIN "rong_clanmember" cm ON (cl."id" = cm."clan_id" AND cm."user_id" = %s)
-WHERE (
-	(cm."id" IS NOT NULL AND cm."is_lead" IS TRUE)
-	OR cl."admin_id" = %s
-);
-            """, [self.id] * 2)
-            return [row[0] for row in cur.fetchall()]
+        return [clan["id"] for clan in self.clan_associations if clan["is_manager"]]
+
+    @cached_property
+    def listed_clan_ids(self):
+        return [clan["id"] for clan in self.clan_associations if clan["boxes_viewable"]]
 
     @cached_property
     def own_box_ids(self):
@@ -77,6 +95,10 @@ WHERE box."user_id" = %s OR (cm."user_id" = %s AND cm."active" IS TRUE)
     def managed_clans(self):
         return Clan.objects.filter(id__in=self.managed_clan_ids)
 
+    @cached_property
+    def listed_clans(self):
+        return Clan.objects.filter(id__in=self.listed_clan_ids).order_by("name")
+
     def can_administrate(self, clan: Clan):
         return self.is_superadmin or clan.admin_id == self.id
 
@@ -85,6 +107,9 @@ WHERE box."user_id" = %s OR (cm."user_id" = %s AND cm."active" IS TRUE)
 
     def can_view(self, entity: Union[Clan, ClanBattle]):
         return entity.can_be_viewed_by(self)
+
+    def can_view_boxes(self, clan: Clan):
+        return clan.id in self.listed_clan_ids
 
     def preload_perms(self):
         self.clan_ids = self.clan_memberships.values_list('clan_id', flat=True)
