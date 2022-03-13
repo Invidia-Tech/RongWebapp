@@ -55,7 +55,14 @@ page('clan_box_summary', function () {
                             eq_count++;
                         }
                     }
-                    return data.star * 100000 + data.rank * 10000 + eq_count * 1000 + data.level;
+                    let ue_lvl = (data.ue_level === null) ? 0 : data.ue_level;
+                    return (
+                        data.level
+                        + ue_lvl * 1000
+                        + eq_count * 1000000
+                        + data.rank * 10000000
+                        + data.star * 1000000000
+                    );
                 }
             }
         });
