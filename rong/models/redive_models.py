@@ -19,6 +19,14 @@ class Unit(models.Model):
     rarity = models.IntegerField()
 
     @cached_property
+    def unit_number(self):
+        return (self.id - 100001) // 100
+
+    @cached_property
+    def sort_key(self):
+        return self.search_area_width * 1000 + self.unit_number
+
+    @cached_property
     def shard_id(self):
         return 30000 + self.id // 100
 

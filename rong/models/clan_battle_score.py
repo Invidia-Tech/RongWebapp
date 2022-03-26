@@ -30,6 +30,7 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
     unit5_damage = models.PositiveIntegerField(null=True)
     group = models.ForeignKey('HitGroup', null=True, on_delete=models.SET_NULL, related_name='hits')
     tags = models.ManyToManyField('HitTag', related_name='hits')
+    comp = models.ForeignKey('ClanBattleComp', null=True, on_delete=models.SET_NULL, related_name='hits')
     # these fields are autocalculated by the code and shouldn't be filled manually
     boss_lap = models.PositiveIntegerField()
     boss_number = models.PositiveIntegerField()
