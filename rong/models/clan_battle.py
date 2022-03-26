@@ -1,5 +1,6 @@
 import datetime
 import math
+import statistics
 from collections import OrderedDict, defaultdict
 
 from django.db import models, connection
@@ -357,7 +358,7 @@ class ClanBattle(models.Model):
     @cached_property
     def hit_data_for_stats(self):
         return list(self.hits.order_by('order').select_related('member', 'member__user', 'pilot', 'pilot__user',
-                                                               'group').prefetch_related('tags'))
+                                                               'group', 'comp').prefetch_related('tags'))
 
     @cached_property
     def hit_stats(self):
@@ -510,4 +511,93 @@ class ClanBattle(models.Model):
     @cached_property
     def pilot_stats_hitcount(self):
         return self.get_pilot_stats(False)
+
+    @cached_property
+    def comp_stats(self):
+        def initial_row(comp):
+            return {
+                "comp": comp.name,
+                "hits": [],
+                "mean": 0,
+                "median": 0,
+                "minimum": 0,
+                "maximum": 0,
+                "lower_quartile": 0,
+                "upper_quartile": 0,
+                "player_info": {},
+            }
+
+        def initial_player_row(name):
+            return {
+                "name": name,
+                "hits": [],
+                "count": 0,
+                "mean": 0,
+                "median": 0,
+                "average_score": 0,
+            }
+
+        def find_median(sorted_list):
+            indices = []
+            list_size = len(sorted_list)
+            if list_size % 2 == 0:
+                indices.append(int(list_size / 2) - 1)  # -1 because index starts from 0
+                indices.append(int(list_size / 2))
+                median = (sorted_list[indices[0]] + sorted_list[indices[1]]) / 2
+            else:
+                indices.append(int(list_size / 2))
+                median = sorted_list[indices[0]]
+            return median, indices
+
+        boss_data = list(self.bosses.order_by('difficulty').all())
+        difficulty_idx = 0
+        comp_matrix = {}
+        for hit in self.hit_data_for_stats:
+            if boss_data[difficulty_idx].lap_to is not None and hit.boss_lap > boss_data[difficulty_idx].lap_to:
+                difficulty_idx += 1
+            if hit.hit_type == ClanBattleHitType.CARRYOVER or not hit.comp:
+                continue
+            if hit.hit_type == ClanBattleHitType.LAST_HIT and hit.damage / hit.actual_damage < 1.1:
+                continue
+            if hit.boss_number != hit.comp.boss_number or difficulty_idx != hit.comp.boss_phase - 1:
+                continue
+            if hit.comp.id not in comp_matrix:
+                comp_matrix[hit.comp.id] = initial_row(hit.comp)
+            comp_matrix[hit.comp.id]["hits"].append({
+                "player": hit.player_name,
+                "damage": hit.damage,
+                "lap": hit.boss_lap
+            })
+
+        for comp in comp_matrix.values():
+            comp["hits"].sort(key=lambda x: -x["damage"])
+            for idx, hit in enumerate(comp["hits"]):
+                hit["score"] = 100 - idx*(100/(len(comp["hits"])-1))
+                if hit["player"] not in comp["player_info"]:
+                    comp["player_info"][hit["player"]] = initial_player_row(hit["player"])
+                comp["player_info"][hit["player"]]["hits"].append(hit)
+            damages = sorted(hit["damage"] for hit in comp["hits"])
+            comp['mean'] = round(sum(damages)/len(comp["hits"]))
+            median, median_indices = find_median(damages)
+            Q1, Q1_indices = find_median(damages[:median_indices[0]])
+            Q3, Q3_indices = find_median(damages[median_indices[-1] + 1:])
+            comp['median'] = median
+            comp['minimum'] = min(damages)
+            comp['maximum'] = max(damages)
+            comp['lower_quartile'] = Q1
+            comp['upper_quartile'] = Q3
+
+            for player in comp["player_info"].values():
+                player["count"] = len(player["hits"])
+                player["mean"] = round(sum(hit["damage"] for hit in player["hits"])/player["count"])
+                player["median"] = statistics.median(hit["damage"] for hit in player["hits"])
+                player["average_score"] = sum(hit["score"] for hit in player["hits"])/player["count"]
+                del player["hits"]
+            comp["player_info"] = list(comp["player_info"].values())
+            comp["player_info"].sort(key=lambda x: -x["average_score"])
+
+        comps = list(comp_matrix.values())
+        comps.sort(key=lambda x: x["comp"])
+
+        return comps
 

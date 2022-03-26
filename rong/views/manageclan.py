@@ -6,8 +6,49 @@ from django.urls import reverse
 
 from rong.decorators import clan_lead_view, clan_admin_view, clan_boxes_view
 from rong.forms.manageclan import HitGroupForm, EditClanBattleForm, AddClanBattleForm, FullEditClanMemberForm, \
-    EditClanMemberForm, HitTagForm
-from rong.models import ClanBattle, HitGroup, HitTag, User, ClanMember
+    EditClanMemberForm, HitTagForm, ClanBattleCompForm
+from rong.models import ClanBattle, HitGroup, HitTag, User, ClanMember, ClanBattleComp
+
+@clan_lead_view
+def edit_comp(request, clan, battle_id, comp_id):
+    battle = get_object_or_404(clan.clanbattle_set, pk=battle_id)
+    comp = get_object_or_404(battle.comps, pk=comp_id)
+    if request.method == 'POST':
+        form = ClanBattleCompForm(comp, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Comp successfully edited.")
+        return redirect(
+            reverse('rong:clan_edit_battle', kwargs={'clan': clan.slug, 'battle_id': battle.id}) + '#comps')
+    elif request.method == 'DELETE':
+        comp.delete()
+        messages.add_message(request, messages.SUCCESS, "Comp successfully deleted.")
+        return JsonResponse({'success': True})
+    else:
+        form = ClanBattleCompForm(comp)
+    ctx = {
+        'form': form,
+        'clan': clan,
+        'battle': battle,
+        'comp': comp
+    }
+    return render(request, 'rong/manageclan/edit_comp.html', ctx)
+
+
+@clan_lead_view
+def add_comp(request, clan, battle_id):
+    battle = get_object_or_404(clan.clanbattle_set, pk=battle_id)
+    if request.method == 'POST':
+        form = ClanBattleCompForm(ClanBattleComp(clan_battle=battle, submitter=request.user), request.POST, prefix="add-comp")
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Successfully added new comp.")
+        else:
+            messages.add_message(request, messages.ERROR, "Could not add new comp.")
+        return redirect(
+            reverse('rong:clan_edit_battle', kwargs={'clan': clan.slug, 'battle_id': battle.id}) + '#comps')
+    else:
+        raise SuspiciousOperation()
 
 
 @clan_lead_view
@@ -118,6 +159,7 @@ def edit_battle(request, clan, battle_id):
         'clan': clan,
         'battle': battle,
         'hgform': HitGroupForm(prefix="add-group"),
+        'compform': ClanBattleCompForm(comp=ClanBattleComp(clan_battle=battle), prefix="add-comp"),
     }
     return render(request, 'rong/manageclan/edit_battle.html', ctx)
 

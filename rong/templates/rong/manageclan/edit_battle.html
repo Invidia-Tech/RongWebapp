@@ -21,6 +21,7 @@
                                 class="nav-link small active">Basic Details</a></li>
         <li class="nav-item"><a href="#hit-groups" data-toggle="tab" class="nav-link small">Hit
             Groups</a></li>
+        <li class="nav-item"><a href="#comps" data-toggle="tab" class="nav-link small">Comps</a></li>
     </ul>
     <br>
     <div id="tabsContent" class="tab-content">
@@ -69,6 +70,44 @@
             <form role="form" method="post" action="{% url 'rong:clan_add_hit_group' clan.slug battle.id %}">
                 {% csrf_token %}
                 {% bootstrap_form hgform layout='horizontal' bound_css_class='' %}
+                {% buttons submit='OK' %}{% endbuttons %}
+            </form>
+        </div>
+        <div id="comps" class="tab-pane">
+            {% if battle.comps.all %}
+                <h3>Current Comps</h3>
+                <table class="table">
+                    <tr>
+                        <th>Name</th>
+                        <th>Boss</th>
+                        <th>Team</th>
+                        <th>Damage</th>
+                        <th># of Hits</th>
+                        <th>Actions</th>
+                    </tr>
+                    {% for comp in battle.comps.all %}
+                        <tr data-name="{{ comp.name }}">
+                            <td>{{ comp.name }}</td>
+                            <td>{{ comp.boss }}</td>
+                            <td>{% include "../includes/render_team.html" with team=comp.team %}</td>
+                            <td>{{ comp.damage }}</td>
+                            <td>{{ comp.hits.count }}</td>
+                            <td>
+                                <a href="{% url 'rong:clan_edit_comp' clan.slug battle.id comp.id %}"
+                                   class="btn btn-primary" title="Edit"><i class="fa fa-edit"></i></a>
+                                <button class="btn btn-danger delete-comp-button"
+                                        data-url="{% url 'rong:clan_edit_comp' clan.slug battle.id comp.id %}"
+                                        title="Delete"><i class="fa fa-remove"></i></button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <hr>
+            {% endif %}
+            <h3>Add Comp</h3>
+            <form role="form" method="post" action="{% url 'rong:clan_add_comp' clan.slug battle.id %}">
+                {% csrf_token %}
+                {% bootstrap_form compform layout='horizontal' bound_css_class='' %}
                 {% buttons submit='OK' %}{% endbuttons %}
             </form>
         </div>

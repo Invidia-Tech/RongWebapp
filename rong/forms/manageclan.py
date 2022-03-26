@@ -1,9 +1,11 @@
 from django import forms
 from django.core.exceptions import ValidationError
 
-from rong.models import HitGroup, ClanMember, HitTag
+from rong.forms.fields import UnitSelect
+from rong.models import HitGroup, ClanMember, HitTag, ClanBattleComp
 from rong.models.bot_models import DiscordMember
 from rong.models.clan_battle import CB_DATA_SOURCES, ClanBattle
+from rong.models.team import create_team
 
 
 def get_cb_data_source_choices(blank_str='--Choose--'):
@@ -144,6 +146,74 @@ class HitTagForm(forms.ModelForm):
     class Meta:
         model = HitTag
         fields = ['name', 'description']
+
+class ClanBattleCompForm(forms.Form):
+    name = forms.CharField(max_length=50)
+    boss = forms.ChoiceField()
+    damage = forms.IntegerField(min_value=1, max_value=200000000)
+    unit1 = UnitSelect(label='Unit 1', required=False)
+    unit2 = UnitSelect(label='Unit 2', required=False)
+    unit3 = UnitSelect(label='Unit 3', required=False)
+    unit4 = UnitSelect(label='Unit 4', required=False)
+    unit5 = UnitSelect(label='Unit 5', required=False)
+
+    def __init__(self, comp: ClanBattleComp, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.comp = comp
+        num_phases = self.comp.clan_battle.bosses.count()
+        boss_choices = [('', '--Select--')]
+        for phase in range(num_phases):
+            for boss in range(1, 6):
+                boss_str = chr(0x41 + phase) + str(boss)
+                boss_choices.append((boss_str, boss_str))
+        self.fields["boss"].choices = boss_choices
+
+        if comp.id:
+            self.fields["name"].initial = comp.name
+            selected_boss_str = chr(0x40 + comp.boss_phase) + str(comp.boss_number)
+            self.fields["boss"].initial = selected_boss_str
+            self.fields["damage"].initial = comp.damage
+
+            if comp.team:
+                for unit in range(1, 6):
+                    self.fields["unit%d" % unit].initial = getattr(comp.team, "unit%d" % unit)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        form_errors = []
+        # unit duplication check
+        for first_unit in range(1, 5):
+            for second_unit in range(first_unit + 1, 6):
+                fu = cleaned_data.get("unit%d" % first_unit, None)
+                su = cleaned_data.get("unit%d" % second_unit, None)
+                if fu and su and fu == su:
+                    form_errors.append(
+                        ValidationError("You must be a CB2 top clan member, using two %(name)ss in the same team!",
+                                        code='invalid',
+                                        params={'name': fu.name}))
+
+        if len(form_errors):
+            if len(form_errors) == 1:
+                raise form_errors[0]
+            else:
+                raise ValidationError(form_errors)
+        return cleaned_data
+
+    def save(self):
+        self.comp.name = self.cleaned_data["name"]
+        self.comp.boss_phase = ord(self.cleaned_data["boss"][0]) - 0x40
+        self.comp.boss_number = int(self.cleaned_data["boss"][1])
+        self.comp.damage = self.cleaned_data["damage"]
+
+        # individual unit data?
+        units = [x for x in (self.cleaned_data.get("unit%d" % unit) for unit in range(1, 6)) if x is not None]
+        if units:
+            team, ordering = create_team(units)
+            self.comp.team = team
+        else:
+            self.comp.team = None
+
+        self.comp.save()
 
 
 class EditClanMemberForm(forms.ModelForm):

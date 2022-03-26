@@ -31,6 +31,7 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
     group = models.ForeignKey('HitGroup', null=True, on_delete=models.SET_NULL, related_name='hits')
     tags = models.ManyToManyField('HitTag', related_name='hits')
     comp = models.ForeignKey('ClanBattleComp', null=True, on_delete=models.SET_NULL, related_name='hits')
+    comp_locked = models.BooleanField(default=False)
     # these fields are autocalculated by the code and shouldn't be filled manually
     boss_lap = models.PositiveIntegerField()
     boss_number = models.PositiveIntegerField()
@@ -46,6 +47,14 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
     def clear_unit_damage(self):
         for unit in range(1, 6):
             setattr(self, "unit%d_damage" % unit, None)
+
+    @property
+    def phase(self):
+        return self.clan_battle.lap_info(self.boss_lap).difficulty
+
+    @property
+    def player_name(self):
+        return self.pilot.ign if self.pilot else self.member.ign
 
     def save(self, *args, **kwargs):
         # autopopulate fields for new entry

@@ -11,6 +11,7 @@ require('./pages/memberlist');
 require('./pages/hit-log');
 require('./pages/edit-battle');
 require('./pages/box-summary');
+require('./pages/dashboard');
 
 import './styles/main.scss';
 import $ from 'jquery';

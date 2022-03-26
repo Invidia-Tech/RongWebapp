@@ -29,6 +29,14 @@
   font-size: 80%;
 }
 
+#compHitsTable, #compHittersTable {
+  font-size: 80%;
+}
+
+#compHitsTable_wrapper > div:first-child, #compHittersTable_wrapper > div:first-child {
+  display: none;
+}
+
 .stats-table {
   font-size: 80%;
   td {
