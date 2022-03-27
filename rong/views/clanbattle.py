@@ -61,7 +61,7 @@ def add_hit(request, battle: ClanBattle):
 @clanbattle_view
 def hit_log_data(request, battle: ClanBattle):
     hits = list(battle.hits.select_related('member', 'member__user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
-                                           'team__unit5', 'group').prefetch_related('tags').order_by('order'))
+                                           'team__unit5', 'group', 'comp').prefetch_related('tags').order_by('order'))
     daily_attempt_counts = defaultdict(lambda: 0)
     day = None
     hits_json = []
@@ -69,7 +69,13 @@ def hit_log_data(request, battle: ClanBattle):
     tags = set()
     groups = set()
     members = set()
+    comps = set()
+    boss_codes = set()
+    boss_data = list(battle.bosses.order_by('difficulty').all())
+    phase = 1
     for hit in hits:
+        if boss_data[phase-1].lap_to is not None and hit.boss_lap > boss_data[phase-1].lap_to:
+            phase += 1
         if hit.day != day:
             daily_attempt_counts.clear()
             day = hit.day
@@ -96,6 +102,9 @@ def hit_log_data(request, battle: ClanBattle):
                 "per_day": ClanBattle.HITS_PER_DAY,
             },
             "hit_type": hit.hit_type.value,
+            "phase": phase,
+            "comp": "None" if hit.comp is None else hit.comp.name,
+            "boss_code": chr(0x40 + phase)+str(hit.boss_number),
         }
         if manageable:
             hit_json["id"] = hit.id
@@ -109,6 +118,8 @@ def hit_log_data(request, battle: ClanBattle):
             if hit.group:
                 groups.add(hit.group)
             tags.update(hit.tags.all())
+            comps.add(hit_json["comp"])
+            boss_codes.add(hit_json["boss_code"])
         hits_json.append(hit_json)
     resp = {
         "hits": hits_json
@@ -121,6 +132,10 @@ def hit_log_data(request, battle: ClanBattle):
         resp["boss_choices"] = [(num, getattr(battle, "boss%d_name" % num)) for num in range(1, 6)]
         resp["members"].sort(key=lambda x:x[1].lower())
         resp["unit_choices"].sort(key=lambda x: x[1].lower())
+        resp["comps"] = [(c, c) for c in comps]
+        resp["comps"].sort(key=lambda x:x[1].lower())
+        resp["boss_codes"] = [(c, c) for c in boss_codes]
+        resp["boss_codes"].sort(key=lambda x:x[1].lower())
     return JsonResponse(resp)
 
 

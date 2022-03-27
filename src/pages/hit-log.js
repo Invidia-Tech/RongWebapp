@@ -229,8 +229,24 @@ page('cb_list_hits', function () {
                         let tag_present = data.tags.indexOf(value) > -1;
                         return tag_present == (comparison == 'is tagged');
                     }
-                }
-
+                },
+                {
+                    name: "Phase",
+                    control: "number",
+                    column: "phase"
+                },
+                {
+                    name: "Comp",
+                    control: "dropdown_isnot",
+                    choices: json.comps,
+                    column: 'comp'
+                },
+                {
+                    name: "Boss Code",
+                    control: "dropdown_isnot",
+                    choices: json.boss_codes,
+                    column: 'boss_code'
+                },
             ];
             let filtersByName = {};
             for (let filter of filters) {

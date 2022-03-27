@@ -571,16 +571,23 @@ class ClanBattle(models.Model):
 
         for comp in comp_matrix.values():
             comp["hits"].sort(key=lambda x: -x["damage"])
+            hit_count = len(comp["hits"])
             for idx, hit in enumerate(comp["hits"]):
-                hit["score"] = 100 - idx*(100/(len(comp["hits"])-1))
+                hit["score"] = 100 if hit_count == 1 else 100 - idx*(100/(hit_count-1))
                 if hit["player"] not in comp["player_info"]:
                     comp["player_info"][hit["player"]] = initial_player_row(hit["player"])
                 comp["player_info"][hit["player"]]["hits"].append(hit)
             damages = sorted(hit["damage"] for hit in comp["hits"])
-            comp['mean'] = round(sum(damages)/len(comp["hits"]))
+            comp['mean'] = round(sum(damages)/hit_count)
             median, median_indices = find_median(damages)
-            Q1, Q1_indices = find_median(damages[:median_indices[0]])
-            Q3, Q3_indices = find_median(damages[median_indices[-1] + 1:])
+            if hit_count == 1:
+                Q1 = Q3 = median
+            elif hit_count == 2:
+                Q1 = damages[0]
+                Q3 = damages[1]
+            else:
+                Q1, Q1_indices = find_median(damages[:median_indices[0]])
+                Q3, Q3_indices = find_median(damages[median_indices[-1] + 1:])
             comp['median'] = median
             comp['minimum'] = min(damages)
             comp['maximum'] = max(damages)
