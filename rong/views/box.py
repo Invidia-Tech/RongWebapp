@@ -76,8 +76,9 @@ def import_loadindex(request: HttpRequest, box_id):
             try:
                 data = json.loads(form.cleaned_data["data"].strip())
                 assert type(data) == dict
-                assert "data" in data
-                data = data["data"]
+                assert "data" in data or "unit_list" in data
+                if "unit_list" not in data:
+                    data = data["data"]
                 assert type(data) == dict
                 assert "unit_list" in data
                 assert type(data["unit_list"]) == list
