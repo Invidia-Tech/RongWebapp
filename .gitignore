@@ -136,3 +136,6 @@ webpack-stats.json
 # Different env configurations
 deploy/envs/*
 !deploy/envs/example-env
+
+# Random mac shit
+.DS_Store

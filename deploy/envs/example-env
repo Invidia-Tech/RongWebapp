@@ -1,7 +1,0 @@
-DB_NAME=rongexample
-DB_USER=rongexample
-DB_PASSWORD=some-password-here
-ALLOWED_HOSTS='["clanbattle.xyz", "www.clanbattle.xyz"]'
-BOT_TOKEN=some-bot-token-here
-DB_OUTPORT=5432
-WEBAPP_OUTPORT=8000
