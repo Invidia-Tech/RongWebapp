@@ -9,7 +9,7 @@ def create_team(units, stars=None, levels=None, power=None):
     assert stars is None or len(stars) == len(units)
     assert levels is None or len(levels) == len(units)
 
-    t = Team(power=power, uid=0)
+    t = Team(power=power, uid=1)
     for u in range(5):
         setattr(t, "unit%d" % (u+1), None if u >= len(units) else units[u])
         setattr(t, "unit%d_star" % (u+1), None if (stars is None or u >= len(units)) else stars[u])
@@ -76,6 +76,7 @@ class Team(models.Model, ModelDiffMixin):
     def fix(self):
         order_map = self.order_units()
         if self.has_changed:
+            print("Team %d: order corrected" % self.id)
             self.save()
             for score in self.clanbattlescore_set.all():
                 damages = [getattr(score, "unit%d_damage" % (u+1)) for u in range(5)]
@@ -120,5 +121,6 @@ class Team(models.Model, ModelDiffMixin):
             unit_data = getattr(self, 'unit%d' % (unit + 1))
             uid *= unit_data.prime if unit_data is not None else 1
         if self.uid != uid:
+            print("Team %d: UID %d => %d" % (self.id, self.uid, uid))
             self.uid = uid
             self.save()
