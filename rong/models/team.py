@@ -105,20 +105,20 @@ class Team(models.Model, ModelDiffMixin):
             "original_index": u
         } for u in range(5)]
         unit_data.sort(key=lambda x: (x["unit"].sort_key if x["unit"] is not None else 999999))
-        uid = 0
+        uid = 1
         for unit, data in enumerate(unit_data):
             setattr(self, 'unit%d' % (unit + 1), data["unit"])
             setattr(self, 'unit%d_star' % (unit + 1), data["star"])
             setattr(self, 'unit%d_level' % (unit + 1), data["level"])
-            uid += (data["unit"].unit_number if data["unit"] is not None else 0) << (unit * 10)
+            uid *= data["unit"].prime if data["unit"] is not None else 1
         self.uid = uid
         return [unit_data[n]["original_index"] for n in range(5)]
 
     def fix_uid(self):
-        uid = 0
+        uid = 1
         for unit in range(5):
             unit_data = getattr(self, 'unit%d' % (unit + 1))
-            uid += (unit_data.unit_number if unit_data is not None else 0) << (unit * 10)
+            uid *= unit_data.prime if unit_data is not None else 1
         if self.uid != uid:
             self.uid = uid
             self.save()

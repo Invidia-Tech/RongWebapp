@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.functional import cached_property
 
+from rong.helpers import primes
+
 
 class UnitUniqueEquip(models.Model):
     id = models.AutoField(primary_key=True, db_column='equip_id')
@@ -21,6 +23,10 @@ class Unit(models.Model):
     @cached_property
     def unit_number(self):
         return (self.id - 100001) // 100
+
+    @cached_property
+    def prime(self):
+        return primes.PRIME_LIST[self.unit_number - 1]
 
     @cached_property
     def sort_key(self):
