@@ -74,6 +74,11 @@ def add_hit(request):
         if "pilot" in data:
             hit.kyaru_pilot = data["pilot"]
             hit.pilot = clan.members.filter(ign__iexact=data['pilot']).first()
+        if "comp" in data:
+            comp = clan.comps.filter(name__iexact=data['comp']).first()
+            if comp:
+                hit.comp = comp
+                hit.comp_locked = True
         hit.save()
         return JsonResponse({"success": True})
 

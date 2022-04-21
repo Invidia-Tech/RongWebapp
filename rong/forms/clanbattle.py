@@ -19,6 +19,8 @@ class HitForm(forms.Form):
                                     empty_label="None", required=False)
     tags = CBLabelModelMultipleChoiceField(callback=lambda x: x.name, queryset=None, required=False,
                                            widget=forms.SelectMultiple(attrs={'class': 'select2-multi'}))
+    comp = forms.ChoiceField(required=False)
+    comp_locked = forms.BooleanField(required=False)
     unit1 = UnitSelect(label='Unit 1', required=False)
     unit2 = UnitSelect(label='Unit 2', required=False)
     unit3 = UnitSelect(label='Unit 3', required=False)
@@ -60,6 +62,10 @@ class HitForm(forms.Form):
         self.fields["pilot"].choices = pilot_choices
         self.fields["pilot"].widget.attrs["class"] = "select2-dd"
         self.fields["pilot"].widget.attrs["placeholder"] = "(None)"
+        comp_list = list(hit.clan_battle.comps.all())
+        comp_list.sort(key=lambda comp: comp.name.lower())
+        comp_choices = [('', 'None')] + [(x.id, x.name) for x in comp_list]
+        self.fields["comp"].choices = comp_choices
         if hit.clan_battle.in_progress:
             self.fields["day"].initial = hit.clan_battle.current_day
         else:
@@ -73,6 +79,8 @@ class HitForm(forms.Form):
             self.fields["member"].initial = hit.member_id
             self.fields["pilot"].initial = hit.pilot_id
             self.fields["damage"].initial = hit.damage
+            self.fields["comp"].initial = hit.comp_id
+            self.fields["comp_locked"].initial = hit.comp_locked
 
             if hit.team:
                 for unit in range(1, 6):
@@ -133,6 +141,8 @@ class HitForm(forms.Form):
         self.hit.member_id = self.cleaned_data["member"]
         self.hit.pilot_id = self.cleaned_data["pilot"]
         self.hit.damage = self.cleaned_data["damage"]
+        self.hit.comp_id = self.cleaned_data["comp"]
+        self.hit.comp_locked = self.cleaned_data["comp_locked"]
         if "group" in self.cleaned_data:
             self.hit.group = self.cleaned_data["group"]
 

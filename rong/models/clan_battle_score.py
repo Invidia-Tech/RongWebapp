@@ -69,7 +69,8 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
             self.boss_lap = self.clan_battle.current_lap
             self.boss_number = self.clan_battle.current_boss
             self.actual_damage = min(self.damage, self.clan_battle.current_hp)
-            previous_hit_today = self.clan_battle.hits.filter(day=self.day, member=self.member).order_by('-order').first()
+            previous_hit_today = self.clan_battle.hits.filter(day=self.day, member=self.member).order_by(
+                '-order').first()
             if previous_hit_today and previous_hit_today.hit_type == ClanBattleHitType.LAST_HIT:
                 self.hit_type = ClanBattleHitType.CARRYOVER
             elif self.actual_damage == self.clan_battle.current_hp:
@@ -81,6 +82,10 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
             if self.clan_battle.current_hp == 0:
                 self.clan_battle.spawn_next_boss()
             self.clan_battle.save()
+        if not self.comp_id and not self.comp_locked and self.team_id:
+            self.comp = self.clan_battle.comps.filter(boss_phase=self.phase, boss_number=self.boss_number,
+                                                      team__uid=self.team.uid).first()
+
         super().save(*args, **kwargs)
 
     @cached_property
