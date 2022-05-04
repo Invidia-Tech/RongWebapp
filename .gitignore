@@ -129,6 +129,7 @@ webpack-stats.json
 
 # dev
 /dev_scripts
+/dumps
 
 # docker
 .docker

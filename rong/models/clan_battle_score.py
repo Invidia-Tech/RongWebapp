@@ -98,3 +98,6 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
     @cached_property
     def killing_blow(self):
         return self.boss_hp_left == 0
+
+    class Meta:
+        ordering = ['order']
