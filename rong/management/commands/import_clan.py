@@ -129,6 +129,8 @@ class Command(BaseCommand):
                     comp.submitter = user_mapping[comp_data["submitter_id"]]
                 if "team" in comp_data:
                     comp.team, _ = create_team(populate_team(comp_data["team"]))
+                    if not comp.team.id:
+                        tosave.append(comp.team)
                 comp.clan_battle = cb
                 tosave.append(comp)
                 comp_mapping[comp_data["id"]] = comp
@@ -142,6 +144,7 @@ class Command(BaseCommand):
                 tosave.append(group)
                 group_mapping[group_data["id"]] = group
 
+            hit_count = 0
             for hit_data in battle_data["hits"]:
                 h_data = dict(hit_data)
                 del h_data["member_id"]
@@ -165,9 +168,14 @@ class Command(BaseCommand):
                 if "team" in hit_data:
                     # todo actually check order_map? shouldn't be needed tho
                     hit.team, order_map = create_team(populate_team(hit_data["team"]))
+                    if not hit.team.id:
+                        tosave.append(hit.team)
                 if hit_data["tags"]:
                     queued_tags.append((hit, hit_data["tags"]))
                 tosave.append(hit)
+                hit_count += 1
+                if hit_count % 100 == 0:
+                    print("Processed %d/%d hits" % (hit_count, len(battle_data["hits"])))
 
             for flight_data in battle_data["flights"]:
                 f_data = dict(flight_data)
@@ -183,6 +191,8 @@ class Command(BaseCommand):
                 flight.cb = cb
                 if "team" in flight_data:
                     flight.team, _ = create_team(populate_team(flight_data["team"]))
+                    if not flight.team.id:
+                        tosave.append(flight.team)
                 tosave.append(flight)
 
 
@@ -196,8 +206,12 @@ class Command(BaseCommand):
                     type_mapping[typ] = 0
                 type_mapping[typ] += 1
             print(str(type_mapping))
+            num_saved = 0
             for model in tosave:
                 model.save()
+                num_saved += 1
+                if num_saved % 100 == 0:
+                    print("Saved %d" % num_saved)
             for hit, tag_list in queued_tags:
                 for tag_id in tag_list:
                     hit.tags.add(tag_mapping[tag_id])

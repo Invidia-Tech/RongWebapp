@@ -4,7 +4,7 @@ from django.utils.functional import cached_property
 from rong.mixins import ModelDiffMixin
 
 
-def create_team(units, stars=None, levels=None, power=None):
+def create_team(units, stars=None, levels=None, power=None, do_save=True):
     assert len(units) and len(units) <= 5
     assert stars is None or len(stars) == len(units)
     assert levels is None or len(levels) == len(units)
@@ -20,7 +20,8 @@ def create_team(units, stars=None, levels=None, power=None):
     if duplicate:
         return duplicate, order_map
     else:
-        t.save()
+        if do_save:
+            t.save()
         return t, order_map
 
 
