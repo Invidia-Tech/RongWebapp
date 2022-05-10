@@ -1,16 +1,14 @@
 import base64
 import json
 import re
-import traceback
 import zlib
 
 from django.contrib import messages
 from django.core.exceptions import SuspiciousOperation, BadRequest
-from django.db import connection
-from django.http import HttpRequest, Http404, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, Http404, HttpResponseRedirect
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 from rong.decorators import login_required
 from rong.forms.box import EditBoxUnitForm, ImportTWArmoryBoxForm, CreateBoxUnitBulkForm, BoxForm, \
@@ -62,6 +60,7 @@ def edit_boxunit(request: HttpRequest, box_id, boxunit_id):
         return JsonResponse({"unit": boxunit.edit_json()})
     else:
         raise SuspiciousOperation()
+
 
 @login_required
 def import_loadindex(request: HttpRequest, box_id):
@@ -131,14 +130,15 @@ def import_loadindex(request: HttpRequest, box_id):
                         if unit["promotion_level"] > unit_data.ranks.count():
                             raise ValueError(
                                 "You have %s's rank set to %d ingame, which is beyond current EN ranks." % (
-                                unit_data.name, unit["p"]))
+                                    unit_data.name, unit["p"]))
                         box_unit.rank = unit["promotion_level"]
                         if unit["unit_rarity"] > 5:
                             raise ValueError("6-star units do not exist on EN yet.")
                         box_unit.star = unit["unit_rarity"]
                         box_unit.level = unit["unit_level"]
                         for eq in range(6):
-                            eq_val = unit["equip_slot"][eq]["enhancement_level"] if unit["equip_slot"][eq]["is_slot"] else None
+                            eq_val = unit["equip_slot"][eq]["enhancement_level"] if unit["equip_slot"][eq][
+                                "is_slot"] else None
                             setattr(box_unit, 'equip%d' % (eq + 1), eq_val)
                         box_unit.ue_level = None
                         if unit["unique_equip_slot"] and unit["unique_equip_slot"][0]["is_slot"]:
@@ -152,7 +152,7 @@ def import_loadindex(request: HttpRequest, box_id):
 
                 box.boxunit_set.exclude(id__in=[bu.id for bu in save_units]).delete()
                 item_ids = [item.id for item in Item.inventory_items()]
-                quantities = {}
+                quantities = {item_id: 0 for item_id in item_ids}
                 for item in data["item_list"]:
                     if item["id"] in item_ids:
                         quantities[item["id"]] = item["stock"]
@@ -163,7 +163,7 @@ def import_loadindex(request: HttpRequest, box_id):
                 return HttpResponseRedirect(next)
             messages.add_message(request, messages.SUCCESS,
                                  "Successfully imported %d units (%d new) from /load/index." % (
-                                 len(save_units), new_units))
+                                     len(save_units), new_units))
             return HttpResponseRedirect(next)
         else:
             messages.add_message(request, messages.ERROR, "Could not import box data. Form issue detected.")
@@ -230,7 +230,7 @@ def import_box(request: HttpRequest, box_id):
                             if unit["p"] > unit_data.ranks.count():
                                 raise ValueError(
                                     "You have %s's rank set to %d on Armory, which is beyond current EN ranks." % (
-                                    unit_data.name, unit["p"]))
+                                        unit_data.name, unit["p"]))
                             box_unit.rank = unit["p"]
                             if unit["r"] > 5:
                                 raise ValueError("6-star units do not exist on EN yet.")
@@ -279,7 +279,7 @@ def import_box(request: HttpRequest, box_id):
                 return HttpResponseRedirect(next)
             messages.add_message(request, messages.SUCCESS,
                                  "Successfully imported %d units (%d new) from TW Armory." % (
-                                 len(save_units), new_units))
+                                     len(save_units), new_units))
             return HttpResponseRedirect(next)
         else:
             messages.add_message(request, messages.ERROR, "Could not import box data. Form issue detected.")
