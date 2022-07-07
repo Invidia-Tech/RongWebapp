@@ -30,7 +30,6 @@ def edit_hit(request, battle: ClanBattle, hit_id):
         if form.is_valid():
             form.save()
             messages.add_message(request, messages.SUCCESS, 'Hit successfully edited.')
-            # return HttpResponse('<html><head><title>A</title></head><body>A</body></html>')
             return redirect('rong:cb_list_hits', battle.slug)
     else:
         form = HitForm(hit)

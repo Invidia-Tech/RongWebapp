@@ -119,13 +119,6 @@ class HitForm(forms.Form):
                                         code='invalid',
                                         params={'name': fu.name}))
 
-        # hit limit check
-        if not self.hit.id and self.hit.clan_battle.member_hits_on_day(cleaned_data.get("member"), cleaned_data.get(
-                "day")) >= ClanBattle.HITS_PER_DAY:
-            form_errors.append(
-                ValidationError("That member already has %(hits)d or more hits for this day!", code='invalid',
-                                params={'hits': ClanBattle.HITS_PER_DAY}))
-
         if len(form_errors):
             if len(form_errors) == 1:
                 raise form_errors[0]
