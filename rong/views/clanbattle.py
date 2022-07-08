@@ -60,7 +60,7 @@ def add_hit(request, battle: ClanBattle):
 @clanbattle_view
 def hit_log_data(request, battle: ClanBattle):
     hits = list(battle.hits.select_related('member', 'member__user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
-                                           'team__unit5', 'group', 'comp').prefetch_related('tags').order_by('order'))
+                                           'team__unit5', 'group', 'comp', 'pilot', 'pilot__user').prefetch_related('tags').order_by('order'))
     daily_attempt_counts = defaultdict(lambda: 0)
     day = None
     hits_json = []
@@ -70,7 +70,11 @@ def hit_log_data(request, battle: ClanBattle):
     members = set()
     comps = set()
     boss_codes = set()
+    pilots = set()
+    players = set()
     boss_data = list(battle.bosses.order_by('difficulty').all())
+    member_list = list(battle.clan.members.select_related('user'))
+    pilot_choices = [(x.id, x.ign) for x in member_list]
     phase = 1
     for hit in hits:
         if boss_data[phase-1].lap_to is not None and hit.boss_lap > boss_data[phase-1].lap_to:
@@ -84,6 +88,7 @@ def hit_log_data(request, battle: ClanBattle):
             "order": hit.order,
             "day": hit.day,
             "username": hit.displayed_username,
+            "pilot": hit.displayed_pilot,
             "team": hit.team.units if hit.team else False,
             "damage": {
                 "damage": hit.damage,
@@ -108,6 +113,8 @@ def hit_log_data(request, battle: ClanBattle):
         if manageable:
             hit_json["id"] = hit.id
             hit_json["member_id"] = hit.member_id
+            hit_json["player_id"] = hit.pilot_id if hit.pilot_id else hit.member_id
+            hit_json["pilot_id"] = hit.pilot_id if hit.pilot_id else 0
             hit_json["links"] = {
                 "edit_url": reverse('rong:cb_edit_hit', args=[battle.slug, hit.id])
             }
@@ -116,9 +123,18 @@ def hit_log_data(request, battle: ClanBattle):
             members.add(hit.member)
             if hit.group:
                 groups.add(hit.group)
+            if hit.pilot:
+                pilots.add(hit.pilot)
+                players.add(hit.pilot)
+            else:
+                players.add(hit.member)
             tags.update(hit.tags.all())
             comps.add(hit_json["comp"])
             boss_codes.add(hit_json["boss_code"])
+            if hit.pilot_id and hit.pilot_id not in [x[0] for x in pilot_choices]:
+                pilot_choices.append((hit.pilot_id, hit.pilot.ign))
+            if hit.member_id and hit.member_id not in [x[0] for x in pilot_choices]:
+                pilot_choices.append((hit.member_id, hit.member.ign))
         hits_json.append(hit_json)
     resp = {
         "hits": hits_json
@@ -129,12 +145,20 @@ def hit_log_data(request, battle: ClanBattle):
         resp["unit_choices"] = [(unit.id,unit.name) for unit in Unit.valid_units().order_by('search_area_width')]
         resp["members"] = [(member.id,member.ign) for member in members]
         resp["boss_choices"] = [(num, getattr(battle, "boss%d_name" % num)) for num in range(1, 6)]
+        resp["players"] = [(member.id, member.ign) for member in players]
+        resp["pilots"] = [(member.id, member.ign) for member in pilots]
         resp["members"].sort(key=lambda x:x[1].lower())
+        resp["players"].sort(key=lambda x: x[1].lower())
+        resp["pilots"].sort(key=lambda x: x[1].lower())
+        resp["pilots"] = [(0, "Self Hit")] + resp["pilots"]
         resp["unit_choices"].sort(key=lambda x: x[1].lower())
         resp["comps"] = [(c, c) for c in comps]
         resp["comps"].sort(key=lambda x:x[1].lower())
         resp["boss_codes"] = [(c, c) for c in boss_codes]
         resp["boss_codes"].sort(key=lambda x:x[1].lower())
+        resp["pilot_choices"] = pilot_choices
+        resp["pilot_choices"].sort(key=lambda x:x[1].lower())
+        resp["pilot_choices"] = [(0, "Self Hit")] + resp["pilot_choices"]
     return JsonResponse(resp)
 
 

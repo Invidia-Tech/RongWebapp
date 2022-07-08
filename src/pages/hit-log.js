@@ -12,6 +12,7 @@ page('cb_list_hits', function () {
         {data: "order"},
         {data: "day"},
         {data: "username"},
+        {data: "pilot"},
         {
             data: "team",
             orderable: false,
@@ -91,6 +92,7 @@ page('cb_list_hits', function () {
         columns: columns,
         order: [[manageable ? 1 : 0, "desc"]],
         autoWidth: false,
+        lengthMenu: [[100,200,-1], [100,200,"All"]]
     };
     if (manageable) {
         opts.rowReorder = {
@@ -156,7 +158,7 @@ page('cb_list_hits', function () {
         if (manageable) {
             let filters = [
                 {
-                    name: "Player",
+                    name: "Account",
                     control: "dropdown_isnot",
                     choices: json.members,
                     column: 'member_id'
@@ -246,6 +248,18 @@ page('cb_list_hits', function () {
                     control: "dropdown_isnot",
                     choices: json.boss_codes,
                     column: 'boss_code'
+                },
+                {
+                    name: "Player",
+                    control: "dropdown_isnot",
+                    choices: json.players,
+                    column: 'player_id'
+                },
+                {
+                    name: "Pilot",
+                    control: "dropdown_isnot",
+                    choices: json.pilots,
+                    column: 'pilot_id'
                 },
             ];
             let filtersByName = {};

@@ -96,6 +96,15 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
             return self.member.ign
 
     @cached_property
+    def displayed_pilot(self):
+        if self.pilot and self.pilot.user:
+            return format_html('<span title="{}">{}</span>', self.pilot.user.plaindiscordname, self.pilot.ign)
+        elif self.pilot:
+            return self.pilot.ign
+        else:
+            return "Self Hit"
+
+    @cached_property
     def killing_blow(self):
         return self.boss_hp_left == 0
 

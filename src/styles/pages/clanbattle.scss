@@ -129,6 +129,12 @@
   display: none;
 }
 
+#hitLogTable {
+  th, td {
+    padding-left: 0.25rem;
+  }
+}
+
 #pilotsClashesTable, #pilotsHitcountTable {
   th {
     padding-left: 4px;
