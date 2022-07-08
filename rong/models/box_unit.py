@@ -43,6 +43,10 @@ class BoxUnit(models.Model):
     equip5 = models.PositiveIntegerField(null=True)
     equip6 = models.PositiveIntegerField(null=True)
     ue_level = models.PositiveIntegerField(null=True)
+    ub_level = models.PositiveIntegerField(null=True)
+    s1_level = models.PositiveIntegerField(null=True)
+    s2_level = models.PositiveIntegerField(null=True)
+    ex_level = models.PositiveIntegerField(null=True)
 
     @staticmethod
     @functools.lru_cache

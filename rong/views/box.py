@@ -115,55 +115,14 @@ def import_loadindex(request: HttpRequest, box_id):
                                      "Could not import box data. Invalid /load/index data received.")
                 return HttpResponseRedirect(next)
             # now the input looks ok, so start processing it according to the form choices
-            all_units = {u.id: u for u in Unit.valid_units().prefetch_related('ranks')}
-            save_units = []
-            new_units = 0
             try:
-                for unit in data["unit_list"]:
-                    uid = unit["id"]
-                    if uid in all_units:
-                        unit_data = all_units[uid]
-                        box_unit = box.boxunit_set.filter(unit_id=uid).first()
-                        if not box_unit:
-                            box_unit = BoxUnit(box=box, unit_id=uid, level=BoxUnit.max_level())
-                            new_units += 1
-                        if unit["promotion_level"] > unit_data.ranks.count():
-                            raise ValueError(
-                                "You have %s's rank set to %d ingame, which is beyond current EN ranks." % (
-                                    unit_data.name, unit["p"]))
-                        box_unit.rank = unit["promotion_level"]
-                        if unit["unit_rarity"] > 5:
-                            raise ValueError("6-star units do not exist on EN yet.")
-                        box_unit.star = unit["unit_rarity"]
-                        box_unit.level = unit["unit_level"]
-                        for eq in range(6):
-                            eq_val = unit["equip_slot"][eq]["enhancement_level"] if unit["equip_slot"][eq][
-                                "is_slot"] else None
-                            setattr(box_unit, 'equip%d' % (eq + 1), eq_val)
-                        box_unit.ue_level = None
-                        if unit["unique_equip_slot"] and unit["unique_equip_slot"][0]["is_slot"]:
-                            box_unit.ue_level = unit["unique_equip_slot"][0]["enhancement_level"]
-                        save_units.append(box_unit)
-                    else:
-                        raise ValueError("Missing unit found in your import.")
-
-                for box_unit in save_units:
-                    box_unit.save()
-
-                box.boxunit_set.exclude(id__in=[bu.id for bu in save_units]).delete()
-                item_ids = [item.id for item in Item.inventory_items()]
-                quantities = {item_id: 0 for item_id in item_ids}
-                for item in data["item_list"]:
-                    if item["id"] in item_ids:
-                        quantities[item["id"]] = item["stock"]
-                box.bulk_update_inventory(quantities)
-                box.flag_updated()
+                save_units, new_units = box.import_loadindex(data)
             except ValueError as ex:
                 messages.add_message(request, messages.ERROR, "Could not import box data. " + str(ex))
                 return HttpResponseRedirect(next)
             messages.add_message(request, messages.SUCCESS,
                                  "Successfully imported %d units (%d new) from /load/index." % (
-                                     len(save_units), new_units))
+                                     save_units, new_units))
             return HttpResponseRedirect(next)
         else:
             messages.add_message(request, messages.ERROR, "Could not import box data. Form issue detected.")

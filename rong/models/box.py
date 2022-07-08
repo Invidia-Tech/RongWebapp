@@ -5,8 +5,9 @@ from django.db import models
 from django.utils import timezone, dateformat
 from django.utils.functional import cached_property
 
+from .box_unit import BoxUnit
 from .box_item import BoxItem
-from .redive_models import Unit, Item
+from .redive_models import Unit, Item, StoryDetail
 
 
 class Box(models.Model):
@@ -100,6 +101,77 @@ class Box(models.Model):
             items = Item.inventory_items()
         return [{"id": item.id, "name": item.name, "quantity": self.get_item_quantity(item.id), "limit": item.limit_num}
                 for item in items]
+
+    def import_loadindex(self, data):
+        if "unit_list" not in data and "data" in data:
+            data = data["data"]
+        if "unit_list" not in data:
+            raise ValueError("Did not receive /load/index")
+        all_units = {u.id: u for u in Unit.valid_units().prefetch_related('ranks')}
+        save_units = []
+        new_units = 0
+        skill_levels = [
+            ["ub_level", "union_burst", 0],
+            ["s1_level", "main_skill", 0],
+            ["s2_level", "main_skill", 1],
+            ["ex_level", "ex_skill", 0],
+        ]
+        story_loves = {story.id:story.love_level for story in StoryDetail.objects.all()}
+        for unit in data["unit_list"]:
+            uid = unit["id"]
+            if uid in all_units:
+                unit_data = all_units[uid]
+                box_unit = self.boxunit_set.filter(unit_id=uid).first()
+                if not box_unit:
+                    box_unit = BoxUnit(box=self, unit_id=uid, level=BoxUnit.max_level())
+                    new_units += 1
+                if unit["promotion_level"] > unit_data.ranks.count():
+                    raise ValueError(
+                        "You have %s's rank set to %d ingame, which is beyond current EN ranks." % (
+                            unit_data.name, unit["p"]))
+                box_unit.rank = unit["promotion_level"]
+                if unit["unit_rarity"] > 5:
+                    raise ValueError("6-star units do not exist on EN yet.")
+                box_unit.star = unit["unit_rarity"]
+                box_unit.level = unit["unit_level"]
+                for eq in range(6):
+                    eq_val = unit["equip_slot"][eq]["enhancement_level"] if unit["equip_slot"][eq][
+                        "is_slot"] else None
+                    setattr(box_unit, 'equip%d' % (eq + 1), eq_val)
+                box_unit.ue_level = None
+                if unit["unique_equip_slot"] and unit["unique_equip_slot"][0]["is_slot"]:
+                    box_unit.ue_level = unit["unique_equip_slot"][0]["enhancement_level"]
+                for skill in skill_levels:
+                    if len(unit[skill[1]]) > skill[2]:
+                        setattr(box_unit, skill[0], unit[skill[1]][skill[2]]["skill_level"])
+                    else:
+                        setattr(box_unit, skill[0], None)
+                read_bonds = [n for n in data["read_story_ids"] if n//1000 == uid//100]
+                if read_bonds:
+                    max_bond = story_loves[max(read_bonds)]
+                    box_unit.bond = max_bond if max_bond else 1
+                else:
+                    box_unit.bond = 1
+                save_units.append(box_unit)
+            else:
+                raise ValueError("Missing unit found in your import.")
+
+        for box_unit in save_units:
+            box_unit.save()
+
+        self.boxunit_set.exclude(id__in=[bu.id for bu in save_units]).delete()
+        item_ids = [item.id for item in Item.inventory_items()]
+        quantities = {item_id: 0 for item_id in item_ids}
+        for item in data["item_list"]:
+            if item["id"] in item_ids:
+                quantities[item["id"]] = item["stock"]
+        for item_id in item_ids:
+            if item_id not in quantities:
+                quantities[item_id] = 0
+        self.bulk_update_inventory(quantities)
+        self.flag_updated()
+
+        return len(save_units), new_units
 
     @staticmethod
     def full_data_queryset():

@@ -12,13 +12,13 @@ from django.views.decorators.csrf import csrf_exempt
 
 from rong.decorators import clan_view, clanbattle_view, clanbattle_lead_view
 from rong.forms.clanbattle import HitForm
-from rong.models import ClanBattle, Unit, Clan, UnitAlias
+from rong.models import ClanBattle, Unit, Clan, UnitAlias, ClanMember
 from rong.models.clan_battle_score import ClanBattleHitType, ClanBattleScore
 from rong.models.team import create_team
 from rong.templatetags.clan_battle import format_hits
 
 @csrf_exempt
-def add_hit(request):
+def kyaru_add_hit(request):
     try:
         if request.method != "POST" or "X-Kyaru-Bot" not in request.headers:
             return JsonResponse({"boo": "PUDDING DAYO"})
@@ -80,6 +80,26 @@ def add_hit(request):
                 hit.comp = comp
                 hit.comp_locked = True
         hit.save()
+        return JsonResponse({"success": True})
+
+    except Exception as ex:
+        return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed"})
+
+@csrf_exempt
+def gearbot_update_box(request):
+    try:
+        if request.method != "POST" or "X-Gearbot-Memez" not in request.headers:
+            return JsonResponse({"boo": "PUDDING DAYO"})
+        data = json.loads(request.body)
+        num_players = ClanMember.objects.filter(player_id=data["viewer_id"], active=True).count()
+        if not num_players:
+            return JsonResponse(
+                {"success": False, "error": "No active players found matching provided viewer id"})
+        if num_players > 1:
+            return JsonResponse(
+                {"success": False, "error": "Multiple active players found matching provided viewer id"})
+        player = ClanMember.objects.get(player_id=data["viewer_id"], active=True)
+        player.box.import_loadindex(data["load_index"])
         return JsonResponse({"success": True})
 
     except Exception as ex:

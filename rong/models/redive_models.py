@@ -154,6 +154,14 @@ class EnemyParameter(models.Model):
         managed = False
         db_table = u'redive_en"."enemy_parameter'
 
+class StoryDetail(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='story_id')
+    love_level = models.IntegerField()
+
+    class Meta():
+        managed = False
+        db_table = u'redive_en"."story_detail'
+
 
 class ENClanBattlePeriod(models.Model):
     id = models.IntegerField(primary_key=True, db_column='clan_battle_id')
