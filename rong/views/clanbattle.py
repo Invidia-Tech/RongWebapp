@@ -2,6 +2,7 @@ import json
 from collections import defaultdict
 
 from django.contrib import messages
+from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from django.db.models import F
 from django.http import JsonResponse, HttpResponse
@@ -164,7 +165,7 @@ def hit_log_data(request, battle: ClanBattle):
 
 @clanbattle_view
 def hit_log(request, battle: ClanBattle):
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.can_manage(battle):
         try:
             reorder_data = json.loads(request.POST['reorderData'])
             assert isinstance(reorder_data, dict)
@@ -196,6 +197,31 @@ def hit_log(request, battle: ClanBattle):
         'battle': battle
     }
     return render(request, 'rong/clanbattle/hit_log.html', ctx)
+
+@clanbattle_lead_view
+def bulk_edit_pilots(request, battle: ClanBattle):
+    if request.method == 'POST':
+        try:
+            pilot_data = json.loads(request.POST['pilotData'])
+            assert isinstance(pilot_data, dict)
+            assert pilot_data
+            for k in pilot_data:
+                assert isinstance(k, str)
+                assert isinstance(pilot_data[k], str)
+                assert k.isdigit()
+                assert pilot_data[k].isdigit()
+            hits_changed = list(battle.hits.filter(id__in=[int(k) for k in pilot_data]))
+            assert len(hits_changed) == len(pilot_data)
+            for hit in hits_changed:
+                h_id = str(hit.id)
+                hit.pilot_id = int(pilot_data[h_id]) if int(pilot_data[h_id]) else None
+            battle.hits.bulk_update(hits_changed, ['pilot_id'])
+            messages.add_message(request, messages.SUCCESS, "Pilots for %d hits successfully changed." % len(hits_changed))
+        except Exception as exc:
+            messages.add_message(request, messages.ERROR, "Could not edit pilots.")
+        return redirect('rong:cb_list_hits', battle.slug)
+    else:
+        raise SuspiciousOperation()
 
 
 @clanbattle_view

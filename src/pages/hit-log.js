@@ -7,12 +7,39 @@ import 'datatables.net-rowreorder';
 page('cb_list_hits', function () {
     let $hitLog = $('#hitLogTable');
     let manageable = $hitLog.hasClass('manageable');
+    let bulkPilotMode = false;
+    let fullData = null;
     let columns = [
         {orderable: false, data: null, defaultContent: "<span class=\"grippy\"></span>"},
         {data: "order"},
         {data: "day"},
         {data: "username"},
-        {data: "pilot"},
+        {
+            data: "pilot",
+            render: function (data, type, row) {
+                if(type == 'sort') {
+                    return data;
+                }
+                if(bulkPilotMode) {
+                    let selector = $("<select class='bulk-pilot'></select>");
+                    selector.attr("data-id", row.id);
+                    selector.attr("data-original", row.pilot_id);
+                    for(let choice of fullData.pilot_choices) {
+                        let option = $("<option></option>");
+                        option.attr("value", choice[0]);
+                        option.text(choice[1]);
+                        if(choice[0] == row.pilot_id) {
+                            option.attr("selected", true);
+                        }
+                        selector.append(option);
+                    }
+                    return selector.outerHTML();
+                }
+                else {
+                    return data;
+                }
+            }
+        },
         {
             data: "team",
             orderable: false,
@@ -22,7 +49,7 @@ page('cb_list_hits', function () {
                 }
                 let units = '';
                 for (let unit of data) {
-                    let icon = $("<div class='unit-ddicon'></div>")
+                    let icon = $("<div class='unit-ddicon'></div>");
                     icon.addClass('u-' + unit.icon);
                     icon.attr('title', unit.name);
                     units += icon.outerHTML();
@@ -155,6 +182,7 @@ page('cb_list_hits', function () {
     });
     table.on('xhr.dt', function (e, settings, json, xhr) {
         // populate filters for tags and groups from json
+        fullData = json;
         if (manageable) {
             let filters = [
                 {
@@ -392,6 +420,33 @@ page('cb_list_hits', function () {
                     return true;
                 }
             );
+
+            $("#bulkPilotBtn").prop("disabled", false).click(function() {
+                if(bulkPilotMode) {
+                    // submit
+                    let updateMap = {};
+                    let numUpdates = 0;
+                    $(".bulk-pilot").each(function() {
+                        let $t = $(this);
+                        if($t.attr("data-original") != $t.val()) {
+                            updateMap[$t.attr("data-id")] = $t.val();
+                            numUpdates++;
+                        }
+                    });
+                    if(numUpdates == 0) {
+                        alert("You didn't update any pilots!");
+                        return;
+                    }
+                    show_loading();
+                    $('#pilotData').val(JSON.stringify(updateMap));
+                    $('#bulkPilotForm').submit();
+                }
+                else {
+                    bulkPilotMode = true;
+                    table.rows().invalidate().draw( false );
+                    $("#bulkPilotBtn").text("Save Pilots");
+                }
+            });
         }
     });
 

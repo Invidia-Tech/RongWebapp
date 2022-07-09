@@ -23,6 +23,7 @@ urlpatterns = [
     path('clanbattle/<slug:battle>/hits/<int:hit_id>/', clanbattle.edit_hit, name='cb_edit_hit'),
     path('clanbattle/<slug:battle>/hits/add/', clanbattle.add_hit, name='cb_add_hit'),
     path('clanbattle/<slug:battle>/hits/data/', clanbattle.hit_log_data, name='cb_list_hits_data'),
+    path('clanbattle/<slug:battle>/bulkpilots/', clanbattle.bulk_edit_pilots, name='cb_bulk_edit_pilots'),
     path('clanbattle/<slug:battle>/hits/', clanbattle.hit_log, name='cb_list_hits'),
     path('clanbattle/<slug:battle>/', clanbattle.view_battle, name='cb_view'),
     path('box/', box.index, name='box_index'),

@@ -21,6 +21,7 @@
         <div class="col-md-6 text-right">
             {% can_manage request.user battle as manageable %}
             {% if manageable %}
+                <button class="btn btn-primary" disabled id="bulkPilotBtn">Bulk Edit Pilots</button>
                 <a href="{% url 'rong:cb_add_hit' battle.slug %}" class="btn btn-primary">Add Hit</a>
             {% endif %}
             <a href="{% url 'rong:cb_view' battle.slug %}" class="btn btn-primary">Dashboard</a>
@@ -59,8 +60,14 @@
             </div>
         </div>
     </div>
-    <form role="form" method="post" id="reorderForm">
-        {% csrf_token %}
-        <input type="hidden" name="reorderData" id="reorderData" value=""/>
-    </form>
+    {% if manageable %}
+        <form role="form" method="post" id="reorderForm">
+            {% csrf_token %}
+            <input type="hidden" name="reorderData" id="reorderData" value=""/>
+        </form>
+        <form role="form" method="post" id="bulkPilotForm" action="{% url 'rong:cb_bulk_edit_pilots' battle.slug %}">
+            {% csrf_token %}
+            <input type="hidden" name="pilotData" id="pilotData" value=""/>
+        </form>
+    {% endif %}
 {% endblock %}
