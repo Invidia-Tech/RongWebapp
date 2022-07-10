@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from django.db.models import F
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
@@ -60,8 +60,11 @@ def add_hit(request, battle: ClanBattle):
 
 @clanbattle_view
 def hit_log_data(request, battle: ClanBattle):
-    hits = list(battle.hits.select_related('member', 'member__user', 'team', 'team__unit1', 'team__unit2', 'team__unit3', 'team__unit4',
-                                           'team__unit5', 'group', 'comp', 'pilot', 'pilot__user').prefetch_related('tags').order_by('order'))
+    hits = list(
+        battle.hits.select_related('member', 'member__user', 'team', 'team__unit1', 'team__unit2', 'team__unit3',
+                                   'team__unit4',
+                                   'team__unit5', 'group', 'comp', 'pilot', 'pilot__user').prefetch_related(
+            'tags').order_by('order'))
     daily_attempt_counts = defaultdict(lambda: 0)
     day = None
     hits_json = []
@@ -78,12 +81,13 @@ def hit_log_data(request, battle: ClanBattle):
     pilot_choices = [(x.id, x.ign) for x in member_list]
     phase = 1
     for hit in hits:
-        if boss_data[phase-1].lap_to is not None and hit.boss_lap > boss_data[phase-1].lap_to:
+        if boss_data[phase - 1].lap_to is not None and hit.boss_lap > boss_data[phase - 1].lap_to:
             phase += 1
         if hit.day != day:
             daily_attempt_counts.clear()
             day = hit.day
-        hit.attempt_count = daily_attempt_counts[hit.member_id] + (1 if hit.hit_type == ClanBattleHitType.NORMAL else 0.5)
+        hit.attempt_count = daily_attempt_counts[hit.member_id] + (
+            1 if hit.hit_type == ClanBattleHitType.NORMAL else 0.5)
         daily_attempt_counts[hit.member_id] = hit.attempt_count
         hit_json = {
             "order": hit.order,
@@ -109,7 +113,7 @@ def hit_log_data(request, battle: ClanBattle):
             "hit_type": hit.hit_type.value,
             "phase": phase,
             "comp": "None" if hit.comp is None else hit.comp.name,
-            "boss_code": chr(0x40 + phase)+str(hit.boss_number),
+            "boss_code": chr(0x40 + phase) + str(hit.boss_number),
         }
         if manageable:
             hit_json["id"] = hit.id
@@ -141,24 +145,24 @@ def hit_log_data(request, battle: ClanBattle):
         "hits": hits_json
     }
     if manageable:
-        resp["tags"] = [(tag.id,tag.name) for tag in tags]
-        resp["groups"] = [(group.id,group.name) for group in groups]
-        resp["unit_choices"] = [(unit.id,unit.name) for unit in Unit.valid_units().order_by('search_area_width')]
-        resp["members"] = [(member.id,member.ign) for member in members]
+        resp["tags"] = [(tag.id, tag.name) for tag in tags]
+        resp["groups"] = [(group.id, group.name) for group in groups]
+        resp["unit_choices"] = [(unit.id, unit.name) for unit in Unit.valid_units().order_by('search_area_width')]
+        resp["members"] = [(member.id, member.ign) for member in members]
         resp["boss_choices"] = [(num, getattr(battle, "boss%d_name" % num)) for num in range(1, 6)]
         resp["players"] = [(member.id, member.ign) for member in players]
         resp["pilots"] = [(member.id, member.ign) for member in pilots]
-        resp["members"].sort(key=lambda x:x[1].lower())
+        resp["members"].sort(key=lambda x: x[1].lower())
         resp["players"].sort(key=lambda x: x[1].lower())
         resp["pilots"].sort(key=lambda x: x[1].lower())
         resp["pilots"] = [(0, "Self Hit")] + resp["pilots"]
         resp["unit_choices"].sort(key=lambda x: x[1].lower())
         resp["comps"] = [(c, c) for c in comps]
-        resp["comps"].sort(key=lambda x:x[1].lower())
+        resp["comps"].sort(key=lambda x: x[1].lower())
         resp["boss_codes"] = [(c, c) for c in boss_codes]
-        resp["boss_codes"].sort(key=lambda x:x[1].lower())
+        resp["boss_codes"].sort(key=lambda x: x[1].lower())
         resp["pilot_choices"] = pilot_choices
-        resp["pilot_choices"].sort(key=lambda x:x[1].lower())
+        resp["pilot_choices"].sort(key=lambda x: x[1].lower())
         resp["pilot_choices"] = [(0, "Self Hit")] + resp["pilot_choices"]
     return JsonResponse(resp)
 
@@ -198,6 +202,7 @@ def hit_log(request, battle: ClanBattle):
     }
     return render(request, 'rong/clanbattle/hit_log.html', ctx)
 
+
 @clanbattle_lead_view
 def bulk_edit_pilots(request, battle: ClanBattle):
     if request.method == 'POST':
@@ -216,7 +221,8 @@ def bulk_edit_pilots(request, battle: ClanBattle):
                 h_id = str(hit.id)
                 hit.pilot_id = int(pilot_data[h_id]) if int(pilot_data[h_id]) else None
             battle.hits.bulk_update(hits_changed, ['pilot_id'])
-            messages.add_message(request, messages.SUCCESS, "Pilots for %d hits successfully changed." % len(hits_changed))
+            messages.add_message(request, messages.SUCCESS,
+                                 "Pilots for %d hits successfully changed." % len(hits_changed))
         except Exception as exc:
             messages.add_message(request, messages.ERROR, "Could not edit pilots.")
         return redirect('rong:cb_list_hits', battle.slug)

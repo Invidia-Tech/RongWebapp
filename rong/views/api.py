@@ -1,21 +1,12 @@
 import json
-import traceback
-from collections import defaultdict
 
-from django.contrib import messages
-from django.db import transaction
-from django.db.models import F
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from rong.decorators import clan_view, clanbattle_view, clanbattle_lead_view
-from rong.forms.clanbattle import HitForm
-from rong.models import ClanBattle, Unit, Clan, UnitAlias, ClanMember
-from rong.models.clan_battle_score import ClanBattleHitType, ClanBattleScore
+from rong.models import Unit, Clan, UnitAlias, ClanMember, Flight
+from rong.models.clan_battle_score import ClanBattleScore
 from rong.models.team import create_team
-from rong.templatetags.clan_battle import format_hits
+
 
 @csrf_exempt
 def kyaru_add_hit(request):
@@ -33,12 +24,12 @@ def kyaru_add_hit(request):
             return JsonResponse({"success": False, "error": "Could not find account"})
         if len(data["units"]) != len(data["damages"]):
             return JsonResponse({"success": False, "error": "Missing or extra damages"})
-        all_units = {unit.id:unit for unit in Unit.valid_units()}
+        all_units = {unit.id: unit for unit in Unit.valid_units()}
         aliases = {}
         for al in UnitAlias.objects.all():
             if al.unit_id in all_units:
                 aliases[al.name.lower()] = all_units[al.unit_id]
-        aliases.update({unit.name.lower():unit for unit in all_units.values()})
+        aliases.update({unit.name.lower(): unit for unit in all_units.values()})
         valid_units = []
         invalid_units = []
         duplicate_units = []
@@ -85,6 +76,7 @@ def kyaru_add_hit(request):
     except Exception as ex:
         return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed"})
 
+
 @csrf_exempt
 def gearbot_update_box(request):
     try:
@@ -106,3 +98,17 @@ def gearbot_update_box(request):
         return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed"})
 
 
+@csrf_exempt
+def gearbot_flight_check(request):
+    try:
+        if request.method != "POST" or "X-Gearbot-Memez" not in request.headers:
+            return JsonResponse({"boo": "PUDDING DAYO"})
+        data = json.loads(request.body)
+        statuses = {viewer_id: False for viewer_id in data["viewer_ids"]}
+        flights = Flight.objects.filter(passenger__player_id__in=data["viewer_ids"], passenger__active=True,
+                                        status="in flight").select_related("passenger")
+        for flight in flights:
+            statuses[flight.passenger.player_id] = True
+        return JsonResponse({"statuses": statuses})
+    except Exception as ex:
+        return JsonResponse({"error": "Exception thrown when handling request, probably malformed"})

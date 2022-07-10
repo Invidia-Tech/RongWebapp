@@ -5,6 +5,7 @@ app_name = 'rong'
 urlpatterns = [
     path('api/add_hit/', api.kyaru_add_hit, name='api_kyaru_add_hit'),
     path('api/update_box/', api.gearbot_update_box, name='api_gearbot_update_box'),
+    path('api/flight_check/', api.gearbot_flight_check, name='api_gearbot_flight_check'),
     path('clan/<slug:clan>/boxes/', manageclan.box_summary, name='clan_box_summary'),
     path('clan/<slug:clan>/tags/<int:tag_id>/', manageclan.edit_hit_tag, name='clan_edit_hit_tag'),
     path('clan/<slug:clan>/tags/add/', manageclan.add_hit_tag, name='clan_add_hit_tag'),
