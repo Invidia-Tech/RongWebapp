@@ -90,7 +90,8 @@ class ClanBattle(models.Model):
                                source_info["bossGroupModel"].objects.filter(
                                    id=map_entry.boss_group_id).order_by('order_num')]
             else:
-                boss_groups = [{"wave_group": getattr(map_entry, 'wave_group_id_%d' % (i+1)), "multiplier": getattr(map_entry, 'score_coefficient_%d' % (i + 1))} for i in
+                boss_groups = [{"wave_group": getattr(map_entry, 'wave_group_id_%d' % (i + 1)),
+                                "multiplier": getattr(map_entry, 'score_coefficient_%d' % (i + 1))} for i in
                                range(5)]
             current_id = source_info["waveGroupModel"].objects.get(id=boss_groups[0]["wave_group"]).enemy_id_1
             assert len(boss_groups) == 5
@@ -240,6 +241,14 @@ class ClanBattle(models.Model):
         if now.hour >= 13:
             now = now + datetime.timedelta(days=1)
         return now.replace(hour=13, minute=0, second=0, microsecond=0)
+
+    def day_of(self, dt):
+        if self.start_time is None or self.end_time is None:
+            return 0
+        first_day_reset = self.start_time.replace(hour=13, minute=0, second=0, microsecond=0)
+        started_before_reset = self.start_time.hour < 13
+        return max(min(math.floor((dt - first_day_reset).total_seconds() / 86400) + (2 if started_before_reset else 1),
+                       self.total_days), 1)
 
     @property
     def current_boss_icon(self):
@@ -573,12 +582,12 @@ class ClanBattle(models.Model):
             comp["hits"].sort(key=lambda x: -x["damage"])
             hit_count = len(comp["hits"])
             for idx, hit in enumerate(comp["hits"]):
-                hit["score"] = 100 if hit_count == 1 else 100 - idx*(100/(hit_count-1))
+                hit["score"] = 100 if hit_count == 1 else 100 - idx * (100 / (hit_count - 1))
                 if hit["player"] not in comp["player_info"]:
                     comp["player_info"][hit["player"]] = initial_player_row(hit["player"])
                 comp["player_info"][hit["player"]]["hits"].append(hit)
             damages = sorted(hit["damage"] for hit in comp["hits"])
-            comp['mean'] = round(sum(damages)/hit_count)
+            comp['mean'] = round(sum(damages) / hit_count)
             median, median_indices = find_median(damages)
             if hit_count == 1:
                 Q1 = Q3 = median
@@ -596,9 +605,9 @@ class ClanBattle(models.Model):
 
             for player in comp["player_info"].values():
                 player["count"] = len(player["hits"])
-                player["mean"] = round(sum(hit["damage"] for hit in player["hits"])/player["count"])
+                player["mean"] = round(sum(hit["damage"] for hit in player["hits"]) / player["count"])
                 player["median"] = statistics.median(hit["damage"] for hit in player["hits"])
-                player["average_score"] = sum(hit["score"] for hit in player["hits"])/player["count"]
+                player["average_score"] = sum(hit["score"] for hit in player["hits"]) / player["count"]
                 del player["hits"]
             comp["player_info"] = list(comp["player_info"].values())
             comp["player_info"].sort(key=lambda x: -x["average_score"])
@@ -607,4 +616,3 @@ class ClanBattle(models.Model):
         comps.sort(key=lambda x: x["comp"])
 
         return comps
-

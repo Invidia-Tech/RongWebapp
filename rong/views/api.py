@@ -1,5 +1,8 @@
+import datetime
 import json
 
+import pytz
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -112,3 +115,62 @@ def gearbot_flight_check(request):
         return JsonResponse({"statuses": statuses})
     except Exception as ex:
         return JsonResponse({"error": "Exception thrown when handling request, probably malformed"})
+
+@csrf_exempt
+def gearbot_add_hits(request):
+    try:
+        if request.method != "POST" or "X-Gearbot-Memez" not in request.headers:
+            return JsonResponse({"boo": "PUDDING DAYO"})
+        data = json.loads(request.body)
+        clan = Clan.objects.filter(name__iexact=data['clan']).first()
+        if not clan:
+            return JsonResponse({"success": False, "error": "Invalid clan"})
+        if not clan.current_cb or not clan.current_cb.in_progress:
+            return JsonResponse({"success": False, "error": "No active CB"})
+        existing_hits = clan.current_cb.hits.filter(ingame_log_id__in=[hit["log"]["history_id"] for hit in data["hits"]]).values_list('history_id', flat=True)
+        all_units = {unit.id: unit for unit in Unit.valid_units()}
+        hits = list(data["hits"])
+        hits.sort(key=lambda x: x["log"]["create_time"])
+        created_hits = []
+        for hit_data in data["hits"]:
+            log = hit_data["log"]
+            report = hit_data["report"]
+            if log["history_id"] in existing_hits:
+                continue
+            hitter = clan.members.filter(player_id=log["viewer_id"]).first()
+            if not hitter:
+                return JsonResponse({"success": False, "error": "No active member with player id %d" % log["viewer_id"]})
+            units = []
+            damages = []
+            for unit in report["history_report"]:
+                if unit["viewer_id"] == 0:
+                    # boss
+                    continue
+                else:
+                    units.append(all_units[unit["unit_id"]])
+                    damages.append(unit["damage"])
+            # create hit
+            hit = ClanBattleScore()
+            hit.ingame_log_id = log["history_id"]
+            hit.ingame_timestamp = datetime.datetime.fromtimestamp(log["create_time"], pytz.timezone(settings.TIME_ZONE))
+            hit.ingame_fulldata = json.dumps(hit_data)
+            hit.clan_battle = clan.current_cb
+            hit.member = hitter
+            hit.day = clan.current_cb.day_of(hit.ingame_timestamp)
+            hit.damage = sum(damages)
+            team, ordering = create_team(units)
+            hit.team = team
+            for idx, dmg in enumerate(damages):
+                new_idx = ordering.index(idx)
+                setattr(hit, "unit%d_damage" % (new_idx + 1), dmg)
+            for i in range(len(damages), 5):
+                setattr(hit, "unit%d_damage" % (i + 1), None)
+            hit.ign = hitter.ign
+            created_hits.append(hit)
+        # should be good to save hits if we got this far
+        for hit in created_hits:
+            hit.save()
+        return JsonResponse({"success": True, "created_hits": len(created_hits)})
+
+    except Exception as ex:
+        return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed"})

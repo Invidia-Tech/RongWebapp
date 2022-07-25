@@ -2,6 +2,7 @@ from enum import Enum
 
 from django.db import models
 from django.db.models import Max
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.html import format_html
 from django_enum_choices.fields import EnumChoiceField
@@ -32,17 +33,24 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
     tags = models.ManyToManyField('HitTag', related_name='hits')
     comp = models.ForeignKey('ClanBattleComp', null=True, on_delete=models.SET_NULL, related_name='hits')
     comp_locked = models.BooleanField(default=False)
+    created_time = models.DateTimeField(null=True)
+    updated_time = models.DateTimeField(null=True)
     # these fields are autocalculated by the code and shouldn't be filled manually
     boss_lap = models.PositiveIntegerField()
     boss_number = models.PositiveIntegerField()
     actual_damage = models.PositiveIntegerField()
     boss_hp_left = models.PositiveIntegerField()
     hit_type = EnumChoiceField(ClanBattleHitType, default=ClanBattleHitType.NORMAL)
+    # kyaru
     kyaru_date = models.CharField(max_length=50, null=True)
     kyaru_author = models.CharField(max_length=50, null=True)
     kyaru_image_url = models.TextField(null=True)
     kyaru_boss_number = models.PositiveIntegerField(null=True)
     kyaru_pilot = models.CharField(max_length=50, null=True)
+    # ingame from gearbot
+    ingame_log_id = models.PositiveIntegerField(null=True)
+    ingame_timestamp = models.DateTimeField(null=True)
+    ingame_fulldata = models.TextField(null=True)
 
     def clear_unit_damage(self):
         for unit in range(1, 6):
@@ -85,6 +93,10 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
         if not self.comp_id and not self.comp_locked and self.team_id:
             self.comp = self.clan_battle.comps.filter(boss_phase=self.phase, boss_number=self.boss_number,
                                                       team__uid=self.team.uid).first()
+
+        self.updated_time = timezone.now()
+        if not self.created_time:
+            self.created_time = self.updated_time
 
         super().save(*args, **kwargs)
 
