@@ -21,6 +21,20 @@ class Clan(models.Model):
             'start_time').first()
 
     @cached_property
+    def nearest_cb(self):
+        now = timezone.now()
+        def cb_distance(cb):
+            distance_start = now - cb.start_time if now > cb.start_time else cb.start_time - now
+            distance_end = now - cb.end_time if now > cb.end_time else cb.end_time - now
+            return min(distance_start, distance_end)
+
+        possible_cbs = list(self.clanbattle_set.exclude(start_time=None))
+        if not possible_cbs:
+            return None
+        possible_cbs.sort(key=cb_distance)
+        return possible_cbs[0]
+
+    @cached_property
     def future_cbs(self):
         near_future_cbs = self.clanbattle_set.exclude(start_time=None).filter(end_time__gt=timezone.now()).order_by(
             'start_time')[1:]

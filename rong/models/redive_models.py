@@ -195,6 +195,25 @@ class ENClanBattleBossGroup(models.Model):
         managed = False
         db_table = u'redive_en"."clan_battle_boss_group'
 
+class ENClanBattleMapData2(models.Model):
+    id = models.IntegerField(primary_key=True, db_column='clan_battle_id')
+    lap_num_from = models.IntegerField()
+    lap_num_to = models.IntegerField()
+    wave_group_id_1 = models.IntegerField()
+    score_coefficient_1 = models.FloatField()
+    wave_group_id_2 = models.IntegerField()
+    score_coefficient_2 = models.FloatField()
+    wave_group_id_3 = models.IntegerField()
+    score_coefficient_3 = models.FloatField()
+    wave_group_id_4 = models.IntegerField()
+    score_coefficient_4 = models.FloatField()
+    wave_group_id_5 = models.IntegerField()
+    score_coefficient_5 = models.FloatField()
+
+    class Meta():
+        managed = False
+        db_table = u'redive_en"."clan_battle_2_map_data'
+
 
 class JPClanBattlePeriod(models.Model):
     id = models.IntegerField(primary_key=True, db_column='clan_battle_id')

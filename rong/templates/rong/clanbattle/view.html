@@ -71,7 +71,7 @@
                                             <b>{{ hit.damage|intcomma }}</b> damage{% if hit.killing_blow %}
                                                 (Victory){% endif %}
                                         </div>
-                                        <div class="timestamp">XX hours ago</div>
+                                        <div class="timestamp">{{ hit.timestamp }}</div>
                                     </div>
                                 {% endfor %}
                             {% else %}
@@ -100,7 +100,7 @@
                                                 <b>{{ hit.damage|intcomma }}</b> damage{% if hit.killing_blow %}
                                                     (Victory){% endif %}
                                             </div>
-                                            <div class="timestamp">XX hours ago</div>
+                                            <div class="timestamp">{{ hit.timestamp }}</div>
                                         </div>
                                     {% endfor %}
                                 {% else %}

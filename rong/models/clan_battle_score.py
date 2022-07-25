@@ -5,6 +5,7 @@ from django.db.models import Max
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.html import format_html
+from django.utils.timesince import timesince
 from django_enum_choices.fields import EnumChoiceField
 
 from rong.mixins import ModelDiffMixin
@@ -119,6 +120,12 @@ class ClanBattleScore(models.Model, ModelDiffMixin):
     @cached_property
     def killing_blow(self):
         return self.boss_hp_left == 0
+
+    @cached_property
+    def timestamp(self):
+        if self.ingame_timestamp:
+            return timesince(self.ingame_timestamp) + " ago"
+        return "Day " + str(self.day)
 
     class Meta:
         ordering = ['order']

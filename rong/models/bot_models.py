@@ -45,7 +45,7 @@ class Flight(models.Model):
     pilot = models.ForeignKey('Pilot', db_column='pilot_id', on_delete=models.DO_NOTHING)
     clan = models.ForeignKey('Clan', db_column='clan_id', on_delete=models.DO_NOTHING, related_name='flights')
     cb = models.ForeignKey('ClanBattle', db_column='cb_id', on_delete=models.DO_NOTHING, related_name='flights')
-    passenger = models.ForeignKey('ClanMember', db_column='passenger_id', on_delete=models.DO_NOTHING)
+    passenger = models.ForeignKey('ClanMember', db_column='passenger_id', null=True, on_delete=models.DO_NOTHING)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     status = models.CharField(max_length=20)
@@ -62,6 +62,7 @@ class Pilot(models.Model):
     code = models.CharField(max_length=10)
     clan = models.ForeignKey('Clan', db_column='clan_id', on_delete=models.DO_NOTHING, related_name='pilots')
     user = models.ForeignKey('User', db_column='user_id', on_delete=models.DO_NOTHING)
+
 
     class Meta():
         managed = False

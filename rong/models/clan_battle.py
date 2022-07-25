@@ -11,7 +11,7 @@ from django_extensions.db.fields import AutoSlugField
 
 from rong.models.clan_battle_boss_info import ClanBattleBossInfo
 from rong.models.redive_models import CNClanBattleMapData, CNClanBattlePeriod, CNEnemyParameter, CNWaveGroupData, \
-    ENClanBattleBossGroup, ENClanBattleMapData, ENClanBattlePeriod, EnemyParameter, JPClanBattleMapData, \
+    ENClanBattleMapData2, ENClanBattlePeriod, EnemyParameter, JPClanBattleMapData, \
     JPClanBattlePeriod, JPEnemyParameter, JPWaveGroupData, WaveGroupData
 from .clan_battle_score import ClanBattleHitType
 
@@ -20,9 +20,8 @@ CB_DATA_SOURCES = [
         "prefix": "en",
         "name": "Global Server",
         "periodModel": ENClanBattlePeriod,
-        "mapModel": ENClanBattleMapData,
-        "dataType": "old",
-        "bossGroupModel": ENClanBattleBossGroup,
+        "mapModel": ENClanBattleMapData2,
+        "dataType": "new",
         "waveGroupModel": WaveGroupData,
         "enemyModel": EnemyParameter
     },

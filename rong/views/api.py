@@ -1,9 +1,11 @@
 import datetime
 import json
+import traceback
 
 import pytz
 from django.conf import settings
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from rong.models import Unit, Clan, UnitAlias, ClanMember, Flight
@@ -20,8 +22,12 @@ def kyaru_add_hit(request):
         clan = Clan.objects.filter(name__iexact=data['clan']).first()
         if not clan:
             return JsonResponse({"success": False, "error": "Invalid clan"})
-        if not clan.current_cb or not clan.current_cb.in_progress:
+        if not clan.nearest_cb:
             return JsonResponse({"success": False, "error": "No active CB"})
+        if clan.nearest_cb.start_time > timezone.now():
+            return JsonResponse({"success": False, "error": "CB %s has not started yet" % clan.nearest_cb.name})
+        if clan.nearest_cb.end_time < timezone.now() + datetime.timedelta(days=3):
+            return JsonResponse({"success": False, "error": "CB %s ended more than 3 days ago" % clan.nearest_cb.name})
         hitter = clan.members.filter(ign__iexact=data['account']).first()
         if not hitter:
             return JsonResponse({"success": False, "error": "Could not find account"})
@@ -49,9 +55,9 @@ def kyaru_add_hit(request):
             return JsonResponse({"success": False, "error": "Duplicate units: %s" % str(duplicate_units)})
         # create hit
         hit = ClanBattleScore()
-        hit.clan_battle = clan.current_cb
+        hit.clan_battle = clan.nearest_cb
         hit.member = hitter
-        hit.day = clan.current_cb.current_day
+        hit.day = clan.nearest_cb.current_day
         hit.damage = int(data["total_damage"])
         hit.kyaru_date = data["date"]
         hit.kyaru_author = data["author"]
@@ -108,13 +114,20 @@ def gearbot_flight_check(request):
             return JsonResponse({"boo": "PUDDING DAYO"})
         data = json.loads(request.body)
         statuses = {viewer_id: False for viewer_id in data["viewer_ids"]}
-        flights = Flight.objects.filter(passenger__player_id__in=data["viewer_ids"], passenger__active=True,
-                                        status="in flight").select_related("passenger")
-        for flight in flights:
-            statuses[flight.passenger.player_id] = True
+        active_flights = Flight.objects.filter(status="in flight").select_related("passenger", "pilot")
+        for flight in active_flights:
+            if flight.passenger:
+                if flight.passenger.active and flight.passenger.player_id in statuses:
+                    statuses[flight.passenger.player_id] = True
+            else:
+                clanmember = ClanMember.objects.filter(clan_id=flight.pilot.clan_id, user_id=flight.pilot.user_id,
+                                                       active=True).first()
+                if clanmember and clanmember.player_id in statuses:
+                    statuses[clanmember.player_id] = True
         return JsonResponse({"statuses": statuses})
     except Exception as ex:
         return JsonResponse({"error": "Exception thrown when handling request, probably malformed"})
+
 
 @csrf_exempt
 def gearbot_add_hits(request):
@@ -125,21 +138,30 @@ def gearbot_add_hits(request):
         clan = Clan.objects.filter(name__iexact=data['clan']).first()
         if not clan:
             return JsonResponse({"success": False, "error": "Invalid clan"})
-        if not clan.current_cb or not clan.current_cb.in_progress:
+        if not clan.nearest_cb:
             return JsonResponse({"success": False, "error": "No active CB"})
-        existing_hits = clan.current_cb.hits.filter(ingame_log_id__in=[hit["log"]["history_id"] for hit in data["hits"]]).values_list('history_id', flat=True)
+        if clan.nearest_cb.start_time > timezone.now():
+            return JsonResponse({"success": False, "error": "CB %s has not started yet" % clan.nearest_cb.name})
+        if clan.nearest_cb.end_time < timezone.now() + datetime.timedelta(days=3):
+            return JsonResponse({"success": False, "error": "CB %s ended more than 3 days ago" % clan.nearest_cb.name})
+        if not data["hits"]:
+            return JsonResponse({"success": True, "created_hits": 0})
+        existing_hits = clan.nearest_cb.hits.filter(
+            ingame_log_id__in=[hit["log"]["history_id"] for hit in data["hits"]]).values_list('ingame_log_id',
+                                                                                              flat=True)
         all_units = {unit.id: unit for unit in Unit.valid_units()}
         hits = list(data["hits"])
         hits.sort(key=lambda x: x["log"]["create_time"])
         created_hits = []
-        for hit_data in data["hits"]:
+        for hit_data in hits:
             log = hit_data["log"]
             report = hit_data["report"]
             if log["history_id"] in existing_hits:
                 continue
             hitter = clan.members.filter(player_id=log["viewer_id"]).first()
             if not hitter:
-                return JsonResponse({"success": False, "error": "No active member with player id %d" % log["viewer_id"]})
+                return JsonResponse(
+                    {"success": False, "error": "No active member with player id %d" % log["viewer_id"]})
             units = []
             damages = []
             for unit in report["history_report"]:
@@ -152,11 +174,12 @@ def gearbot_add_hits(request):
             # create hit
             hit = ClanBattleScore()
             hit.ingame_log_id = log["history_id"]
-            hit.ingame_timestamp = datetime.datetime.fromtimestamp(log["create_time"], pytz.timezone(settings.TIME_ZONE))
+            hit.ingame_timestamp = datetime.datetime.fromtimestamp(log["create_time"],
+                                                                   pytz.timezone(settings.TIME_ZONE))
             hit.ingame_fulldata = json.dumps(hit_data)
-            hit.clan_battle = clan.current_cb
+            hit.clan_battle = clan.nearest_cb
             hit.member = hitter
-            hit.day = clan.current_cb.day_of(hit.ingame_timestamp)
+            hit.day = clan.nearest_cb.day_of(hit.ingame_timestamp)
             hit.damage = sum(damages)
             team, ordering = create_team(units)
             hit.team = team
@@ -173,4 +196,6 @@ def gearbot_add_hits(request):
         return JsonResponse({"success": True, "created_hits": len(created_hits)})
 
     except Exception as ex:
-        return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed"})
+        return JsonResponse(
+            {"success": False, "error": "Exception thrown when handling request, probably malformed",
+             "error_detail": str(ex), "traceback": str(traceback.format_exc())})
