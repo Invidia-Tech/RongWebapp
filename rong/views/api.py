@@ -57,7 +57,7 @@ def kyaru_add_hit(request):
         hit = ClanBattleScore()
         hit.clan_battle = clan.nearest_cb
         hit.member = hitter
-        hit.day = clan.nearest_cb.current_day
+        hit.day = min(clan.nearest_cb.current_day, clan.nearest_cb.total_days)
         hit.damage = int(data["total_damage"])
         hit.kyaru_date = data["date"]
         hit.kyaru_author = data["author"]
