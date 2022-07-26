@@ -4,6 +4,7 @@ import traceback
 
 import pytz
 from django.conf import settings
+from django.db import models
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -120,13 +121,31 @@ def gearbot_flight_check(request):
                 if flight.passenger.active and flight.passenger.player_id in statuses:
                     statuses[flight.passenger.player_id] = True
             else:
-                clanmember = ClanMember.objects.filter(clan_id=flight.pilot.clan_id, user_id=flight.pilot.user_id,
-                                                       active=True).first()
-                if clanmember and clanmember.player_id in statuses:
-                    statuses[clanmember.player_id] = True
+                if flight.pilot.clanmember and flight.pilot.clanmember.player_id in statuses:
+                    statuses[flight.pilot.clanmember.player_id] = True
         return JsonResponse({"statuses": statuses})
     except Exception as ex:
-        return JsonResponse({"error": "Exception thrown when handling request, probably malformed"})
+        return JsonResponse({"error": "Exception thrown when handling request, probably malformed",
+                             "error_detail": str(ex), "traceback": str(traceback.format_exc())})
+
+
+@csrf_exempt
+def gearbot_fc_check(request):
+    try:
+        if request.method != "POST" or "X-Gearbot-Memez" not in request.headers:
+            return JsonResponse({"boo": "PUDDING DAYO"})
+        data = json.loads(request.body)
+        statuses = {viewer_id: False for viewer_id in data["viewer_ids"]}
+        for clan in Clan.objects.all():
+            if clan.current_cb and clan.current_cb.in_progress:
+                for fc in clan.current_cb.forcequits.filter(day=clan.current_cb.current_day).select_related(
+                        'clanmember'):
+                    if fc.clanmember.active and fc.clanmember.player_id in statuses:
+                        statuses[fc.clanmember.player_id] = True
+        return JsonResponse({"statuses": statuses})
+    except Exception as ex:
+        return JsonResponse({"error": "Exception thrown when handling request, probably malformed",
+                             "error_detail": str(ex), "traceback": str(traceback.format_exc())})
 
 
 @csrf_exempt
@@ -189,10 +208,19 @@ def gearbot_add_hits(request):
             for i in range(len(damages), 5):
                 setattr(hit, "unit%d_damage" % (i + 1), None)
             hit.ign = hitter.ign
+            # attempt to automatch pilot with ATC
+            matching_flights = hit.clan_battle.flights.filter(models.Q(start_time__lte=hit.ingame_timestamp) & (
+                    models.Q(end_time=None) | models.Q(end_time__gte=hit.ingame_timestamp)) & models.Q(
+                status__in=["in flight", "landed"]) & models.Q(passenger=hitter)).select_related('pilot')
+            if len(matching_flights) == 1:
+                hit.pilot = matching_flights[0].pilot.clanmember
             created_hits.append(hit)
         # should be good to save hits if we got this far
         for hit in created_hits:
             hit.save()
+        # integrity check
+        if created_hits:
+            clan.nearest_cb.recalculate()
         return JsonResponse({"success": True, "created_hits": len(created_hits)})
 
     except Exception as ex:

@@ -160,17 +160,25 @@ class ClanBattle(models.Model):
         # recalculate all hits starting from scratch
         # used after order or boss data change
         boss_data = list(self.bosses.order_by('difficulty').all())
+        has_manual_hits = self.hits.filter(ingame_timestamp=None).exists()
         difficulty_idx = 0
         self.current_lap = 1
         self.current_boss = 1
         self.current_hp = boss_data[0].boss1_hp
         current_day = 0
         lasthit_users = []
-        hits = list(self.hits.order_by('order').all())
+        ordernum = 0
+        if has_manual_hits:
+            hits = self.hits.order_by('day', 'order')
+        else:
+            hits = self.hits.order_by('day', 'ingame_timestamp', 'order')
+        hits = list(hits.all())
         for hit in hits:
             if current_day != hit.day:
                 current_day = hit.day
                 lasthit_users = []
+            ordernum += 1
+            hit.order = ordernum
             hit.boss_lap = self.current_lap
             hit.boss_number = self.current_boss
             hit.actual_damage = min(hit.damage, self.current_hp)
