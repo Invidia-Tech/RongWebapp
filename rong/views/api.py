@@ -27,7 +27,7 @@ def kyaru_add_hit(request):
             return JsonResponse({"success": False, "error": "No active CB"})
         if clan.nearest_cb.start_time > timezone.now():
             return JsonResponse({"success": False, "error": "CB %s has not started yet" % clan.nearest_cb.name})
-        if clan.nearest_cb.end_time < timezone.now() + datetime.timedelta(days=3):
+        if clan.nearest_cb.end_time + datetime.timedelta(days=3) < timezone.now():
             return JsonResponse({"success": False, "error": "CB %s ended more than 3 days ago" % clan.nearest_cb.name})
         hitter = clan.members.filter(ign__iexact=data['account']).first()
         if not hitter:
@@ -161,7 +161,7 @@ def gearbot_add_hits(request):
             return JsonResponse({"success": False, "error": "No active CB"})
         if clan.nearest_cb.start_time > timezone.now():
             return JsonResponse({"success": False, "error": "CB %s has not started yet" % clan.nearest_cb.name})
-        if clan.nearest_cb.end_time < timezone.now() + datetime.timedelta(days=3):
+        if clan.nearest_cb.end_time + datetime.timedelta(days=3) < timezone.now():
             return JsonResponse({"success": False, "error": "CB %s ended more than 3 days ago" % clan.nearest_cb.name})
         if not data["hits"]:
             return JsonResponse({"success": True, "created_hits": 0})
