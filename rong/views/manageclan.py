@@ -237,6 +237,7 @@ def edit_member(request, clan, member_id):
 def box_summary(request, clan):
     member_data = clan.members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks',
                                                                               'box__boxunit_set__unit__unique_equip',
+                                                                              'box__boxunit_set__unit__rarity_6_quest',
                                                                               'box__inventory')
     members = [member.as_json(True) for member in member_data]
     seen_units = []
@@ -265,6 +266,7 @@ def list_members(request, clan):
     boxes = {}
     members = clan.all_members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks',
                                                                               'box__boxunit_set__unit__unique_equip',
+                                                                              'box__boxunit_set__unit__rarity_6_quest',
                                                                               'box__inventory')
     active_members = []
     inactive_members = []

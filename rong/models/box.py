@@ -130,8 +130,6 @@ class Box(models.Model):
                         "You have %s's rank set to %d ingame, which is beyond current EN ranks." % (
                             unit_data.name, unit["p"]))
                 box_unit.rank = unit["promotion_level"]
-                if unit["unit_rarity"] > 5:
-                    raise ValueError("6-star units do not exist on EN yet.")
                 box_unit.star = unit["unit_rarity"]
                 box_unit.level = unit["unit_level"]
                 for eq in range(6):
@@ -176,4 +174,4 @@ class Box(models.Model):
     @staticmethod
     def full_data_queryset():
         return Box.objects.select_related("clanmember", "clanmember__clan").prefetch_related(
-            'boxunit_set__unit__ranks', 'boxunit_set__unit__unique_equip', 'inventory')
+            'boxunit_set__unit__ranks', 'boxunit_set__unit__unique_equip', 'boxunit_set__unit__rarity_6_quest', 'inventory')

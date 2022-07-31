@@ -8,14 +8,13 @@ let setting_up = false;
 let equipped_all_slots = false;
 let refined_all_slots = false;
 let dirty = false;
-let MAX_STAR = 5;
 let editable = false;
 let saveFn = null;
 let deleteFn = null;
 let deleteText = null;
 
 function renderUnitStars() {
-    for (let star = 1; star <= MAX_STAR; star++) {
+    for (let star = 1; star <= current_unit.max_star; star++) {
         $(".unit-star-holder span.star[data-num='" + star + "']").toggleClass("active", current_unit.star >= star);
     }
 }
@@ -172,7 +171,7 @@ export function boxUnitModal(data, options) {
     rank_field.attr("max", current_unit.ranks.length);
     rank_field.val(current_unit.rank);
 
-    for (let star = 1; star <= MAX_STAR; star++) {
+    for (let star = 1; star <= current_unit.max_star; star++) {
         $(".unit-star-holder span.star[data-num='" + star + "']").toggleClass("selectable", current_unit.unit.rarity <= star);
     }
     renderUnitStars();
@@ -265,7 +264,7 @@ $(document).ready(function () {
         if (setting_up) {
             return;
         }
-        if (star < current_unit.unit.rarity) {
+        if (star < current_unit.unit.rarity || star > current_unit.max_star) {
             return;
         }
         current_unit.star = parseInt(star);
@@ -358,7 +357,7 @@ $(document).ready(function () {
 
     $('#boxUnitMaxAllBtn').click(function () {
         $('#boxUnitRankField').val(current_unit.ranks.length).change();
-        current_unit.star = MAX_STAR;
+        current_unit.star = current_unit.max_star;
         renderUnitStars();
         $('#boxUnitLevelField').val(current_unit.max_level).change();
         equipAll(true);

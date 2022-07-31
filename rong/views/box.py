@@ -191,8 +191,6 @@ def import_box(request: HttpRequest, box_id):
                                     "You have %s's rank set to %d on Armory, which is beyond current EN ranks." % (
                                         unit_data.name, unit["p"]))
                             box_unit.rank = unit["p"]
-                            if unit["r"] > 5:
-                                raise ValueError("6-star units do not exist on EN yet.")
                             box_unit.star = unit["r"]
                             if levels == 'Update to Max':
                                 # TODO: skill levels

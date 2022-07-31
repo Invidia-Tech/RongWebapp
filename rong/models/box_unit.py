@@ -70,6 +70,7 @@ class BoxUnit(models.Model):
         base["max_level"] = BoxUnit.max_level()
         base["shards"] = self.box.get_item_quantity(self.unit.shard_id)
         base["max_ue_level"] = BoxUnit.max_ue_level() if self.unit.has_ue else -1
+        base["max_star"] = 6 if self.unit.has_6star else 5
         return base
 
     class Meta:

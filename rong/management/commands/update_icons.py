@@ -75,12 +75,17 @@ class Command(BaseCommand):
         star_overlap = 2
         star_on = Image.open("rong/static/rong/images/star_on.png").resize((10, 10))
         star_off = Image.open("rong/static/rong/images/star_off.png").resize((10, 10))
-        star_sheet = Image.new(mode="RGBA", size=(star_size * 5 - star_overlap * 4, star_size * 6))
+        star_6_on = Image.open("rong/static/rong/images/star_6_on.png").resize((10, 10))
+        star_sheet = Image.new(mode="RGBA", size=(star_size * 6 - star_overlap * 4, star_size * 7))
         for star_num in range(6):
             for off in range(4, star_num - 1, -1):
                 star_sheet.paste(star_off, (off * (star_size - star_overlap), star_num * star_size))
             for on in range(star_num - 1, -1, -1):
                 star_sheet.paste(star_on, (on * (star_size - star_overlap), star_num * star_size))
+        # 6 star separate
+        star_sheet.paste(star_6_on, (5 * (star_size - star_overlap), 6 * star_size))
+        for on in range(4, -1, -1):
+            star_sheet.paste(star_on, (on * (star_size - star_overlap), 6 * star_size))
         star_sheet.save("rong/static/rong/images/icon_stars.png", format='png')
 
         # generate CSS
@@ -98,7 +103,7 @@ class Command(BaseCommand):
                 css.write("&.u-%s {background-position: -%dpx -%dpx; }\n" % (
                 unit, positions[unit][0] * 32 // 64, positions[unit][1] * 32 // 64))
             css.write("}\n.unit-icon-stars {\n")
-            for star_num in range(6):
+            for star_num in range(7):
                 css.write("&.s-%d {background-position: 0px -%dpx; }\n" % (star_num, star_num * star_size))
             css.write("}\n")
 
