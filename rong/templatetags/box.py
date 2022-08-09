@@ -8,7 +8,7 @@ def equip_star_range():
 
 @register.simple_tag
 def unit_star_range():
-    return range(1, 5 + 1)
+    return range(1, 6 + 1)
 
 @register.simple_tag
 def equip_range():

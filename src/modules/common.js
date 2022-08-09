@@ -13,8 +13,11 @@ export function rank_color(rank) {
 
 export function icon_id(unit_id, star) {
     let star_num = parseInt(star);
-    if (star_num < 3 || star_num > 5) {
+    if (star_num < 3 || star_num > 6) {
         return Math.floor(unit_id / 100) * 100 + 11;
+    }
+    else if(star_num == 6) {
+        return Math.floor(unit_id / 100) * 100 + 61;
     }
     else {
         return Math.floor(unit_id / 100) * 100 + 31;

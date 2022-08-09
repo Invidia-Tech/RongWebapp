@@ -12,6 +12,14 @@ class UnitUniqueEquip(models.Model):
         managed = False
         db_table = u'redive_en"."unit_unique_equip'
 
+class Rarity6QuestData(models.Model):
+    id = models.AutoField(primary_key=True, db_column='rarity_6_quest_id')
+    unit = models.OneToOneField('Unit', db_column='unit_id', on_delete=models.DO_NOTHING, related_name='rarity_6_quest')
+
+    class Meta():
+        managed = False
+        db_table = u'redive_en"."rarity_6_quest_data'
+
 
 class Unit(models.Model):
     id = models.AutoField(primary_key=True, db_column='unit_id')
@@ -39,6 +47,10 @@ class Unit(models.Model):
     @cached_property
     def has_ue(self):
         return hasattr(self, 'unique_equip')
+
+    @cached_property
+    def has_6star(self):
+        return hasattr(self, 'rarity_6_quest')
 
     @staticmethod
     def valid_units():
