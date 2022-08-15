@@ -116,7 +116,7 @@ GitHub.sublime-settings
 .history
 
 # env-specific config
-rongdjango/config.py
+# rongdjango/config.py
 
 # game assets
 assets/*/*.unity3d
