@@ -89,11 +89,11 @@ page('clan_box_summary', function () {
 
     let unitData = [];
     for(const unit of units) {
-        let unitRow = [unit.name, 0, 0, 0, 0, 0, 0, 0];
+        let unitRow = [unit.name, 0, 0, 0, 0, 0, 0, 0, 0];
         for(const member of members) {
             if(member.hasOwnProperty("unit_" + unit.id)) {
                 unitRow[member["unit_"+unit.id]["star"] + 1] += 1;
-                unitRow[7] += 1;
+                unitRow[8] += 1;
             }
             else {
                 unitRow[1] += 1;
