@@ -115,9 +115,6 @@ GitHub.sublime-settings
 .vscode/* 
 .history
 
-# env-specific config
-# rongdjango/config.py
-
 # game assets
 assets/*/*.unity3d
 
@@ -140,3 +137,6 @@ deploy/envs/*
 
 # Random mac shit
 .DS_Store
+
+# local env config
+rongdjango/config.py

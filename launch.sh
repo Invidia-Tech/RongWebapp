@@ -1,4 +1,5 @@
 #!/bin/sh
+cp rongdjango/config.docker.py rongdjango/config.py
 python manage.py update_database en
 python manage.py update_database cn
 python manage.py update_database jp
