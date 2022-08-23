@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import {icon_id, page} from '../modules/common';
+import {icon_id, page, rankDesc} from '../modules/common';
 import 'jquery-validation';
 import 'jquery-mask-plugin';
 
@@ -29,22 +29,25 @@ page('clan_box_summary', function () {
                     if (data === undefined) {
                         return "N/A";
                     }
-                    let eq_count = 0;
-                    for (let i = 1; i <= 6; i++) {
-                        if (data["equip" + i] !== null) {
-                            eq_count++;
-                        }
-                    }
                     let ue = "";
-                    if(data.max_ue_level > -1) {
-                        if(data.ue_level === null) {
+                    if (data.max_ue_level > -1) {
+                        if (data.ue_level === null) {
                             ue = "<br />No UE";
-                        }
-                        else {
-                            ue = "<br />UE"+data.ue_level;
+                        } else {
+                            ue = "<br />UE" + data.ue_level;
                         }
                     }
-                    return data.star + "★ R" + data.rank + "-" + eq_count + "<br />Lv" + data.level+ue;
+                    let slvl_info = "";
+                    for (let slvl of ["ub_level", "s1_level", "s2_level", "ex_level"]) {
+                        if (data[slvl] !== null && data[slvl] !== data.level) {
+                            slvl_info += " " + slvl.substring(0, 2).toUpperCase() + "@" + data[slvl];
+                        }
+                    }
+                    let level = "Lv" + data.level.toString();
+                    if (slvl_info !== "") {
+                        level = "<span class='underline-dotted' title='" + slvl_info.substring(1) + "'>" + level + "</span>";
+                    }
+                    return data.star + "★ " + rankDesc(unit, data) + "<br />" + level + ue + "<br/>Bond" + data.bond;
                 } else {
                     if (data === undefined) {
                         return 0;
@@ -69,13 +72,12 @@ page('clan_box_summary', function () {
     }
     let storedFilter = window.localStorage.getItem('unitFilter');
     let unitFilter;
-    if(storedFilter === null) {
+    if (storedFilter === null) {
         unitFilter = [];
-        for(const unit of units) {
+        for (const unit of units) {
             unitFilter.push(unit.id);
         }
-    }
-    else {
+    } else {
         unitFilter = JSON.parse(storedFilter);
     }
     let table = $('#boxSummaryTable').DataTable({
@@ -88,14 +90,13 @@ page('clan_box_summary', function () {
     });
 
     let unitData = [];
-    for(const unit of units) {
+    for (const unit of units) {
         let unitRow = [unit.name, 0, 0, 0, 0, 0, 0, 0, 0];
-        for(const member of members) {
-            if(member.hasOwnProperty("unit_" + unit.id)) {
-                unitRow[member["unit_"+unit.id]["star"] + 1] += 1;
+        for (const member of members) {
+            if (member.hasOwnProperty("unit_" + unit.id)) {
+                unitRow[member["unit_" + unit.id]["star"] + 1] += 1;
                 unitRow[8] += 1;
-            }
-            else {
+            } else {
                 unitRow[1] += 1;
             }
         }
@@ -146,14 +147,14 @@ page('clan_box_summary', function () {
         }
         $('#unitSelectorModal').modal();
     });
-    $('#selectAllBtn').click(function() {
+    $('#selectAllBtn').click(function () {
         unitFilter = [];
-        for(const unit of units) {
+        for (const unit of units) {
             unitFilter.push(unit.id);
         }
         applyUnitFilter();
     });
-    $('#selectNoneBtn').click(function() {
+    $('#selectNoneBtn').click(function () {
         unitFilter = [];
         applyUnitFilter();
     });
