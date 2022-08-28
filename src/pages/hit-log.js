@@ -3,8 +3,7 @@ import {getDescendantProp, hide_loading, make_alert, page, show_loading} from '.
 import 'jquery-validation';
 import 'datatables.net';
 import 'datatables.net-rowreorder';
-
-page('cb_list_hits', function () {
+let page_function = function () {
     let $hitLog = $('#hitLogTable');
     let manageable = $hitLog.hasClass('manageable');
     let bulkPilotMode = false;
@@ -60,6 +59,9 @@ page('cb_list_hits', function () {
         {
             data: "damage",
             render: function (data, type) {
+                if(window.location.href.includes("hitsactual")) {
+                    return data.actual;
+                }
                 if (type == 'sort') {
                     return data.damage;
                 }
@@ -451,5 +453,8 @@ page('cb_list_hits', function () {
     });
 
 
-});
+}
+
+page('cb_list_hits', page_function);
+page('cb_list_hitsa', page_function);
 
