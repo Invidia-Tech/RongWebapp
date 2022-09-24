@@ -187,7 +187,7 @@ WHERE constraint_type = 'FOREIGN KEY' AND ccu.table_schema = %s;
 
             for fkey in fkeys:
                 cur.execute(
-                    "ALTER TABLE {0}.{1} DROP CONSTRAINT {6}".format(*fkey))
+                    'ALTER TABLE "{0}"."{1}" DROP CONSTRAINT "{6}"'.format(*fkey))
 
             try:
                 # convert database
@@ -195,7 +195,7 @@ WHERE constraint_type = 'FOREIGN KEY' AND ccu.table_schema = %s;
                 cur.execute(
                     "SELECT tablename FROM pg_tables WHERE schemaname = %s", [schema_name])
                 for row in cur.fetchall():
-                    cur.execute("DROP TABLE {0}.{1}".format(
+                    cur.execute('DROP TABLE "{0}"."{1}"'.format(
                         schema_name, row[0]))
 
                 # now move over sqlite data
@@ -203,7 +203,7 @@ WHERE constraint_type = 'FOREIGN KEY' AND ccu.table_schema = %s;
                     sqlite_conn.row_factory = sqlite3.Row
                     with closing(sqlite_conn.cursor()) as sqlite_cur:
                         sqlite_cur.execute(
-                            "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")
+                            "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '20%'")
                         tables = [row["name"] for row in sqlite_cur.fetchall()]
                         for table in tables:
                             for line in _iterdump(sqlite_conn, table, schema_name):
