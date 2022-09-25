@@ -4,7 +4,7 @@ from django.db.models import Max, Min, F
 from django.utils import timezone
 
 from rong.forms.fields import CBLabelModelChoiceField, UnitSelect, CBLabelModelMultipleChoiceField
-from rong.models import ClanBattleScore, ClanBattle
+from rong.models import ClanBattleScore
 from rong.models.clan_battle_score import ClanBattleHitType
 from rong.models.team import create_team
 
