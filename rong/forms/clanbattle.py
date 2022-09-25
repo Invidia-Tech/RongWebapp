@@ -4,7 +4,7 @@ from django.db.models import Max, Min, F
 from django.utils import timezone
 
 from rong.forms.fields import CBLabelModelChoiceField, UnitSelect, CBLabelModelMultipleChoiceField
-from rong.models import ClanBattleScore, ClanBattle
+from rong.models import ClanBattleScore
 from rong.models.clan_battle_score import ClanBattleHitType
 from rong.models.team import create_team
 
@@ -105,9 +105,9 @@ class HitForm(forms.Form):
         if units_filled != damages_filled and sum(damages_filled) != 0:
             form_errors.append(ValidationError(
                 "If you enter per-unit damage, you must enter units too and fill damage for all units."))
-        if sum(damages_filled) != 0 and sum(
-                [cleaned_data.get("unit%d_damage" % unit) or 0 for unit in range(1, 6)]) != cleaned_data.get("damage"):
-            form_errors.append(ValidationError("Sum of individual damage must equal total damage."))
+        # if sum(damages_filled) != 0 and sum(
+        #         [cleaned_data.get("unit%d_damage" % unit) or 0 for unit in range(1, 6)]) != cleaned_data.get("damage"):
+        #     form_errors.append(ValidationError("Sum of individual damage must equal total damage."))
         # unit duplication check
         for first_unit in range(1, 5):
             for second_unit in range(first_unit + 1, 6):

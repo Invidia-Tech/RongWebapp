@@ -199,7 +199,7 @@ def gearbot_add_hits(request):
             hit.clan_battle = clan.nearest_cb
             hit.member = hitter
             hit.day = clan.nearest_cb.day_of(hit.ingame_timestamp)
-            hit.damage = sum(damages)
+            hit.damage = log["damage"]
             team, ordering = create_team(units)
             hit.team = team
             for idx, dmg in enumerate(damages):
