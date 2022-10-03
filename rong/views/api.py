@@ -95,8 +95,7 @@ def gearbot_update_box(request):
         data = json.loads(request.body)
         num_players = ClanMember.objects.filter(player_id=data["viewer_id"], active=True).count()
         if not num_players:
-            return JsonResponse(
-                {"success": False, "error": "No active players found matching provided viewer id"})
+            return JsonResponse({"success": False, "error": "No active players found matching provided viewer id"})
         if num_players > 1:
             return JsonResponse(
                 {"success": False, "error": "Multiple active players found matching provided viewer id"})
@@ -125,8 +124,9 @@ def gearbot_flight_check(request):
                     statuses[flight.pilot.clanmember.player_id] = True
         return JsonResponse({"statuses": statuses})
     except Exception as ex:
-        return JsonResponse({"error": "Exception thrown when handling request, probably malformed",
-                             "error_detail": str(ex), "traceback": str(traceback.format_exc())})
+        return JsonResponse(
+            {"error": "Exception thrown when handling request, probably malformed", "error_detail": str(ex),
+             "traceback": str(traceback.format_exc())})
 
 
 @csrf_exempt
@@ -144,8 +144,9 @@ def gearbot_fc_check(request):
                         statuses[fc.clanmember.player_id] = True
         return JsonResponse({"statuses": statuses})
     except Exception as ex:
-        return JsonResponse({"error": "Exception thrown when handling request, probably malformed",
-                             "error_detail": str(ex), "traceback": str(traceback.format_exc())})
+        return JsonResponse(
+            {"error": "Exception thrown when handling request, probably malformed", "error_detail": str(ex),
+             "traceback": str(traceback.format_exc())})
 
 
 @csrf_exempt
@@ -224,6 +225,5 @@ def gearbot_add_hits(request):
         return JsonResponse({"success": True, "created_hits": len(created_hits)})
 
     except Exception as ex:
-        return JsonResponse(
-            {"success": False, "error": "Exception thrown when handling request, probably malformed",
-             "error_detail": str(ex), "traceback": str(traceback.format_exc())})
+        return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed",
+                             "error_detail": str(ex), "traceback": str(traceback.format_exc())})
