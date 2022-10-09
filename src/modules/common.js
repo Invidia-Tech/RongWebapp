@@ -6,10 +6,10 @@ export function rank_color(rank) {
     if (isNaN(rank_num)) {
         return 'white';
     }
-    if (rank_num < 0 || rank_num > 14) {
+    if (rank_num < 0 || rank_num > 17) {
         return 'white';
     }
-    return ['white', 'blue', 'bronze', 'bronze', 'silver', 'silver', 'silver', 'gold', 'gold', 'gold', 'gold', 'purple', 'purple', 'purple', 'purple'][rank_num];
+    return ['white', 'blue', 'bronze', 'bronze', 'silver', 'silver', 'silver', 'gold', 'gold', 'gold', 'gold', 'purple', 'purple', 'purple', 'purple', 'purple', 'purple', 'purple'][rank_num];
 }
 
 export function icon_id(unit_id, star) {
