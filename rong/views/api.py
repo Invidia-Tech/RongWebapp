@@ -227,3 +227,19 @@ def gearbot_add_hits(request):
     except Exception as ex:
         return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed",
                              "error_detail": str(ex), "traceback": str(traceback.format_exc())})
+
+
+@csrf_exempt
+def gearbot_get_members(request):
+    try:
+        if request.method != "POST" or "X-Gearbot-Memez" not in request.headers:
+            return JsonResponse({"boo": "PUDDING DAYO"})
+        data = json.loads(request.body)
+        clan = Clan.objects.filter(name__iexact=data['clan']).first()
+        if not clan:
+            return JsonResponse({"success": False, "error": "Invalid clan"})
+        member_ids = [member.player_id for member in clan.in_clan_members if member.player_id]
+        return JsonResponse({"success": True, "members": member_ids})
+    except Exception as ex:
+        return JsonResponse({"success": False, "error": "Exception thrown when handling request, probably malformed",
+                             "error_detail": str(ex), "traceback": str(traceback.format_exc())})
