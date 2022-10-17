@@ -54,7 +54,8 @@
                                    class="btn btn-primary" title="Edit"><i class="fa fa-edit"></i></a>
                                 {% if group.hits.count %}
                                     <button class="btn btn-danger" disabled
-                                            title="Cannot delete group with tagged hits"><i class="fa fa-remove"></i></button>
+                                            title="Cannot delete group with tagged hits"><i class="fa fa-remove"></i>
+                                    </button>
                                 {% else %}
                                     <button class="btn btn-danger delete-group-button"
                                             data-url="{% url 'rong:clan_edit_hit_group' clan.slug battle.id group.id %}"

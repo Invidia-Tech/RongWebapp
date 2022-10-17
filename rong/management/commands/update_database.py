@@ -35,13 +35,14 @@ def _iterdump(connection, table_name, schema_name):
     schema_res = cu.execute(q, {'table_name': table_name})
     for table_name, type, sql in schema_res.fetchall():
         if table_name == 'sqlite_sequence':
-            yield('DELETE FROM sqlite_sequence;')
+            yield ('DELETE FROM sqlite_sequence;')
         elif table_name == 'sqlite_stat1':
-            yield('ANALYZE sqlite_master;')
+            yield ('ANALYZE sqlite_master;')
         elif table_name.startswith('sqlite_'):
             continue
         else:
-            yield(('%s;' % sql).replace("'", '"').replace('"%s"' % table_name, '"%s"."%s"' % (schema_name, table_name)))
+            yield (
+                ('%s;' % sql).replace("'", '"').replace('"%s"' % table_name, '"%s"."%s"' % (schema_name, table_name)))
 
         # Build the insert statement for each row of the current table
         table_name_ident = table_name.replace('"', '""')
@@ -56,14 +57,14 @@ def _iterdump(connection, table_name, schema_name):
             schema_name)
         query_res = cu.execute(q)
         for row in query_res:
-            yield("{0};".format(row[0]))
+            yield ("{0};".format(row[0]))
 
 
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('version', type=str, choices=[
-                            'en', 'jp', 'cn'], help='PCRD version to update')
+            'en', 'jp', 'cn'], help='PCRD version to update')
         parser.add_argument('--download', action='store_true',
                             help='Download latest database from PCRD servers')
 
@@ -81,7 +82,8 @@ class Command(BaseCommand):
             test_version = int(truth_version) + 10
             while fails < 20:
                 print("[TESTING] %d" % test_version)
-                with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/manifest_assetmanifest' % test_version) as r:
+                with requests.get(
+                        'http://assets-priconne-redive-us.akamaized.net/dl/Resources/%d/Jpn/AssetBundles/iOS/manifest/manifest_assetmanifest' % test_version) as r:
                     if r.status_code == 200:
                         print(
                             "[SUCCESS] %d returned status code 200 (valid version)" % test_version)
@@ -92,12 +94,14 @@ class Command(BaseCommand):
                     test_version += 10
                 time.sleep(1.0)
 
-            with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/Resources/%s/Jpn/AssetBundles/iOS/manifest/masterdata_assetmanifest' % truth_version) as rm:
+            with requests.get(
+                    'http://assets-priconne-redive-us.akamaized.net/dl/Resources/%s/Jpn/AssetBundles/iOS/manifest/masterdata_assetmanifest' % truth_version) as rm:
                 manifest = rm.text
                 dbhash = manifest.split(",")[1]
                 print(
-                    'http://assets-priconne-redive-us.akamaized.net/dl/pool/AssetBundles/'+dbhash[0:2]+'/'+dbhash)
-                with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/pool/AssetBundles/'+dbhash[0:2]+'/'+dbhash) as r2:
+                    'http://assets-priconne-redive-us.akamaized.net/dl/pool/AssetBundles/' + dbhash[0:2] + '/' + dbhash)
+                with requests.get('http://assets-priconne-redive-us.akamaized.net/dl/pool/AssetBundles/' + dbhash[
+                                                                                                           0:2] + '/' + dbhash) as r2:
                     if r2.status_code == 200:
                         with open("./redive_en.unity3d", "wb") as fh:
                             fh.write(r2.content)
@@ -132,7 +136,7 @@ class Command(BaseCommand):
         with connection.cursor() as cur:
             schema_name = 'redive_%s' % options['version']
             cur.execute("SELECT EXISTS(SELECT FROM information_schema.schemata WHERE schema_name = %s)", [
-                        schema_name])
+                schema_name])
             if not cur.fetchone()[0]:
                 # try to create it, error if not possible
                 cur.execute("CREATE SCHEMA {0}".format(schema_name))
@@ -218,7 +222,8 @@ WHERE constraint_type = 'FOREIGN KEY' AND ccu.table_schema = %s;
                 # add back fkeys when done
                 for fkey in fkeys:
                     cur.execute(
-                        "ALTER TABLE ONLY {0}.{1} ADD CONSTRAINT {6} FOREIGN KEY({2}) REFERENCES {3}.{4}({5}) DEFERRABLE INITIALLY DEFERRED".format(*fkey))
+                        "ALTER TABLE ONLY {0}.{1} ADD CONSTRAINT {6} FOREIGN KEY({2}) REFERENCES {3}.{4}({5}) DEFERRABLE INITIALLY DEFERRED".format(
+                            *fkey))
 
             end_time = time.time()
-            print("Install complete, took", round((end_time-start_time) * 1000), "ms")
+            print("Install complete, took", round((end_time - start_time) * 1000), "ms")

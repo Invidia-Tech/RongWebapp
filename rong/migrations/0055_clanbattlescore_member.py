@@ -3,6 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+
 def fill_score_member(apps, schema_editor):
     ClanBattleScore = apps.get_model("rong", "ClanBattleScore")
     ClanMember = apps.get_model("rong", "ClanMember")
@@ -10,13 +11,14 @@ def fill_score_member(apps, schema_editor):
         if score.member is None:
             m = ClanMember.objects.filter(user=score.user, clan=score.clan_battle.clan).first()
             if m is None:
-                m = ClanMember(user=score.user, clan=score.clan_battle.clan, ign=score.user.name, is_lead=False, active=False)
+                m = ClanMember(user=score.user, clan=score.clan_battle.clan, ign=score.user.name, is_lead=False,
+                               active=False)
                 m.save()
             score.member = m
             score.save()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ('rong', '0054_auto_20211020_1400'),
     ]

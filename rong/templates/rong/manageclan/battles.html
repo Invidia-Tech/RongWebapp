@@ -16,7 +16,8 @@
 {% block content %}
     <div class="row header mb-3">
         <div class="col-md-6"><h2>{{ clan.name }} &gt; Clan Battles</h2></div>
-        <div class="col-md-6 text-right"><a class="btn btn-primary" href="{% url 'rong:clan_add_battle' clan.slug %}">Add CB</a></div>
+        <div class="col-md-6 text-right"><a class="btn btn-primary" href="{% url 'rong:clan_add_battle' clan.slug %}">Add
+            CB</a></div>
     </div>
     {% if not clan.current_cb and not clan.past_cbs %}
         <p><i>This clan has no Clan Battles defined!</i></p>

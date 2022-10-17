@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0028_rename_begin_time_clanbattle_start_time'),
     ]

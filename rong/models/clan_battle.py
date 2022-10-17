@@ -280,7 +280,7 @@ class ClanBattle(models.Model):
 
     @cached_property
     def total_daily_hits(self):
-        return self.clan.members.count() * ClanBattle.HITS_PER_DAY
+        return self.clan.in_clan_members.count() * ClanBattle.HITS_PER_DAY
 
     @cached_property
     def hits_left_today(self):
@@ -384,7 +384,7 @@ class ClanBattle(models.Model):
         hit_matrix = OrderedDict()
         if self.in_progress:
             # if CB in progress, include all active members so 0/3 hit people can be seen
-            members = list(self.clan.members.select_related('user'))
+            members = list(self.clan.in_clan_members.select_related('user'))
             members.sort(key=lambda x: x.ign.lower())
             for member in members:
                 hit_matrix[member.id] = self.initial_matrix_row(member)

@@ -26,7 +26,8 @@ class Command(BaseCommand):
                     pilots[hit.member.ign] = 0
                 pilots[hit.member.ign] += 1
                 # print it
-                unpiloted.append("Boss %d - #%03d (Lap %d) - %s attacked for %d damage" % (hit.boss_number, hit.order, hit.boss_lap, hit.member.ign, hit.damage))
+                unpiloted.append("Boss %d - #%03d (Lap %d) - %s attacked for %d damage" % (
+                hit.boss_number, hit.order, hit.boss_lap, hit.member.ign, hit.damage))
                 pass
         unpiloted.sort()
         for up in unpiloted:

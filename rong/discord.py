@@ -3,10 +3,12 @@ from django.conf import settings
 from django.urls import reverse
 from requests_oauthlib import OAuth2Session
 
-def token_updater(request : HttpRequest, token):
+
+def token_updater(request: HttpRequest, token):
     request.session['discord_token'] = token
 
-def make_session(request : HttpRequest, token=None, state=None, scope=None):
+
+def make_session(request: HttpRequest, token=None, state=None, scope=None):
     redirect_url = request.build_absolute_uri(reverse('rong:discordcallback'))
     return OAuth2Session(
         client_id=settings.DISCORD_CLIENT_ID,

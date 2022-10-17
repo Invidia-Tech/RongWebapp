@@ -45,6 +45,7 @@ def edit_boxunit(request: HttpRequest, box_id, boxunit_id):
     if request.method == 'POST':
         form = EditBoxUnitForm(request.POST, instance=boxunit)
         if form.is_valid():
+            boxunit.power = None
             box.set_item_quantity(boxunit.unit.shard_id, form.cleaned_data["shards"])
             form.save()
             box.flag_updated()

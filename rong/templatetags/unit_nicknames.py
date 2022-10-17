@@ -5,6 +5,7 @@ from rong.models import UnitAlias
 
 register = template.Library()
 
+
 @register.simple_tag
 def nicknames():
     nicks = [{"unit": str(alias.unit_id), "name": alias.name.capitalize()} for alias in UnitAlias.objects.all()]

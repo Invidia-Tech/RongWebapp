@@ -2,7 +2,7 @@ import $ from 'jquery';
 import {formatDiscordName, formatPlayerId, hide_loading, make_alert, page, show_loading} from '../modules/common';
 import 'jquery-validation';
 import 'jquery-mask-plugin';
-import {renderBox, setupBoxes, boxes as editorBoxes} from "../modules/box-editing";
+import {boxes as editorBoxes, renderBox, setupBoxes} from "../modules/box-editing";
 
 require("datatables.net-bs4/js/dataTables.bootstrap4");
 
@@ -22,7 +22,7 @@ page('clan_list_members', function () {
                 "                <td>\n" +
                 "                    <button type=\"button\" class=\"btn btn-primary show-member-box\">Show</button>\n" +
                 "                </td>\n" +
-                "                <td class=\"member-box-update\" data-sort='"+data.member.box.last_update_unixtime+"'></td>\n" +
+                "                <td class=\"member-box-update\" data-sort='" + data.member.box.last_update_unixtime + "'></td>\n" +
                 "                <td>\n" +
                 "                    <button type=\"button\" class=\"btn btn-primary edit-member\">Edit Details</button>\n" +
                 "                </td>\n" +
@@ -49,7 +49,11 @@ page('clan_list_members', function () {
             $rootRow.find(".member-discord").html('N/A');
         }
         $rootRow.find(".member-ign").text(data.member.ign);
-        $rootRow.find(".member-pid").text(formatPlayerId(data.member.player_id));
+        if (data.member.out_of_clan) {
+            $rootRow.find(".member-pid").text("Outside clan");
+        } else {
+            $rootRow.find(".member-pid").text(formatPlayerId(data.member.player_id));
+        }
         if (data.member.is_admin) {
             $rootRow.find(".member-lead").text("Admin");
         } else {

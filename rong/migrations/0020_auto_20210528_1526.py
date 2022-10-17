@@ -7,7 +7,6 @@ import rong.models.clan_battle_score
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0019_remove_clanbattle_game_battle'),
     ]
@@ -24,6 +23,10 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clanbattlescore',
             name='hit_type',
-            field=django_enum_choices.fields.EnumChoiceField(choice_builder=django_enum_choices.choice_builders.value_value, choices=[('Normal', 'Normal'), ('Last Hit', 'Last Hit'), ('Carryover', 'Carryover')], default=rong.models.clan_battle_score.ClanBattleHitType['NORMAL'], enum_class=rong.models.clan_battle_score.ClanBattleHitType, max_length=9),
+            field=django_enum_choices.fields.EnumChoiceField(
+                choice_builder=django_enum_choices.choice_builders.value_value,
+                choices=[('Normal', 'Normal'), ('Last Hit', 'Last Hit'), ('Carryover', 'Carryover')],
+                default=rong.models.clan_battle_score.ClanBattleHitType['NORMAL'],
+                enum_class=rong.models.clan_battle_score.ClanBattleHitType, max_length=9),
         ),
     ]

@@ -13,5 +13,5 @@ class FieldRenderer(bootstrap4.renderers.FieldRenderer):
         else:
             label_part = ''
 
-        html = '<label class="form-check-label switch">'+html+'<div class="slider round"></div></label>' + label_part
+        html = '<label class="form-check-label switch">' + html + '<div class="slider round"></div></label>' + label_part
         return super().append_to_checkbox_field(html)

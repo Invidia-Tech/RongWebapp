@@ -14,7 +14,8 @@
 {% block title %}Edit Hit Tag - {{ tag.name }}{% endblock %}
 
 {% block content %}
-    <h2>{{ clan.name }} &gt; <a href="{% url 'rong:clan_list_hit_tags' clan.slug %}">Hit Tags</a> &gt; Edit Hit Tag - {{ tag.name }}</h2>
+    <h2>{{ clan.name }} &gt; <a href="{% url 'rong:clan_list_hit_tags' clan.slug %}">Hit Tags</a> &gt; Edit Hit Tag
+        - {{ tag.name }}</h2>
     <form role="form" method="post" action="">
         {% csrf_token %}
         {% bootstrap_form form layout='horizontal' bound_css_class='' %}

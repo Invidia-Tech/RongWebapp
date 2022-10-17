@@ -15,13 +15,15 @@
     {% for battle in battles %}
         <tr>
             <td>{{ battle.name }}</td>
-            <td>{% if battle.start_time %}{{ battle.start_time }}<br>({{ battle.start_time|naturaltime }}){% else %}N/A{% endif %}</td>
-            <td>{% if battle.start_time %}{{ battle.end_time }}<br>({{ battle.end_time|naturaltime }}){% else %}N/A{% endif %}</td>
+            <td>{% if battle.start_time %}{{ battle.start_time }}<br>({{ battle.start_time|naturaltime }}){% else %}
+                N/A{% endif %}</td>
+            <td>{% if battle.start_time %}{{ battle.end_time }}<br>({{ battle.end_time|naturaltime }}){% else %}
+                N/A{% endif %}</td>
             <td>
                 <div class="row">
                     {% for boss in battle.boss_list %}
                         <div class="col-boss">
-                            {% enemy_icon boss.icon alt=boss.name %}<br />
+                            {% enemy_icon boss.icon alt=boss.name %}<br/>
                             {{ boss.name }}
                         </div>
                     {% endfor %}

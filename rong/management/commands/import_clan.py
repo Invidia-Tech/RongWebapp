@@ -23,7 +23,8 @@ class Command(BaseCommand):
         with open("dumps/" + options['filename'], "r", encoding="utf-8") as fh:
             clan_data = json.load(fh)
         # user mapping
-        existing_users = {user.platform_id:user for user in User.objects.filter(platform_id__in=[u["platform_id"] for u in clan_data["users"]])}
+        existing_users = {user.platform_id: user for user in
+                          User.objects.filter(platform_id__in=[u["platform_id"] for u in clan_data["users"]])}
         print(str(existing_users))
         user_mapping = {}
         created_users = 0
@@ -195,7 +196,6 @@ class Command(BaseCommand):
                         tosave.append(flight.team)
                 tosave.append(flight)
 
-
         # done, save
         with transaction.atomic():
             print("Creating %d records" % (len(tosave)))
@@ -216,4 +216,3 @@ class Command(BaseCommand):
                 for tag_id in tag_list:
                     hit.tags.add(tag_mapping[tag_id])
             pass
-

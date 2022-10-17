@@ -9,6 +9,7 @@ from rong.forms.manageclan import HitGroupForm, EditClanBattleForm, AddClanBattl
     EditClanMemberForm, HitTagForm, ClanBattleCompForm
 from rong.models import ClanBattle, HitGroup, HitTag, User, ClanMember, ClanBattleComp
 
+
 @clan_lead_view
 def edit_comp(request, clan, battle_id, comp_id):
     battle = get_object_or_404(clan.clanbattle_set, pk=battle_id)
@@ -39,7 +40,8 @@ def edit_comp(request, clan, battle_id, comp_id):
 def add_comp(request, clan, battle_id):
     battle = get_object_or_404(clan.clanbattle_set, pk=battle_id)
     if request.method == 'POST':
-        form = ClanBattleCompForm(ClanBattleComp(clan_battle=battle, submitter=request.user), request.POST, prefix="add-comp")
+        form = ClanBattleCompForm(ClanBattleComp(clan_battle=battle, submitter=request.user), request.POST,
+                                  prefix="add-comp")
         if form.is_valid():
             form.save()
             messages.add_message(request, messages.SUCCESS, "Successfully added new comp.")
@@ -235,10 +237,10 @@ def edit_member(request, clan, member_id):
 
 @clan_boxes_view
 def box_summary(request, clan):
-    member_data = clan.members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks',
-                                                                              'box__boxunit_set__unit__unique_equip',
-                                                                              'box__boxunit_set__unit__rarity_6_quest',
-                                                                              'box__inventory')
+    member_data = clan.in_clan_members.select_related('box', 'user').prefetch_related('box__boxunit_set__unit__ranks',
+                                                                                      'box__boxunit_set__unit__unique_equip',
+                                                                                      'box__boxunit_set__unit__rarity_6_quest',
+                                                                                      'box__inventory')
     members = [member.as_json(True) for member in member_data]
     seen_units = []
     units = []

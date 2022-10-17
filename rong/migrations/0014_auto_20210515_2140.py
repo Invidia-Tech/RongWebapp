@@ -4,6 +4,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import rong.models.box_unit
 
+
 def fill_boxunit_fields(apps, schema_editor):
     BoxUnit = apps.get_model("rong", "BoxUnit")
     for unit in BoxUnit.objects.all():
@@ -19,7 +20,6 @@ def fill_boxunit_fields(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0013_auto_20210507_2020'),
     ]
@@ -94,6 +94,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='boxunit',
             name='unit',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rong.unit', validators=[rong.models.box_unit.valid_box_unit]),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rong.unit',
+                                    validators=[rong.models.box_unit.valid_box_unit]),
         ),
     ]

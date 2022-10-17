@@ -47,7 +47,11 @@ page('clan_box_summary', function () {
                     if (slvl_info !== "") {
                         level = "<span class='underline-dotted' title='" + slvl_info.substring(1) + "'>" + level + "</span>";
                     }
-                    return data.star + "★ " + rankDesc(unit, data) + "<br />" + level + ue + "<br/>Bond" + data.bond;
+                    let retval = data.star + "★ " + rankDesc(unit, data) + "<br />" + level + ue + "<br/>Bond" + data.bond;
+                    if(data.power !== null) {
+                        retval += "<br/>Power: "+data.power;
+                    }
+                    return retval;
                 } else {
                     if (data === undefined) {
                         return 0;

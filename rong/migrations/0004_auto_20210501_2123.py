@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0003_auto_20210425_1319'),
     ]
@@ -221,11 +220,16 @@ class Migration(migrations.Migration):
                 ('unit4_level', models.PositiveIntegerField(null=True)),
                 ('unit5_level', models.PositiveIntegerField(null=True)),
                 ('unit5_star', models.PositiveIntegerField(null=True)),
-                ('unit1', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit1teams', to='rong.unit')),
-                ('unit2', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit2teams', to='rong.unit')),
-                ('unit3', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit3teams', to='rong.unit')),
-                ('unit4', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit4teams', to='rong.unit')),
-                ('unit5', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit5teams', to='rong.unit')),
+                ('unit1', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit1teams',
+                                            to='rong.unit')),
+                ('unit2', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit2teams',
+                                            to='rong.unit')),
+                ('unit3', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit3teams',
+                                            to='rong.unit')),
+                ('unit4', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit4teams',
+                                            to='rong.unit')),
+                ('unit5', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit5teams',
+                                            to='rong.unit')),
             ],
         ),
         migrations.CreateModel(
@@ -237,9 +241,13 @@ class Migration(migrations.Migration):
                 ('last_updated', models.DateTimeField()),
                 ('notes', models.TextField()),
                 ('pfp_unit', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='rong.unit')),
-                ('team1', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='team1_for', to='rong.team')),
-                ('team2', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='team2_for', to='rong.team')),
-                ('team3', models.OneToOneField(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='team3_for', to='rong.team')),
+                ('team1', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='team1_for',
+                                               to='rong.team')),
+                ('team2', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='team2_for',
+                                               to='rong.team')),
+                ('team3',
+                 models.OneToOneField(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='team3_for',
+                                      to='rong.team')),
             ],
         ),
         migrations.CreateModel(
@@ -251,9 +259,14 @@ class Migration(migrations.Migration):
                 ('upvotes', models.PositiveIntegerField()),
                 ('downvotes', models.PositiveIntegerField()),
                 ('notes', models.TextField()),
-                ('attacker_team', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='attacker_in', to='rong.team')),
-                ('defender_team', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='defender_in', to='rong.team')),
-                ('submitter', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='rong.member')),
+                ('attacker_team',
+                 models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='attacker_in',
+                                      to='rong.team')),
+                ('defender_team',
+                 models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='defender_in',
+                                      to='rong.team')),
+                ('submitter',
+                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='rong.member')),
             ],
         ),
         migrations.AddField(

@@ -11,8 +11,8 @@ def create_team(units, stars=None, levels=None, power=None, do_save=True):
 
     t = Team(power=power, uid=1)
     for u in range(5):
-        setattr(t, "unit%d" % (u+1), None if u >= len(units) else units[u])
-        setattr(t, "unit%d_star" % (u+1), None if (stars is None or u >= len(units)) else stars[u])
+        setattr(t, "unit%d" % (u + 1), None if u >= len(units) else units[u])
+        setattr(t, "unit%d_star" % (u + 1), None if (stars is None or u >= len(units)) else stars[u])
         setattr(t, 'unit%d_level' % (u + 1), None if (levels is None or u >= len(units)) else levels[u])
 
     order_map = t.order_units()
@@ -80,7 +80,7 @@ class Team(models.Model, ModelDiffMixin):
             print("Team %d: order corrected" % self.id)
             self.save()
             for score in self.clanbattlescore_set.all():
-                damages = [getattr(score, "unit%d_damage" % (u+1)) for u in range(5)]
+                damages = [getattr(score, "unit%d_damage" % (u + 1)) for u in range(5)]
                 for idx, dmg in enumerate(damages):
                     new_idx = order_map.index(idx)
                     setattr(score, "unit%d_damage" % (new_idx + 1), dmg)

@@ -116,7 +116,7 @@ class Box(models.Model):
             ["s2_level", "main_skill", 1],
             ["ex_level", "ex_skill", 0],
         ]
-        story_loves = {story.id:story.love_level for story in StoryDetail.objects.all()}
+        story_loves = {story.id: story.love_level for story in StoryDetail.objects.all()}
         for unit in data["unit_list"]:
             uid = unit["id"]
             if uid in all_units:
@@ -144,12 +144,13 @@ class Box(models.Model):
                         setattr(box_unit, skill[0], unit[skill[1]][skill[2]]["skill_level"])
                     else:
                         setattr(box_unit, skill[0], None)
-                read_bonds = [n for n in data["read_story_ids"] if n//1000 == uid//100]
+                read_bonds = [n for n in data["read_story_ids"] if n // 1000 == uid // 100]
                 if read_bonds:
                     max_bond = story_loves[max(read_bonds)]
                     box_unit.bond = max_bond if max_bond else 1
                 else:
                     box_unit.bond = 1
+                box_unit.power = unit["power"]
                 save_units.append(box_unit)
             else:
                 raise ValueError("Missing unit found in your import.")
@@ -174,4 +175,5 @@ class Box(models.Model):
     @staticmethod
     def full_data_queryset():
         return Box.objects.select_related("clanmember", "clanmember__clan").prefetch_related(
-            'boxunit_set__unit__ranks', 'boxunit_set__unit__unique_equip', 'boxunit_set__unit__rarity_6_quest', 'inventory')
+            'boxunit_set__unit__ranks', 'boxunit_set__unit__unique_equip', 'boxunit_set__unit__rarity_6_quest',
+            'inventory')

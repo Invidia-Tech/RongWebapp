@@ -14,7 +14,8 @@
 {% block title %}{{ clan.name }} - Add Clan Battles{% endblock %}
 
 {% block content %}
-    <h2>{{ clan.name }} &gt; <a href="{% url 'rong:clan_list_battles' clan.slug %}">Clan Battles</a> &gt; Add Clan Battle</h2>
+    <h2>{{ clan.name }} &gt; <a href="{% url 'rong:clan_list_battles' clan.slug %}">Clan Battles</a> &gt; Add Clan
+        Battle</h2>
     <form role="form" method="post">
         {% csrf_token %}
         {% bootstrap_form form layout='horizontal' bound_css_class='' %}

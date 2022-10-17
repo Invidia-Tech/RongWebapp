@@ -66,7 +66,8 @@ class BoxUnit(models.Model):
     def edit_json(self):
         base = model_to_dict(self)
         base["unit"] = model_to_dict(self.unit)
-        base["ranks"] = [[rk.equip1, rk.equip2, rk.equip3, rk.equip4, rk.equip5, rk.equip6] for rk in self.unit.ranks.all()]
+        base["ranks"] = [[rk.equip1, rk.equip2, rk.equip3, rk.equip4, rk.equip5, rk.equip6] for rk in
+                         self.unit.ranks.all()]
         base["max_level"] = BoxUnit.max_level()
         base["shards"] = self.box.get_item_quantity(self.unit.shard_id)
         base["max_ue_level"] = BoxUnit.max_ue_level() if self.unit.has_ue else -1

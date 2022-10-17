@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0015_clanbattlescore_order'),
     ]
@@ -55,7 +54,8 @@ class Migration(migrations.Migration):
                 ('boss5_pdef', models.PositiveIntegerField()),
                 ('boss5_mdef', models.PositiveIntegerField()),
                 ('boss5_iconid', models.PositiveIntegerField(null=True)),
-                ('clan_battle', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bosses', to='rong.clanbattle')),
+                ('clan_battle', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bosses',
+                                                  to='rong.clanbattle')),
             ],
         ),
     ]
