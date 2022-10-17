@@ -140,6 +140,9 @@
                         {% if form.active %}
                             {% bootstrap_field form.active layout='horizontal' %}
                         {% endif %}
+                        {% if form.out_of_clan %}
+                            {% bootstrap_field form.out_of_clan layout='horizontal' %}
+                        {% endif %}
                     </form>
                 </div>
                 <div class="modal-footer">
