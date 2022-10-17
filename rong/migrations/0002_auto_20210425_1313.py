@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0001_initial'),
     ]
@@ -64,7 +63,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clanbattlescore',
             name='unit1',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit1scores', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit1scores', to='rong.unit'),
         ),
         migrations.AddField(
             model_name='clanbattlescore',
@@ -79,7 +79,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clanbattlescore',
             name='unit2',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit2scores', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit2scores', to='rong.unit'),
         ),
         migrations.AddField(
             model_name='clanbattlescore',
@@ -94,7 +95,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clanbattlescore',
             name='unit3',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit3scores', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit3scores', to='rong.unit'),
         ),
         migrations.AddField(
             model_name='clanbattlescore',
@@ -109,7 +111,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clanbattlescore',
             name='unit4',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit4scores', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit4scores', to='rong.unit'),
         ),
         migrations.AddField(
             model_name='clanbattlescore',
@@ -124,7 +127,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clanbattlescore',
             name='unit5',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit5scores', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit5scores', to='rong.unit'),
         ),
         migrations.AddField(
             model_name='clanbattlescore',
@@ -144,26 +148,31 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='clanbattlecomp',
             name='borrowed_unit',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='borrowedcomps', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='borrowedcomps', to='rong.unit'),
         ),
         migrations.AlterField(
             model_name='clanbattlecomp',
             name='unit1',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit1comps', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit1comps', to='rong.unit'),
         ),
         migrations.AlterField(
             model_name='clanbattlecomp',
             name='unit2',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit2comps', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit2comps', to='rong.unit'),
         ),
         migrations.AlterField(
             model_name='clanbattlecomp',
             name='unit3',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit3comps', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit3comps', to='rong.unit'),
         ),
         migrations.AlterField(
             model_name='clanbattlecomp',
             name='unit4',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit4comps', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit4comps', to='rong.unit'),
         ),
     ]

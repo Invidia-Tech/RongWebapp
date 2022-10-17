@@ -17,11 +17,12 @@ def export_data(entity, exclude_columns=[]):
     for column in exclude_columns:
         if column in export:
             del export[column]
-    #for key in export:
+    # for key in export:
     #    if type(export[key]) is datetime:
     #        export[key] = export[key].timestamp()
 
     return export
+
 
 class Command(BaseCommand):
 
@@ -44,12 +45,15 @@ class Command(BaseCommand):
                 user_ids.add(member.user_id)
             if member.box_id:
                 member_data["box"] = export_data(member.box, ["id", "user_id", "name"])
-                member_data["box"]["units"] = [export_data(box_unit, ["id", "box_id"]) for box_unit in member.box.boxunit_set.all()]
-                member_data["box"]["items"] = [export_data(box_item, ["id", "box_id"]) for box_item in member.box.inventory.all()]
+                member_data["box"]["units"] = [export_data(box_unit, ["id", "box_id"]) for box_unit in
+                                               member.box.boxunit_set.all()]
+                member_data["box"]["items"] = [export_data(box_item, ["id", "box_id"]) for box_item in
+                                               member.box.inventory.all()]
             clan_export["members"].append(member_data)
         clan_export["tags"] = [export_data(tag, ["clan_id"]) for tag in clan.hit_tags.all()]
         clan_export["battles"] = []
-        for battle in clan.clanbattle_set.prefetch_related('bosses', 'comps', 'comps__team', 'hits', 'hits__tags', 'hits__team', 'hit_groups', 'flights', 'flights__team'):
+        for battle in clan.clanbattle_set.prefetch_related('bosses', 'comps', 'comps__team', 'hits', 'hits__tags',
+                                                           'hits__team', 'hit_groups', 'flights', 'flights__team'):
             battle_data = export_data(battle, ["clan_id"])
             battle_data["bosses"] = [export_data(boss, ["id", "clan_battle_id"]) for boss in battle.bosses.all()]
             battle_data["comps"] = []
@@ -65,7 +69,7 @@ class Command(BaseCommand):
                 hit_data = export_data(hit, ["id", "clan_battle_id", "team_id"])
                 hit_data["hit_type"] = hit_data["hit_type"].value
                 if hit.team_id:
-                    hit_data["team"] = [getattr(hit.team, "unit%d_id" % u) for u in range(1,6)]
+                    hit_data["team"] = [getattr(hit.team, "unit%d_id" % u) for u in range(1, 6)]
                 hit_data["tags"] = [tag.id for tag in hit.tags.all()]
                 battle_data["hits"].append(hit_data)
             battle_data["flights"] = []

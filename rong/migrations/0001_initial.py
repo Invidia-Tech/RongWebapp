@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -53,7 +52,8 @@ class Migration(migrations.Migration):
                 ('begin_time', models.DateTimeField()),
                 ('end_time', models.DateTimeField()),
                 ('clan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rong.clan')),
-                ('game_battle', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='rong.clanbattleschedule')),
+                ('game_battle', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                                  to='rong.clanbattleschedule')),
             ],
         ),
         migrations.CreateModel(
@@ -64,7 +64,8 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50)),
                 ('is_lead', models.BooleanField()),
                 ('group_num', models.IntegerField()),
-                ('clan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='members', to='rong.clan')),
+                ('clan', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='members',
+                                           to='rong.clan')),
             ],
         ),
         migrations.CreateModel(
@@ -103,19 +104,29 @@ class Migration(migrations.Migration):
                 ('boss_lap', models.IntegerField()),
                 ('boss_number', models.IntegerField()),
                 ('damage', models.IntegerField()),
-                ('borrowed_unit', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='borrowedcomps', to='rong.unit')),
+                ('borrowed_unit', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                                    related_name='borrowedcomps', to='rong.unit')),
                 ('clan_battle', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rong.clanbattle')),
                 ('submitter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='rong.member')),
-                ('unit1', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unit1comps', to='rong.unit')),
-                ('unit2', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unit2comps', to='rong.unit')),
-                ('unit3', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unit3comps', to='rong.unit')),
-                ('unit4', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unit4comps', to='rong.unit')),
+                ('unit1',
+                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unit1comps',
+                                   to='rong.unit')),
+                ('unit2',
+                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unit2comps',
+                                   to='rong.unit')),
+                ('unit3',
+                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unit3comps',
+                                   to='rong.unit')),
+                ('unit4',
+                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='unit4comps',
+                                   to='rong.unit')),
             ],
         ),
         migrations.AddField(
             model_name='clan',
             name='admin',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='clans_administrated', to='rong.member'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    related_name='clans_administrated', to='rong.member'),
         ),
         migrations.AddField(
             model_name='clan',

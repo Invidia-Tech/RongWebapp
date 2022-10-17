@@ -7,7 +7,7 @@
                 <input type="{{ option.type }}" name="{{ option.name }}" id="{{ option.attrs.id }}"
                         {% if option.value != None %} value="{{ option.value|stringformat:'s' }}"
                             {% if option.attrs.checked %} checked="checked"{% endif %}{% endif %}
-                {% if widget.required %} required{% endif %}>
+                        {% if widget.required %} required{% endif %}>
                 {% unit_icon option.value border='white' %}
             </label>
         {% endfor %}

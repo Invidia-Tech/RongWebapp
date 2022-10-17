@@ -93,13 +93,13 @@ def gearbot_update_box(request):
         if request.method != "POST" or "X-Gearbot-Memez" not in request.headers:
             return JsonResponse({"boo": "PUDDING DAYO"})
         data = json.loads(request.body)
-        num_players = ClanMember.objects.filter(player_id=data["viewer_id"], active=True).count()
+        num_players = ClanMember.objects.filter(player_id=data["viewer_id"], active=True, out_of_clan=False).count()
         if not num_players:
             return JsonResponse({"success": False, "error": "No active players found matching provided viewer id"})
         if num_players > 1:
             return JsonResponse(
                 {"success": False, "error": "Multiple active players found matching provided viewer id"})
-        player = ClanMember.objects.get(player_id=data["viewer_id"], active=True)
+        player = ClanMember.objects.get(player_id=data["viewer_id"], active=True, out_of_clan=False)
         player.box.import_loadindex(data["load_index"])
         return JsonResponse({"success": True})
 
@@ -178,10 +178,10 @@ def gearbot_add_hits(request):
             report = hit_data["report"]
             if log["history_id"] in existing_hits:
                 continue
-            hitter = clan.members.filter(player_id=log["viewer_id"]).first()
+            hitter = clan.in_clan_members.filter(player_id=log["viewer_id"]).first()
             if not hitter:
                 return JsonResponse(
-                    {"success": False, "error": "No active member with player id %d" % log["viewer_id"]})
+                    {"success": False, "error": "No active in-clan member with player id %d" % log["viewer_id"]})
             units = []
             damages = []
             for unit in report["history_report"]:

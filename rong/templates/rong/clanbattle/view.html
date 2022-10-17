@@ -231,66 +231,67 @@
                 </div>
                 {% if battle.comp_stats %}
                     <div id="comp-stats" class="tab-pane">
-                    {{ battle.comp_stats|json_script:"compStats" }}
-                    <div class="row">
-                        <div class="col-md-4">
-                            <h3>Comp: <select id="compStatsSelector"></select></h3>
-                            <table class="w-100 table dt dt-noPaging" id="compHitsTable">
-                                <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Attacker</th>
-                                    <th>Lap</th>
-                                    <th>Damage</th>
-                                    <th>%ile</th>
-                                </tr>
-                                </thead>
-                            </table>
+                        {{ battle.comp_stats|json_script:"compStats" }}
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h3>Comp: <select id="compStatsSelector"></select></h3>
+                                <table class="w-100 table dt dt-noPaging" id="compHitsTable">
+                                    <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Attacker</th>
+                                        <th>Lap</th>
+                                        <th>Damage</th>
+                                        <th>%ile</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div class="col-md-4">
+                                <h3>Damage Summary</h3>
+                                <table class="table">
+                                    <tr>
+                                        <th>Mean</th>
+                                        <td id="compStatsMean"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Minimum</th>
+                                        <td id="compStatsMinimum"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Lower Quartile</th>
+                                        <td id="compStatsLQ"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Median</th>
+                                        <td id="compStatsMedian"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Upper Quartile</th>
+                                        <td id="compStatsUQ"></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Maximum</th>
+                                        <td id="compStatsMaximum"></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-4">
+                                <h3>Hitter Summary</h3>
+                                <table class="w-100 table dt dt-noPaging" id="compHittersTable"
+                                       data-order='[[4, "desc"], [0, "asc"]]'>
+                                    <thead>
+                                    <tr>
+                                        <th>Attacker</th>
+                                        <th>Hit Count</th>
+                                        <th>Mean</th>
+                                        <th>Median</th>
+                                        <th>Average %ile</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <h3>Damage Summary</h3>
-                            <table class="table">
-                                <tr>
-                                    <th>Mean</th>
-                                    <td id="compStatsMean"></td>
-                                </tr>
-                                <tr>
-                                    <th>Minimum</th>
-                                    <td id="compStatsMinimum"></td>
-                                </tr>
-                                <tr>
-                                    <th>Lower Quartile</th>
-                                    <td id="compStatsLQ"></td>
-                                </tr>
-                                <tr>
-                                    <th>Median</th>
-                                    <td id="compStatsMedian"></td>
-                                </tr>
-                                <tr>
-                                    <th>Upper Quartile</th>
-                                    <td id="compStatsUQ"></td>
-                                </tr>
-                                <tr>
-                                    <th>Maximum</th>
-                                    <td id="compStatsMaximum"></td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-4">
-                            <h3>Hitter Summary</h3>
-                            <table class="w-100 table dt dt-noPaging" id="compHittersTable"  data-order='[[4, "desc"], [0, "asc"]]'>
-                                <thead>
-                                <tr>
-                                    <th>Attacker</th>
-                                    <th>Hit Count</th>
-                                    <th>Mean</th>
-                                    <th>Median</th>
-                                    <th>Average %ile</th>
-                                </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div>
                     </div>
                 {% endif %}
             </div>

@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0035_alter_clanmember_is_lead'),
     ]
@@ -22,11 +21,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='clanmember',
             name='clan',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='members', to='rong.clan'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='members',
+                                    to='rong.clan'),
         ),
         migrations.AlterField(
             model_name='clanmember',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='clan_memberships', to='rong.user'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='clan_memberships',
+                                    to='rong.user'),
         ),
     ]

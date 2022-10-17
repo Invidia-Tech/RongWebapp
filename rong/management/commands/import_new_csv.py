@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 if not row[0]:
                     break
                 mname = row[2].lower().strip()
-                hit = ClanBattleScore(clan_battle=battle, user=member_map[mname].user, ign=member_map[mname].ign, day=int(row[1]), damage=int(row[7].replace(',', '')))
+                hit = ClanBattleScore(clan_battle=battle, user=member_map[mname].user, ign=member_map[mname].ign,
+                                      day=int(row[1]), damage=int(row[7].replace(',', '')))
                 hit.save()
         print("Done.")
-

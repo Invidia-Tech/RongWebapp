@@ -147,6 +147,7 @@ class HitTagForm(forms.ModelForm):
         model = HitTag
         fields = ['name', 'description']
 
+
 class ClanBattleCompForm(forms.Form):
     name = forms.CharField(max_length=50)
     boss = forms.ChoiceField()
@@ -241,12 +242,13 @@ class EditClanMemberForm(forms.ModelForm):
 class FullEditClanMemberForm(EditClanMemberForm):
     class Meta:
         model = ClanMember
-        fields = ['ign', 'player_id', 'active', 'is_lead']
+        fields = ['ign', 'player_id', 'active', 'is_lead', 'out_of_clan']
         widgets = {
             'player_id': forms.TextInput()
         }
         labels = {
             'ign': 'IGN',
             'player_id': 'Player ID',
-            'active': 'Active'
+            'active': 'Active',
+            'out_of_clan': 'Outside of Clan'
         }

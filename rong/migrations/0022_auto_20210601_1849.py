@@ -4,6 +4,7 @@ from enum import unique
 from django.db import migrations
 import django_extensions.db.fields
 
+
 def fill_slug_fields(apps, schema_editor):
     for model_name in ["Clan", "ClanCollection"]:
         model = apps.get_model("rong", model_name)
@@ -13,7 +14,6 @@ def fill_slug_fields(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0021_auto_20210528_1902'),
     ]

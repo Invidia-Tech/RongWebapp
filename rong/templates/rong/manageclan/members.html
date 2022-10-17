@@ -51,7 +51,13 @@
                         N/A
                     {% endif %}
                 </td>
-                <td class="member-pid">{{ member.formatted_id }}</td>
+                <td class="member-pid">
+                    {% if member.out_of_clan %}
+                        Outside clan
+                    {% else %}
+                        {{ member.formatted_id }}
+                    {% endif %}
+                </td>
                 <td class="member-lead">
                     {% if member.user_id == clan.admin_id %}
                         Leader
@@ -64,7 +70,8 @@
                 <td>
                     <button type="button" class="btn btn-primary show-member-box">Show</button>
                 </td>
-                <td class="member-box-update" data-sort="{% if member.box.last_update %}{{ member.box.last_update|date:"U" }}{% else %}0{% endif %}">
+                <td class="member-box-update" data-sort="
+                        {% if member.box.last_update %}{{ member.box.last_update|date:"U" }}{% else %}0{% endif %}">
                     {% if member.box.last_update %}
                         {{ member.box.last_update|naturaltime }}
                     {% else %}

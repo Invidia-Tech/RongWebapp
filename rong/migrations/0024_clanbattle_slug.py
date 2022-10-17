@@ -5,7 +5,6 @@ import django_extensions.db.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0023_auto_20210601_1859'),
     ]
@@ -14,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clanbattle',
             name='slug',
-            field=django_extensions.db.fields.AutoSlugField(blank=True, editable=False, populate_from=['clan__name', 'name'], unique=True),
+            field=django_extensions.db.fields.AutoSlugField(blank=True, editable=False,
+                                                            populate_from=['clan__name', 'name'], unique=True),
         ),
     ]

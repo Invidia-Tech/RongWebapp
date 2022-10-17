@@ -20,6 +20,7 @@ class CBLabelModelChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
         return self.callback(obj)
 
+
 class CBLabelModelMultipleChoiceField(forms.ModelMultipleChoiceField):
     def __init__(self, callback=None, *args, **kwargs):
         super(CBLabelModelMultipleChoiceField, self).__init__(*args, **kwargs)

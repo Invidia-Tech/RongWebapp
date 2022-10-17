@@ -3,6 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+
 def update_clan_boxes(apps, schema_editor):
     Box = apps.get_model("rong", "Box")
     for box in Box.objects.all():
@@ -20,8 +21,8 @@ def update_clan_boxes(apps, schema_editor):
             cm.ign = cm.user.name[:20]
             cm.save()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ('rong', '0057_auto_20211126_0515'),
     ]

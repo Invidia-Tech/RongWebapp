@@ -57,7 +57,7 @@ class User(models.Model):
             cur.execute("""
 SELECT cl."id", cl."box_summary_public", cl."admin_id", cm."id", cm."is_lead"
 FROM "rong_clan" cl
-LEFT JOIN "rong_clanmember" cm ON (cl."id" = cm."clan_id" AND cm."user_id" = %s AND cm."active" is TRUE)""" + where_part+"""
+LEFT JOIN "rong_clanmember" cm ON (cl."id" = cm."clan_id" AND cm."user_id" = %s AND cm."active" is TRUE)""" + where_part + """
 ORDER BY (cm."id" IS NOT NULL) DESC, cl."name" ASC;
 """, args)
             clan_results = list(cur.fetchall())

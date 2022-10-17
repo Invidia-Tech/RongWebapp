@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0063_auto_20211205_1316'),
     ]
@@ -35,6 +34,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='clanbattlescore',
             name='pilot',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pilots', to='rong.clanmember'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pilots',
+                                    to='rong.clanmember'),
         ),
     ]

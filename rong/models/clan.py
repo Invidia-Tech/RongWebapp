@@ -23,6 +23,7 @@ class Clan(models.Model):
     @cached_property
     def nearest_cb(self):
         now = timezone.now()
+
         def cb_distance(cb):
             distance_start = now - cb.start_time if now > cb.start_time else cb.start_time - now
             distance_end = now - cb.end_time if now > cb.end_time else cb.end_time - now
@@ -51,3 +52,7 @@ class Clan(models.Model):
     @property
     def members(self):
         return self.all_members.filter(active=True)
+
+    @property
+    def in_clan_members(self):
+        return self.all_members.filter(active=True, out_of_clan=False)

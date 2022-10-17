@@ -2,13 +2,14 @@
 import django
 from django.db import migrations
 
+
 def fix_teams(apps, schema_editor):
     from django.apps import apps
     Team = apps.get_model("rong", "Team")
     for t in Team.objects.all():
-        t.fix_uid() # quick set UIDs only
+        t.fix_uid()  # quick set UIDs only
     for t in Team.objects.all():
-        t.fix() # ordering
+        t.fix()  # ordering
     # now preload all teams to avoid weirdness with deleting them
     teams = list(Team.objects.all())
     for t in teams:
@@ -16,7 +17,6 @@ def fix_teams(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0068_alter_clanbattlecomp_clan_battle'),
     ]

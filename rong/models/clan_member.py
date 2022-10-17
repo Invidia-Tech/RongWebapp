@@ -1,5 +1,3 @@
-from django.apps import apps
-from django.contrib.humanize.templatetags import humanize
 from django.db import models
 
 from .box import Box
@@ -14,6 +12,7 @@ class ClanMember(models.Model):
     group_num = models.PositiveIntegerField(null=True)
     box = models.OneToOneField('Box', null=True, on_delete=models.SET_NULL)
     active = models.BooleanField(default=True)
+    out_of_clan = models.BooleanField(default=False)
 
     @property
     def formatted_id(self):
@@ -39,6 +38,7 @@ class ClanMember(models.Model):
             "discord_username": None if not self.user_id else self.user.name,
             "discord_discriminator": None if not self.user_id else self.user.discriminator,
             "active": self.active,
+            "out_of_clan": self.out_of_clan,
             "box": self.box.as_json(include_units=include_units),
         }
 

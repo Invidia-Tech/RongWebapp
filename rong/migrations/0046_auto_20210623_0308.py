@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0045_auto_20210622_2303'),
     ]
@@ -14,12 +13,14 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='battlearenacounter',
             name='attacker_team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attacker_in', to='rong.team'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attacker_in',
+                                    to='rong.team'),
         ),
         migrations.AlterField(
             model_name='battlearenacounter',
             name='defender_team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='defender_in', to='rong.team'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='defender_in',
+                                    to='rong.team'),
         ),
         migrations.AlterField(
             model_name='clanbattlecomp',
@@ -34,16 +35,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='princessarenacomp',
             name='team1',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='team1_for', to='rong.team'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='team1_for',
+                                    to='rong.team'),
         ),
         migrations.AlterField(
             model_name='princessarenacomp',
             name='team2',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='team2_for', to='rong.team'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='team2_for',
+                                    to='rong.team'),
         ),
         migrations.AlterField(
             model_name='princessarenacomp',
             name='team3',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='team3_for', to='rong.team'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='team3_for',
+                                    to='rong.team'),
         ),
     ]

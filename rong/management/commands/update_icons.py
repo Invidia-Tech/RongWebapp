@@ -97,11 +97,11 @@ class Command(BaseCommand):
             css.write("}\n.unit-pfp {\n")
             for unit in positions:
                 css.write("&.u-%s {background-position: -%dpx -%dpx; }\n" % (
-                unit, positions[unit][0] * 48 // 64, positions[unit][1] * 48 // 64))
+                    unit, positions[unit][0] * 48 // 64, positions[unit][1] * 48 // 64))
             css.write("}\n.unit-ddicon {\n")
             for unit in positions:
                 css.write("&.u-%s {background-position: -%dpx -%dpx; }\n" % (
-                unit, positions[unit][0] * 32 // 64, positions[unit][1] * 32 // 64))
+                    unit, positions[unit][0] * 32 // 64, positions[unit][1] * 32 // 64))
             css.write("}\n.unit-icon-stars {\n")
             for star_num in range(7):
                 css.write("&.s-%d {background-position: 0px -%dpx; }\n" % (star_num, star_num * star_size))

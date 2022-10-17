@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0050_auto_20210720_2209'),
     ]
@@ -14,17 +13,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='clanbattlecomp',
             name='group',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='comps', to='rong.hitgroup'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='comps',
+                                    to='rong.hitgroup'),
         ),
         migrations.AlterField(
             model_name='clanbattlescore',
             name='group',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='hits', to='rong.hitgroup'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='hits',
+                                    to='rong.hitgroup'),
         ),
         migrations.AlterField(
             model_name='hitgroup',
             name='clan_battle',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='hit_groups', to='rong.clanbattle'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='hit_groups',
+                                    to='rong.clanbattle'),
         ),
         migrations.AlterField(
             model_name='hitgroup',

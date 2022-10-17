@@ -77,7 +77,7 @@ def hit_log_data(request, battle: ClanBattle):
     pilots = set()
     players = set()
     boss_data = list(battle.bosses.order_by('difficulty').all())
-    member_list = list(battle.clan.members.select_related('user'))
+    member_list = list(battle.clan.in_clan_members.select_related('user'))
     pilot_choices = [(x.id, x.ign) for x in member_list]
     phase = 1
     for hit in hits:

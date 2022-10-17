@@ -12,6 +12,7 @@ class UnitUniqueEquip(models.Model):
         managed = False
         db_table = u'redive_en"."unit_unique_equip'
 
+
 class Rarity6QuestData(models.Model):
     id = models.AutoField(primary_key=True, db_column='rarity_6_quest_id')
     unit = models.OneToOneField('Unit', db_column='unit_id', on_delete=models.DO_NOTHING, related_name='rarity_6_quest')
@@ -166,6 +167,7 @@ class EnemyParameter(models.Model):
         managed = False
         db_table = u'redive_en"."enemy_parameter'
 
+
 class StoryDetail(models.Model):
     id = models.IntegerField(primary_key=True, db_column='story_id')
     love_level = models.IntegerField()
@@ -206,6 +208,7 @@ class ENClanBattleBossGroup(models.Model):
     class Meta():
         managed = False
         db_table = u'redive_en"."clan_battle_boss_group'
+
 
 class ENClanBattleMapData2(models.Model):
     id = models.IntegerField(primary_key=True, db_column='clan_battle_id')

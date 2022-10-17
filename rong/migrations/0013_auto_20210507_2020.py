@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0012_rename_last_updated_princessarenacomp_updated_at'),
     ]

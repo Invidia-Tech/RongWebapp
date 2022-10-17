@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('rong', '0044_clanbattlescore_ign'),
     ]
@@ -14,26 +13,31 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='team',
             name='unit1',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit1teams', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit1teams', to='rong.unit'),
         ),
         migrations.AlterField(
             model_name='team',
             name='unit2',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit2teams', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit2teams', to='rong.unit'),
         ),
         migrations.AlterField(
             model_name='team',
             name='unit3',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit3teams', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit3teams', to='rong.unit'),
         ),
         migrations.AlterField(
             model_name='team',
             name='unit4',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit4teams', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit4teams', to='rong.unit'),
         ),
         migrations.AlterField(
             model_name='team',
             name='unit5',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='unit5teams', to='rong.unit'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.DO_NOTHING,
+                                    related_name='unit5teams', to='rong.unit'),
         ),
     ]
