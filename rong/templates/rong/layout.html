@@ -24,7 +24,7 @@
 
 <body>
 <nav class="navbar navbar-dark bg-dark fixed-top navbar-expand-lg">
-    <div class="container">
+    <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'rong:index' %}">Rong</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,7 +111,7 @@
     </div>
 </nav>
 
-<div class="container page__{{ request.resolver_match.url_name }}" id="mainContent">
+<div class="container-fluid page__{{ request.resolver_match.url_name }}" id="mainContent">
 
     {% bootstrap_messages %}
 
@@ -120,7 +120,7 @@
 
 <hr/>
 
-<div class="container">
+<div class="container-fluid">
     Princess Connect Re;Dive &copy; Cygames &amp; licensed by Crunchyroll Games.<br/>
     The creator of this website is not affiliated with either of these entities.
 </div>

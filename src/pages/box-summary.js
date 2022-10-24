@@ -4,6 +4,7 @@ import 'jquery-validation';
 import 'jquery-mask-plugin';
 
 require("datatables.net-bs4/js/dataTables.bootstrap4");
+import 'datatables.net-fixedcolumns';
 
 page('clan_box_summary', function () {
     let members = JSON.parse(document.getElementById('memberData').textContent);
@@ -24,6 +25,7 @@ page('clan_box_summary', function () {
             title: unit_el.outerHTML(),
             data: "unit_" + unit["id"],
             width: "100px",
+            defaultContent: "",
             render: function (data, type) {
                 if (type === 'display') {
                     if (data === undefined) {
@@ -91,6 +93,7 @@ page('clan_box_summary', function () {
         scrollY: "70vh",
         scrollX: true,
         autoWidth: false,
+        fixedColumns: true
     });
 
     let unitData = [];
