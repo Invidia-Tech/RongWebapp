@@ -13,6 +13,7 @@
     </thead>
     <tbody>
     {% for player in battle.hit_stats.players %}
+        {% if player.in_clan %}
         <tr>
             <td class="name">{{ player.member.user_display_name }}</td>
             {% for day in player.days %}
@@ -40,6 +41,7 @@
             <td data-sort="{{ player|get_item:total_key }}"
                 class="total">{{ player|get_item:total_key|intcomma }}</td>
         </tr>
+        {% endif %}
     {% endfor %}
     </tbody>
     <tfoot>

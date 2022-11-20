@@ -167,6 +167,7 @@
                         </thead>
                         <tbody>
                         {% for player in battle.hit_stats.players %}
+                            {% if player.in_clan %}
                             <tr>
                                 <td>{{ player.member.user_display_name }}</td>
                                 {% for day in player.days %}
@@ -178,6 +179,7 @@
                                     {% endif %}
                                 {% endfor %}
                             </tr>
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
