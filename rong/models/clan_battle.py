@@ -362,6 +362,7 @@ class ClanBattle(models.Model):
             } for n in range(self.total_days)],
             "hits": [],
             "tags": defaultdict(lambda: 0),
+            "in_clan": not member.out_of_clan
         }
 
     def get_boss_info(self, boss_data, difficulty_idx):
@@ -417,6 +418,7 @@ class ClanBattle(models.Model):
             if hit.pilot_id and hit.pilot_id not in hit_matrix:
                 hit_matrix[hit.pilot_id] = self.initial_matrix_row(hit.pilot)
             entry = hit_matrix[hit.member_id]
+            entry["in_clan"] = True
             if int(entry['days'][hit.day - 1]['hits']) >= ClanBattle.HITS_PER_DAY:
                 continue  # silently ignore extra hits to avoid kabooming the dashboard
             entry["hits"].append(hit)
@@ -518,7 +520,21 @@ class ClanBattle(models.Model):
                 pilot_matrix[hit.pilot_id]["days"][hit.day - 1]["piloted"] += value
                 pilot_matrix[hit.pilot_id]["days"][hit.day - 1]["total"] += value
 
-        return list(pilot_matrix.values())
+        aggregate_stats = {
+            "total_own": sum(pilot_matrix[k]["total_own"] for k in pilot_matrix),
+            "total_piloted": sum(pilot_matrix[k]["total_piloted"] for k in pilot_matrix),
+            "total_total": sum(pilot_matrix[k]["total_total"] for k in pilot_matrix),
+            "days": [{
+                "own": sum(pilot_matrix[k]["days"][n]["own"] for k in pilot_matrix),
+                "piloted": sum(pilot_matrix[k]["days"][n]["piloted"] for k in pilot_matrix),
+                "total": sum(pilot_matrix[k]["days"][n]["total"] for k in pilot_matrix),
+            } for n in range(self.total_days)]
+        }
+
+        return {
+            "players": list(pilot_matrix.values()),
+            "aggregate": aggregate_stats
+        }
 
     @cached_property
     def pilot_stats_clashes(self):

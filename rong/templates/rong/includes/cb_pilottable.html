@@ -22,7 +22,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for player in data %}
+    {% for player in data.players %}
         <tr>
             <td class="name">{{ player.member.ign }}</td>
             {% for day in player.days %}
@@ -43,4 +43,24 @@
         </tr>
     {% endfor %}
     </tbody>
+    <tfoot>
+        <tr>
+            <td><b>Totals</b></td>
+            {% for day in data.aggregate.days %}
+                {% day_reached battle forloop.counter as active %}
+                {% if active %}
+                    <td>{{ day.own|format_hits }}</td>
+                    <td>{{ day.piloted|format_hits }}</td>
+                    <td>{{ day.total|format_hits }}</td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                {% endif %}
+            {% endfor %}
+            <td>{{ data.aggregate.total_own|format_hits }}</td>
+            <td>{{ data.aggregate.total_piloted|format_hits }}</td>
+            <td>{{ data.aggregate.total_total|format_hits }}</td>
+        </tr>
+    </tfoot>
 </table>
