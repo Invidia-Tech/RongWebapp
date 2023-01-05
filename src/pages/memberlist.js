@@ -118,6 +118,7 @@ page('clan_list_members', function () {
             $("#id_player_id").val(member.player_id ? formatPlayerId(member.player_id) : "");
             $("#id_player_id").mask('000 000 000');
             $("#id_discord").val(member.discord_id ?? "");
+            $("#id_discord").select2({width: '100%', dropdownParent: $('#memberModal')});
             if ($("#id_is_lead").length) {
                 if (member.is_admin) {
                     $("#id_is_lead").prop("checked", true);
@@ -128,6 +129,8 @@ page('clan_list_members', function () {
                 }
                 $("#id_active").prop("checked", member.active);
                 $("#id_active").prop("disabled", false);
+                $("#id_out_of_clan").prop("checked", member.out_of_clan);
+                $("#id_out_of_clan").prop("disabled", false);
             }
             $('#memberModalLabel').text('Edit Member Details');
             $('#memberModal').modal();

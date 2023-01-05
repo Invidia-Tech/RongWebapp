@@ -111,7 +111,11 @@
     </div>
 </nav>
 
-<div class="container-fluid page__{{ request.resolver_match.url_name }}" id="mainContent">
+{% if request.resolver_match.url_name == "cb_list_hits" %}
+    <div class="container page__{{ request.resolver_match.url_name }}" id="mainContent">
+{% else %}
+    <div class="container-fluid page__{{ request.resolver_match.url_name }}" id="mainContent">
+{% endif %}
 
     {% bootstrap_messages %}
 

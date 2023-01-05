@@ -328,7 +328,8 @@
                     <td class="text-center">
                         Lv{{ boss.level }}<br>
                         HP {{ boss.hp|intcomma }}<br>
-                        {{ boss.pdef }} PDEF / {{ boss.mdef }} MDEF
+                        {{ boss.pdef }} PDEF / {{ boss.mdef }} MDEF<br>
+                        Score Multiplier: {{ boss.multiplier }}x
                     </td>
                 {% endfor %}
             </tr>
