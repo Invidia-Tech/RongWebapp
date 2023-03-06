@@ -11,6 +11,7 @@ require('./pages/memberlist');
 require('./pages/hit-log');
 require('./pages/edit-battle');
 require('./pages/box-summary');
+require('./pages/box-summary-unitfilter');
 require('./pages/dashboard');
 
 import './styles/main.scss';
