@@ -50,8 +50,8 @@ page('clan_box_summary', function () {
                         level = "<span class='underline-dotted' title='" + slvl_info.substring(1) + "'>" + level + "</span>";
                     }
                     let retval = data.star + "★ " + rankDesc(unit, data) + "<br />" + level + ue + "<br/>Bond" + data.bond;
-                    if(data.power !== null) {
-                        retval += "<br/>Power: "+data.power;
+                    if (data.power !== null) {
+                        retval += "<br/>Power: " + data.power;
                     }
                     return retval;
                 } else {
@@ -141,7 +141,7 @@ page('clan_box_summary', function () {
     applyUnitFilter();
 
     $('#selectUnitsBtn').click(function () {
-        $('#unitSelectorBody').empty();
+        $('#unitSelectorUnits').empty();
         for (const unit of units) {
             let unit_el = $("<div class='unit-ddicon unit-selector-icon'></div>").addClass('u-' + icon_id(unit.id, unit.rarity));
             unit_el.attr('title', unit.name);
@@ -150,7 +150,7 @@ page('clan_box_summary', function () {
             unit_el.click(function () {
                 toggleUnit(unit.id);
             });
-            unit_el.appendTo('#unitSelectorBody');
+            unit_el.appendTo('#unitSelectorUnits');
         }
         $('#unitSelectorModal').modal();
     });
@@ -165,4 +165,58 @@ page('clan_box_summary', function () {
         unitFilter = [];
         applyUnitFilter();
     });
+
+    // adds `/` shortcut to open unit filter
+    document.addEventListener('keydown', e => {
+        // Wrong key
+        if (e.key !== '/') return;
+
+        // Already open
+        const modal = document.querySelector("#unitSelectorModal.show");
+        if (modal) return;
+
+        e.preventDefault();
+        document.querySelector("#selectUnitsBtn").click();
+    });
+
+    // filterUnits takes a filterText and returns array of elements matching the rules
+    const filterUnits = filterText => {
+        // If last character is `$` we use `$=` instead of `*=`
+        const mode = (filterText.substr(-1) === "$") ? "$" : "*";
+        filterText = (filterText.substr(-1) === "$") ? filterText.slice(0, -1) : filterText;
+
+        return Array.from(document.querySelectorAll(`.unit-selector-icon[title${mode}="${filterText}"i]`));
+    }
+
+    // highlightUnits highlights all units matching `filterText`
+    const highlightUnits = filterText => {
+        // If it's empty do not highlight anything
+        const parent = document.querySelector("#unitSelectorBody");
+        if (filterText === "") {
+            parent.classList.remove("highlighting");
+        } else {
+            parent.classList.add("highlighting");
+        }
+
+        // Remove previous highlights
+        const highlighted = Array.from(document.querySelectorAll(".unit-selector-icon.highlight"));
+        highlighted.forEach(el => el.classList.remove("highlight"));
+
+        // Add new
+        filterUnits(filterText).forEach(el => el.classList.add("highlight"));
+    }
+
+    // toggleUnits toggles all unit matching `filterText`
+    const toggleUnits = filterText => {
+        filterUnits(filterText).forEach(el => el.click());
+    }
+
+    $("#unitSelectorFilter").keyup(e => {
+        if (e.keyCode == "13") {
+            toggleUnits(e.target.value);
+            e.target.value = "";
+        }
+        highlightUnits(e.target.value);
+    });
+
 });
