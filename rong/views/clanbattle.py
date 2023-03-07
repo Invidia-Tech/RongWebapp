@@ -211,7 +211,7 @@ def hit_log_csv(request, battle: ClanBattle):
         if hit.hit_type != ClanBattleHitType.LAST_HIT:
             of = "None"
         else:
-            of = str(min(math.ceil(110 - hit.actual_damage * 90 / hit.damage), 90)) + "s+"
+            of = str(max(min(math.ceil(110 - hit.actual_damage * 90 / hit.damage), 90), 21)) + "s+"
         hitrow += [
             hit.damage,
             hit.actual_damage,
