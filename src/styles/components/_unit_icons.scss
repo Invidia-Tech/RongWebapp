@@ -96,8 +96,20 @@ html.webp {
   &.unit-selector-icon {
     margin-right: 5px;
     cursor: pointer;
+    transition: opacity 200ms ease;
+
+    &.highlight {
+      outline: 2px solid #f0f;
+      box-shadow: 0 0 0 1px #f0f inset;
+    }
   }
+
   &.inactive {
     filter: grayscale(100%);
   }
 }
+
+#unitSelectorUnits.highlighting .unit-selector-icon:not(.highlight) {
+    opacity: 0.15;
+}
+
