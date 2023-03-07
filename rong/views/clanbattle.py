@@ -1,11 +1,13 @@
+import csv
 import json
+import math
 from collections import defaultdict
 
 from django.contrib import messages
 from django.core.exceptions import SuspiciousOperation
 from django.db import transaction
 from django.db.models import F
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
@@ -165,6 +167,65 @@ def hit_log_data(request, battle: ClanBattle):
         resp["pilot_choices"].sort(key=lambda x: x[1].lower())
         resp["pilot_choices"] = [(0, "Self Hit")] + resp["pilot_choices"]
     return JsonResponse(resp)
+
+
+@clanbattle_view
+def hit_log_csv(request, battle: ClanBattle):
+    hits = list(
+        battle.hits.select_related('member', 'member__user', 'team', 'team__unit1', 'team__unit2', 'team__unit3',
+                                   'team__unit4',
+                                   'team__unit5', 'group', 'comp', 'pilot', 'pilot__user').prefetch_related(
+            'tags').order_by('order'))
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="log.csv"'},
+    )
+    writer = csv.writer(response)
+    writer.writerow(
+        ['#', 'Day', 'Account', 'Player', 'Unit1', 'Unit2', 'Unit3', 'Unit4', 'Unit5', 'Damage', 'ActualDamage', 'OF',
+         'Lap', 'Phase', 'Boss', 'RemainingHP', 'Attempt', 'HitType'])
+    boss_data = list(battle.bosses.order_by('difficulty').all())
+    phase = 1
+    daily_attempt_counts = defaultdict(lambda: 0)
+    day = None
+    for hit in hits:
+        if boss_data[phase - 1].lap_to is not None and hit.boss_lap > boss_data[phase - 1].lap_to:
+            phase += 1
+        if hit.day != day:
+            daily_attempt_counts.clear()
+            day = hit.day
+        hit.attempt_count = daily_attempt_counts[hit.member_id] + (
+            1 if hit.hit_type == ClanBattleHitType.NORMAL else 0.5)
+        daily_attempt_counts[hit.member_id] = hit.attempt_count
+        hitrow = [
+            hit.order,
+            hit.day,
+            hit.member.ign,
+            hit.pilot.ign if hit.pilot else hit.member.ign
+        ]
+        for unit in range(5):
+            if hit.team and len(hit.team.units) > unit:
+                hitrow.append(hit.team.units[unit]["name"])
+            else:
+                hitrow.append("N/A")
+        if hit.hit_type != ClanBattleHitType.LAST_HIT:
+            of = "None"
+        else:
+            of = str(min(math.ceil(110 - hit.actual_damage * 90 / hit.damage), 90)) + "s+"
+        hitrow += [
+            hit.damage,
+            hit.actual_damage,
+            of,
+            hit.boss_lap,
+            phase,
+            hit.boss_number,
+            hit.boss_hp_left,
+            hit.attempt_count,
+            hit.hit_type.value
+        ]
+        writer.writerow(hitrow)
+
+    return response
 
 
 @clanbattle_view
