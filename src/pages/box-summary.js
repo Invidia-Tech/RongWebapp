@@ -191,7 +191,7 @@ page('clan_box_summary', function () {
     // highlightUnits highlights all units matching `filterText`
     const highlightUnits = filterText => {
         // If it's empty do not highlight anything
-        const parent = document.querySelector("#unitSelectorBody");
+        const parent = document.querySelector("#unitSelectorUnits");
         if (filterText === "") {
             parent.classList.remove("highlighting");
         } else {
