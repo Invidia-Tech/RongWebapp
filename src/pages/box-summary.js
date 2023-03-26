@@ -221,7 +221,7 @@ page('clan_box_summary', function () {
 
     // Focus filter text input when modal is shown
     $('#unitSelectorModal').on('shown.bs.modal', function (e) {
-        $('unitSelectorFilter').trigger('focus');
+        $('#unitSelectorFilter').trigger('focus');
     });
 
 });
